@@ -2,143 +2,273 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import { useAuth } from '../contexts/AuthContext';
-
-// Import Layout và Component con
-import { Container, Grid, Typography, Box, Pagination, Paper, TextField, FormControl, InputLabel, Select, MenuItem, Button } from '@mui/material';
+import { Button } from "@/components/ui/button";
 import HeroBanner from '../components/HeroBanner';
-import JobCard from '../components/JobCard';
-import JobCardSkeleton from '../components/JobCardSkeleton';
-// import HotJobs from '../components/HotJobs';
-// import TopCompanies from '../components/TopCompanies';
-// import PopularCategories from '../components/PopularCategories';
+import HeroSearch from '../components/HeroSearch';
+import HorizontalJobFilters from '../components/HorizontalJobFilters';
+import JobGrid from '../components/JobGrid';
+import HotJobs from '../components/HotJobs';
+import { 
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationPrevious,
+  PaginationNext
+} from "@/components/ui/pagination";
 
 function JobList() {
-    const [searchParams, setSearchParams] = useSearchParams();
-    
-    // States cho phần tìm kiếm chính
-    const [jobs, setJobs] = useState([]);
-    const [totalJobs, setTotalJobs] = useState(0);
-    const [page, setPage] = useState(parseInt(searchParams.get('page')) || 1);
-    const [pageCount, setPageCount] = useState(0);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(null);
-    
-    // States cho dropdowns
-    const [categories, setCategories] = useState([]);
-    const [cities, setCities] = useState([]);
+  const [searchParams, setSearchParams] = useSearchParams();
 
-    // States cho bộ lọc
-    const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
-    const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || '');
-    const [selectedCity, setSelectedCity] = useState(searchParams.get('city') || '');
-    
-    const { isAuthenticated, isJobFavorited, toggleFavorite } = useAuth();
+  // States cho phần tìm kiếm chính
+  const [jobs, setJobs] = useState([]);
+  const [totalJobs, setTotalJobs] = useState(0);
+  const [page, setPage] = useState(parseInt(searchParams.get('page')) || 1);
+  const [pageCount, setPageCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-    // Tải dữ liệu cho dropdowns
-    useEffect(() => {
-        const fetchInitialData = async () => {
-            try {
-                const [categoriesRes, citiesRes] = await Promise.all([
-                    axiosClient.get('/api/jobs/categories/'),
-                    axiosClient.get('/api/users/cities/')
-                ]);
-                setCategories(categoriesRes.data);
-                setCities(citiesRes.data);
-            } catch (err) { console.error("Lỗi tải dữ liệu lọc:", err); }
-        };
-        fetchInitialData();
-    }, []);
+  // States cho data
+  const [categories, setCategories] = useState([]);
+  const [cities, setCities] = useState([]);
+  const [workTypes, setWorkTypes] = useState([]);
 
-    // Hàm fetch jobs chính
-    const fetchJobs = useCallback(async () => {
-        setIsLoading(true);
-        const params = new URLSearchParams();
-        if (searchTerm) params.append('search', searchTerm);
-        if (selectedCategory) params.append('category', selectedCategory);
-        if (selectedCity) params.append('city', selectedCity);
-        params.append('page', page);
-        try {
-            const response = await axiosClient.get(`/api/jobs/?${params.toString()}`);
-            setJobs(response.data.results || []);
-            setTotalJobs(response.data.count || 0);
-            setPageCount(Math.ceil((response.data.count || 0) / 10));
-        } catch (err) { setError("Không thể tải danh sách công việc."); } 
-        finally { setIsLoading(false); }
-    }, [searchTerm, selectedCategory, selectedCity, page]);
-    
-    // Đồng bộ state và URL, sau đó gọi API
-    useEffect(() => {
-        const params = {};
-        if (searchTerm) params.search = searchTerm;
-        if (selectedCategory) params.category = selectedCategory;
-        if (selectedCity) params.city = selectedCity;
-        if (page > 1) params.page = page;
-        setSearchParams(params, { replace: true });
+  // States cho bộ lọc
+  const [filters, setFilters] = useState({
+    keyword: searchParams.get('keyword') || '',
+    category: searchParams.get('category') || '',
+    city: searchParams.get('city') || '',
+    work_type: searchParams.get('work_type') || '',
+    experience_level: searchParams.get('experience_level') || '',
+    salary_range: searchParams.get('salary_range') ?
+      searchParams.get('salary_range').split(',').map(Number) : null
+  });
 
-        const debounceTimer = setTimeout(() => { fetchJobs(); }, 500);
-        return () => clearTimeout(debounceTimer);
-    }, [searchTerm, selectedCategory, selectedCity, page, fetchJobs, setSearchParams]);
+  const { isAuthenticated, isJobFavorited, toggleFavorite } = useAuth();
 
-    const handlePageChange = (event, value) => { setPage(value); };
-    const handleClearFilters = () => {
-        setSearchTerm('');
-        setSelectedCategory('');
-        setSelectedCity('');
-        setPage(1);
+  // Tải dữ liệu cho dropdowns
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      try {
+        const [categoriesRes, citiesRes] = await Promise.all([
+          axiosClient.get('/api/jobs/categories/'),
+          axiosClient.get('/api/users/cities/')
+        ]);
+        setCategories(categoriesRes.data);
+        setCities(citiesRes.data);
+      } catch (err) { console.error("Lỗi tải dữ liệu lọc:", err); }
     };
+    fetchInitialData();
+  }, []);
 
-    return (
-        <Box>
-            <HeroBanner>
-                <Paper sx={{ p: 2, backgroundColor: 'rgba(255, 255, 255, 0.9)', borderRadius: 2 }}>
-                    <Grid container spacing={2} alignItems="center">
-                        <Grid item xs={12} md={5}><TextField fullWidth label="Tìm kiếm..." variant="filled" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} /></Grid>
-                        <Grid item xs={12} sm={6} md={3}><FormControl fullWidth variant="filled"><InputLabel>Ngành nghề</InputLabel><Select value={selectedCategory} label="Ngành nghề" onChange={(e) => setSelectedCategory(e.target.value)}>{categories.map(c => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)}</Select></FormControl></Grid>
-                        <Grid item xs={12} sm={6} md={3}><FormControl fullWidth variant="filled"><InputLabel>Địa điểm</InputLabel><Select value={selectedCity} label="Địa điểm" onChange={(e) => setSelectedCity(e.target.value)}>{cities.map(c => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)}</Select></FormControl></Grid>
-                        <Grid item xs={12} md={1}><Button variant="contained" onClick={handleClearFilters} sx={{ height: '56px' }} fullWidth>Xóa</Button></Grid>
-                    </Grid>
-                </Paper>
-            </HeroBanner>
+  // Load initial data for filters
+  useEffect(() => {
+    const fetchFilterData = async () => {
+      try {
+        const [categoriesRes, citiesRes, workTypesRes] = await Promise.all([
+          axiosClient.get('/api/jobs/categories/'),
+          axiosClient.get('/api/users/cities/'),
+          axiosClient.get('/api/jobs/work-types/')
+        ]);
+        setCategories(categoriesRes.data);
+        setCities(citiesRes.data);
+        setWorkTypes(workTypesRes.data);
+      } catch (err) {
+        console.error("Lỗi tải dữ liệu lọc:", err);
+        setError("Không thể tải dữ liệu bộ lọc.");
+      }
+    };
+    fetchFilterData();
+  }, []);
 
-            <Container maxWidth="lg" sx={{ py: 4 }}>
-                {/* CÁC MỤC NỔI BẬT */}
-                {/* <HotJobs />
-                <TopCompanies />
-                <PopularCategories/> */}
+  // Handle filter changes
+  const handleFilterChange = (filterName, value) => {
+    setFilters(prev => ({
+      ...prev,
+      [filterName]: value
+    }));
+    setPage(1);
+  };
 
-                {/* PHẦN TÌM KIẾM CHÍNH */}
-                <Box sx={{ mt: 6 }}>
-                    <Typography variant="h4" component="h1" sx={{ mb: 1, fontWeight: 'bold' }}>Tất cả công việc</Typography>
-                    {!isLoading && !error && (<Typography color="text.secondary" sx={{ mb: 4 }}>Tìm thấy <strong>{totalJobs}</strong> công việc phù hợp.</Typography>)}
+  // Hàm fetch jobs chính
+  const fetchJobs = useCallback(async () => {
+    setIsLoading(true);
+    const params = new URLSearchParams();
+
+    // Add all active filters to params
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value) {
+        if (Array.isArray(value)) {
+          params.append(key, value.join(','));
+        } else {
+          params.append(key, value);
+        }
+      }
+    });
+    params.append('page', page);
+
+    try {
+      const response = await axiosClient.get(`/api/jobs/?${params.toString()}`);
+      setJobs(response.data.results || []);
+      setTotalJobs(response.data.count || 0);
+      setPageCount(Math.ceil((response.data.count || 0) / 10));
+    } catch (err) {
+      setError("Không thể tải danh sách công việc.");
+      console.error("Error fetching jobs:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [filters, page]);
+
+  // Update URL params when filters change
+  useEffect(() => {
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value) {
+        if (Array.isArray(value)) {
+          params.append(key, value.join(','));
+        } else {
+          params.append(key, value);
+        }
+      }
+    });
+    if (page > 1) {
+      params.append('page', page);
+    }
+    setSearchParams(params);
+
+    const debounceTimer = setTimeout(() => {
+      fetchJobs();
+    }, 300);
+    return () => clearTimeout(debounceTimer);
+  }, [filters, page, setSearchParams, fetchJobs]);
+
+  const handlePageChange = (event, value) => { setPage(value); };
+  const handleClearFilters = () => {
+    setFilters({
+      keyword: '',
+      category: '',
+      city: '',
+      work_type: '',
+      experience_level: '',
+      salary_range: null
+    });
+    setPage(1);
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="bg-white pb-8">
+        <div className="container mx-auto px-4">
+          <div className="py-8">
+            <div className="max-w-4xl mx-auto mb-8">
+              <h1 className="text-4xl font-bold text-center text-gray-900 mb-4">
+                Tìm công việc phù hợp với bạn
+              </h1>
+              <p className="text-lg text-center text-gray-600 mb-8">
+                Khám phá hàng nghìn cơ hội việc làm tại các công ty hàng đầu
+              </p>
+              <HeroSearch
+                keyword={filters.keyword}
+                onSearch={(keyword) => handleFilterChange('keyword', keyword)}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <HorizontalJobFilters
+        categories={categories}
+        cities={cities}
+        workTypes={workTypes}
+        filters={filters}
+        onFilterChange={handleFilterChange}
+        onClearFilters={handleClearFilters}
+      />
+
+      <main className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-semibold">
+            {totalJobs} việc làm phù hợp
+          </h2>
+          
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-500">Sắp xếp theo:</span>
+            <select className="text-sm border rounded-md px-3 py-1.5">
+              <option value="newest">Mới nhất</option>
+              <option value="salary-desc">Lương cao nhất</option>
+            </select>
+          </div>
+        </div>
+
+        {isLoading ? (
+          <JobGrid jobs={[]} isLoading={true} />
+        ) : error ? (
+          <div className="text-center py-8">
+            <p className="text-red-500">{error}</p>
+          </div>
+        ) : jobs.length > 0 ? (
+          <>
+            <JobGrid
+              jobs={jobs}
+              isLoading={false}
+              onToggleFavorite={toggleFavorite}
+              getFavoriteStatus={isJobFavorited}
+            />
+            
+            {pageCount > 1 && (
+              <div className="mt-8">
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious 
+                        onClick={() => handlePageChange(page - 1)}
+                        disabled={page === 1}
+                      />
+                    </PaginationItem>
                     
-                    {isLoading ? (
-                        <Grid container spacing={4}>{Array.from(new Array(6)).map((_, index) => (<JobCardSkeleton key={index} />))}</Grid>
-                    ) : error ? (
-                        <Typography color="error">{error}</Typography>
-                    ) : (
-                        <>
-                            <Grid container spacing={4}>
-                                {jobs.length > 0 ? jobs.map((job) => (
-                                    <Grid item key={job.id} xs={12} sm={6} md={4}>
-                                        <JobCard 
-                                            job={job} 
-                                            isAuthenticated={isAuthenticated}
-                                            isFavorited={isJobFavorited(job.id)}
-                                            onToggleFavorite={toggleFavorite}
-                                        />
-                                    </Grid>
-                                )) : (
-                                    <Grid item xs={12}><Typography align="center">Không tìm thấy công việc nào phù hợp.</Typography></Grid>
-                                )}
-                            </Grid>
-                            
-                            {pageCount > 1 && (<Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}><Pagination count={pageCount} page={page} onChange={handlePageChange} color="primary" /></Box>)}
-                        </>
-                    )}
-                </Box>
-            </Container>
-        </Box>
-    );
+                    {Array.from({ length: pageCount }, (_, i) => i + 1)
+                      .slice(Math.max(0, page - 3), Math.min(pageCount, page + 2))
+                      .map(num => (
+                        <PaginationItem key={num}>
+                          <Button
+                            variant={page === num ? "default" : "ghost"}
+                            size="icon"
+                            onClick={() => handlePageChange(num)}
+                          >
+                            {num}
+                          </Button>
+                        </PaginationItem>
+                      ))}
+                    
+                    <PaginationItem>
+                      <PaginationNext
+                        onClick={() => handlePageChange(page + 1)}
+                        disabled={page === pageCount}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-lg text-gray-500">
+              Không tìm thấy công việc nào phù hợp với tiêu chí tìm kiếm.
+            </p>
+            <Button
+              variant="link"
+              onClick={handleClearFilters}
+              className="mt-2"
+            >
+              Xóa bộ lọc
+            </Button>
+          </div>
+        )}
+      </main>
+    </div>
+  );
+
 }
 
 export default JobList;

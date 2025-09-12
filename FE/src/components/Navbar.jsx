@@ -1,75 +1,87 @@
 // src/components/Navbar.jsx
 import React from 'react';
-import { AppBar, Toolbar, Typography, Button, Box } from '@mui/material';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext'; // Import hook useAuth
+import { useAuth } from '../contexts/AuthContext';
 import NotificationBell from './NotificationBell';
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { User } from 'lucide-react';
+
 function Navbar() {
-    // Lấy trạng thái và các hàm từ AuthContext
     const { isAuthenticated, user, logout } = useAuth();
     const navigate = useNavigate();
 
-    const handleLogout = () => {
-        logout();
-        navigate('/login'); // Chuyển hướng về trang login sau khi đăng xuất
+    const handleLogout = async () => {
+        try {
+            logout();
+            // Đảm bảo state đã được clear trước khi chuyển hướng
+            setTimeout(() => {
+                navigate('/login');
+            }, 100);
+        } catch (error) {
+            console.error('Lỗi khi đăng xuất:', error);
+        }
     };
-    console.log('User in Navbar:', user);
 
     return (
-        // AppBar là component chính cho thanh điều hướng
-        <AppBar position="static">
-            {/* Toolbar giúp sắp xếp các item bên trong */}
-            <Toolbar>
-                {/* Tên/Logo của trang web, nhấp vào sẽ về trang chủ */}
-                <Typography
-                    variant="h6"
-                    component={RouterLink}
-                    to="/"
-                    sx={{ flexGrow: 1, textDecoration: 'none', color: 'inherit' }}
-                >
-                    JobBoard
-                </Typography>
-
-                {/* Dùng Box để nhóm các nút lại với nhau */}
-                <Box>
-                    {isAuthenticated ? (
-                        // Giao diện khi người dùng đã đăng nhập
-                        <>
-                            {user && user.role === 'employer' && (
-                                <Button color="inherit" component={RouterLink} to="/employer/dashboard">
-                                    Quản lý
+        <nav className="bg-primary text-white px-4 py-2 flex items-center justify-between shadow">
+            <RouterLink to="/" className="font-bold text-xl text-white no-underline">JobBoard</RouterLink>
+            <div className="flex items-center gap-2">
+                {isAuthenticated ? (
+                    <>
+                        {user && user.role === 'employer' && (
+                            <Button variant="secondary" asChild>
+                                <RouterLink to="/employer/dashboard">Quản lý</RouterLink>
+                            </Button>
+                        )}
+                        <Button variant="secondary" asChild>
+                            <RouterLink to="/profile">Hồ sơ</RouterLink>
+                        </Button>
+                        <Button variant="secondary" asChild>
+                            <RouterLink to="/my-applications">Đã ứng tuyển</RouterLink>
+                        </Button>
+                        <Button variant="secondary" asChild>
+                            <RouterLink to="/favorites">Việc đã lưu</RouterLink>
+                        </Button>
+                        <NotificationBell />
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" className="relative rounded-full">
+                                    <User className="w-5 h-5" />
                                 </Button>
-                            )}
-                            <Button color="inherit" component={RouterLink} to="/profile">
-                                Chào, {user?.email}
-                            </Button>
-                            <Button color="inherit" component={RouterLink} to="/my-applications">
-                                Đã ứng tuyển
-                            </Button>
-                            <Button color="inherit" component={RouterLink} to="/favorites">
-                                Việc đã lưu
-                            </Button>
-                            <NotificationBell />
-                            {/* Nút đăng xuất */}
-                            <Button color="inherit" onClick={handleLogout}>
-                                Đăng xuất
-                            </Button>
-                        </>
-                    ) : (
-                        // Giao diện khi người dùng chưa đăng nhập
-                        <>
-                            <Button color="inherit" component={RouterLink} to="/login">
-                                Đăng nhập
-                            </Button>
-                            <Button color="inherit" component={RouterLink} to="/register">
-                                Đăng ký
-                            </Button>
-                        </>
-                    )}
-                </Box>
-            </Toolbar>
-        </AppBar>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent className="w-56" align="end" forceMount>
+                                <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/profile')}>
+                                    Hồ sơ
+                                </DropdownMenuItem>
+                                <DropdownMenuItem className="cursor-pointer text-red-600 focus:text-red-600" onClick={handleLogout}>
+                                    Đăng xuất
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </>
+                ) : (
+                    <>
+                        <Button variant="secondary" asChild>
+                            <RouterLink to="/login">Đăng nhập</RouterLink>
+                        </Button>
+                        <Button variant="secondary" asChild>
+                            <RouterLink to="/register">Đăng ký</RouterLink>
+                        </Button>
+                    </>
+                )}
+            </div>
+        </nav>
     );
 }
+
+                    
+   
+
 
 export default Navbar;

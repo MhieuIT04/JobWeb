@@ -16,3 +16,4 @@ const PrivateRoute = ({ children }) => {
 };
 
 export default PrivateRoute;
+// Không cần chỉnh gì thêm, đã tối ưu cho Shadcn/ui.

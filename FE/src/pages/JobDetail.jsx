@@ -9,24 +9,14 @@ import { useAuth } from '../contexts/AuthContext';
 import ApplyModal from '../components/ApplyModal';
 import { toast } from 'react-toastify';
 
-// Import các component từ MUI
-import {
-    Container,
-    Grid,
-    Typography,
-    Box,
-    CircularProgress,
-    Button,
-    Paper,
-    Divider,
-    Chip,
-    Avatar
-} from '@mui/material';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
-import CategoryIcon from '@mui/icons-material/Category';
-import WorkIcon from '@mui/icons-material/Work';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import StarIcon from '@mui/icons-material/Star';
+// Import các component từ Shadcn/ui và Lucide
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+// import { Alert, AlertDescription } from "@/components/ui/alert";
+import { MapPin, Briefcase, DollarSign, Star, Tag } from "lucide-react";
 
 function JobDetail() {
     const { id } = useParams();
@@ -112,24 +102,17 @@ function JobDetail() {
 
     if (isLoading) {
         return (
-            <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}>
-                    <CircularProgress size={60} />
-                </Box>
-            </Container>
+            <div className="flex justify-center items-center min-h-[60vh]">
+                <span className="animate-spin w-12 h-12 border-4 border-blue-300 border-t-transparent rounded-full block" />
+            </div>
         );
     }
-
     if (error) {
         return (
-            <Container>
-                <Typography color="error" align="center">{error}</Typography>
-            </Container>
+            <Card className="max-w-xl mx-auto mt-10 p-6 text-center text-red-600 font-semibold">{error}</Card>
         );
     }
-
     if (!job) return null;
-
 
     // Badge "Mới" nếu job mới đăng (giả sử có trường created_at)
     const isNew = job.created_at && (Date.now() - new Date(job.created_at).getTime() < 1000 * 60 * 60 * 24 * 3);
@@ -137,97 +120,56 @@ function JobDetail() {
     // Ưu tiên logo công việc, nếu không có thì lấy logo công ty
     const logoUrl = job.logo || job.employer?.logo;
     return (
-        <Box sx={{ background: 'linear-gradient(120deg, #e3f2fd 60%, #fff 100%)', minHeight: '100vh', pb: 6 }}>
-            <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-                <Paper elevation={4} sx={{ p: { xs: 2, sm: 4, md: 6 }, borderRadius: 4, background: 'rgba(255,255,255,0.97)' }}>
-                    {/* HEADER CÔNG VIỆC */}
-                    <Box sx={{ mb: 4, display: 'flex', alignItems: 'center', gap: 3 }}>
-                        <Avatar
-                            variant="rounded"
-                            src={logoUrl}
-                            sx={{ width: 72, height: 72, boxShadow: 2, mr: 2, bgcolor: '#e3f2fd', fontSize: 32 }}
-                        >
-                            {job.employer?.company_name?.charAt(0)}
+        <div className="min-h-screen pb-6 bg-gradient-to-br from-blue-50 to-white">
+            <div className="container max-w-5xl mx-auto pt-8 pb-8">
+                <Card className="p-6 md:p-10 bg-white/95 rounded-xl shadow-lg">
+                    <div className="flex items-center gap-6 mb-6">
+                        <Avatar className="w-20 h-20">
+                            <AvatarImage src={logoUrl} />
+                            <AvatarFallback>{job.employer?.company_name?.charAt(0)}</AvatarFallback>
                         </Avatar>
-                        <Box sx={{ flex: 1 }}>
-                            <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 800, color: '#1976d2', letterSpacing: 1 }}>
-                                {job.title}
-                                {isNew && <Chip label="Mới" color="primary" size="small" sx={{ ml: 2, fontWeight: 600 }} icon={<StarIcon />} />}
-                            </Typography>
-                            <Typography variant="h6" color="primary" gutterBottom sx={{ fontWeight: 600 }}>
-                                {job.employer?.company_name || 'Tên công ty'}
-                            </Typography>
-                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, color: 'text.secondary', mt: 1 }}>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                    <LocationOnIcon fontSize="small" />
-                                    <Typography variant="body2">{job.city?.name || 'N/A'}</Typography>
-                                </Box>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                    <CategoryIcon fontSize="small" />
-                                    <Typography variant="body2">{job.category?.name || 'N/A'}</Typography>
-                                </Box>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                    <WorkIcon fontSize="small" />
-                                    <Typography variant="body2">{job.work_type?.name || 'N/A'}</Typography>
-                                </Box>
-                            </Box>
-                        </Box>
-                    </Box>
-                    <Divider sx={{ my: 3 }} />
-                    {/* PHẦN THÂN BÀI ĐĂNG - BỐ CỤC 2 CỘT */}
-                    <Grid container spacing={{ xs: 3, md: 5 }}>
-                        {/* CỘT BÊN TRÁI - NỘI DUNG CHÍNH */}
-                        <Grid item xs={12} md={8}>
-                            <Typography variant="h6" gutterBottom sx={{ fontWeight: 700 }}>Mô tả công việc</Typography>
-                            <Typography variant="body1" sx={{ whiteSpace: 'pre-line', fontSize: 17, color: 'text.primary' }}>
-                                {job.description}
-                            </Typography>
-                        </Grid>
-                        {/* CỘT BÊN PHẢI - TÓM TẮT & HÀNH ĐỘNG */}
-                        <Grid item xs={12} md={4}>
-                            <Paper variant="outlined" sx={{ p: 3, borderRadius: 3, position: 'sticky', top: '20px', boxShadow: 2, background: '#f5faff' }}>
-                                <Typography variant="h6" gutterBottom sx={{ fontWeight: 700 }}>Thông tin chung</Typography>
-                                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                                    <AttachMoneyIcon sx={{ mr: 1, color: 'success.main' }} />
-                                    <Typography variant="body1" sx={{ fontWeight: 'bold', fontSize: 18 }}>
-                                        {job.min_salary && job.max_salary ? `${job.min_salary} - ${job.max_salary} ${job.currency}` : "Mức lương: Thương lượng"}
-                                    </Typography>
-                                </Box>
-                                <Typography variant="body2" sx={{ mb: 3, color: 'text.secondary' }}>
-                                    Ngày hết hạn: {job.expires_at ? new Date(job.expires_at).toLocaleDateString('vi-VN') : 'N/A'}
-                                </Typography>
+                        <div className="flex-1">
+                            <h1 className="text-2xl font-bold text-primary">
+                                {job.title} {isNew && <Badge variant="default" className="ml-2"><Star className="w-4 h-4 mr-1" />Mới</Badge>}
+                            </h1>
+                            <h2 className="text-lg font-semibold text-primary">{job.employer?.company_name}</h2>
+                            <div className="flex flex-wrap gap-4 mt-2 text-gray-500">
+                                <span className="flex items-center gap-1"><MapPin className="w-4 h-4" />{job.city?.name || 'N/A'}</span>
+                                <span className="flex items-center gap-1"><Tag className="w-4 h-4" />{job.category?.name || 'N/A'}</span>
+                                <span className="flex items-center gap-1"><Briefcase className="w-4 h-4" />{job.work_type?.name || 'N/A'}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <Separator className="my-6" />
+                    <div className="grid md:grid-cols-3 gap-8">
+                        <div className="md:col-span-2">
+                            <h3 className="font-bold mb-2">Mô tả công việc</h3>
+                            <p className="whitespace-pre-line text-base">{job.description}</p>
+                        </div>
+                        <div>
+                            <Card className="p-4 bg-blue-50 rounded-lg sticky top-8">
+                                <div className="flex items-center mb-2"><DollarSign className="w-5 h-5 text-green-500 mr-2" /> <span className="font-bold">{job.min_salary && job.max_salary ? `${job.min_salary} - ${job.max_salary} ${job.currency}` : "Mức lương: Thương lượng"}</span></div>
+                                <div className="text-sm text-gray-500 mb-4">Ngày hết hạn: {job.expires_at ? new Date(job.expires_at).toLocaleDateString('vi-VN') : 'N/A'}</div>
                                 {isAuthenticated ? (
-                                    <Button
-                                        variant="contained"
-                                        color="primary"
-                                        fullWidth
-                                        size="large"
-                                        sx={{ borderRadius: 2, fontWeight: 700, fontSize: 18, py: 1.5, boxShadow: 2 }}
-                                        onClick={() => setShowApplyModal(true)}
-                                    >
-                                        Ứng tuyển ngay
-                                    </Button>
+                                    <Button className="w-full font-bold py-3" onClick={() => setShowApplyModal(true)}>Ứng tuyển ngay</Button>
                                 ) : (
-                                    <Button variant="contained" color="primary" fullWidth size="large" component={RouterLink} to="/login" sx={{ borderRadius: 2, fontWeight: 700, fontSize: 18, py: 1.5, boxShadow: 2 }}>
-                                        Đăng nhập để ứng tuyển
+                                    <Button asChild className="w-full font-bold py-3">
+                                        <RouterLink to="/login">Đăng nhập để ứng tuyển</RouterLink>
                                     </Button>
                                 )}
-                            </Paper>
-                            {/* Phần kỹ năng */}
-                            {job.skills && job.skills.length > 0 && (
-                                <Box sx={{ mt: 3 }}>
-                                    <Typography variant="h6" gutterBottom sx={{ fontWeight: 700 }}>Kỹ năng yêu cầu</Typography>
-                                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                                        {job.skills.map(skill => (
-                                            <Chip key={skill.id} label={skill.name} color="info" size="medium" sx={{ fontWeight: 600 }} />
-                                        ))}
-                                    </Box>
-                                </Box>
+                            </Card>
+                            {job.skills?.length > 0 && (
+                                <div className="mt-4">
+                                    <h4 className="font-bold mb-2">Kỹ năng yêu cầu</h4>
+                                    <div className="flex flex-wrap gap-2">
+                                        {job.skills.map(skill => <Badge key={skill.id} variant="secondary">{skill.name}</Badge>)}
+                                    </div>
+                                </div>
                             )}
-                        </Grid>
-                    </Grid>
-                </Paper>
-            </Container>
+                        </div>
+                    </div>
+                </Card>
+            </div>
             {/* Render Modal */}
             {job && (
                 <ApplyModal
@@ -239,7 +181,7 @@ function JobDetail() {
                     isLoading={isApplying}
                 />
             )}
-        </Box>
+        </div>
     );
 }
 

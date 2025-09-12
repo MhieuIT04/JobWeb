@@ -1,30 +1,16 @@
 // src/pages/Register.jsx
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 
-// Import các component từ MUI
-import {
-    Container,
-    Box,
-    TextField,
-    Button,
-    Typography,
-    Alert,
-    Grid,
-    Link,
-    CircularProgress,
-    FormControl,
-    FormLabel,
-    RadioGroup,
-    FormControlLabel,
-    Radio,
-    Avatar,Paper
-} from '@mui/material';
-
-// Import Icon
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+// Import các component từ shadcn/ui
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { UserPlus } from "lucide-react";
 
 function Register() {
     // State cho form data
@@ -102,95 +88,109 @@ function Register() {
     };
 
     return (
-        <Box sx={{ background: 'linear-gradient(120deg, #e3f2fd 60%, #fff 100%)', minHeight: '100vh', pb: 6 }}>
-            <Container component="main" maxWidth="xs" sx={{ pt: 8, pb: 8 }}>
-                <Paper elevation={6} sx={{ p: { xs: 2, sm: 4 }, borderRadius: 4, boxShadow: 6, background: 'rgba(255,255,255,0.97)' }}>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                        <Avatar sx={{ m: 1, bgcolor: 'secondary.main', width: 64, height: 64 }}>
-                            <LockOutlinedIcon fontSize="large" />
+        <div className="min-h-screen pb-6 bg-gradient-to-br from-blue-50 to-white">
+            <div className="container max-w-md mx-auto pt-8 pb-8">
+                <Card className="p-6 sm:p-8 shadow-lg bg-white/95">
+                    <div className="flex flex-col items-center">
+                        <Avatar className="w-16 h-16 mb-4 bg-primary">
+                            <AvatarFallback>
+                                <UserPlus className="w-8 h-8" />
+                            </AvatarFallback>
                         </Avatar>
-                        <Typography component="h1" variant="h5" sx={{ fontWeight: 700, mb: 2 }}>
-                            Đăng ký tài khoản
-                        </Typography>
-                        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 3, width: '100%' }}>
-                            {error && <Alert severity="error" sx={{ width: '100%', mb: 2 }}>{error}</Alert>}
-                            {success && <Alert severity="success" sx={{ width: '100%', mb: 2 }}>{success}</Alert>}
-                            <Grid container spacing={2}>
-                                <Grid item xs={12}>
-                                    <FormControl component="fieldset" sx={{ width: '100%' }}>
-                                        <FormLabel component="legend" sx={{ fontWeight: 600, color: 'primary.main', mb: 1 }}>Bạn là?</FormLabel>
-                                        <RadioGroup
-                                            row
-                                            aria-label="role"
+                        <h1 className="text-2xl font-bold mb-4">Đăng ký tài khoản</h1>
+                        <form onSubmit={handleSubmit} className="w-full space-y-4">
+                            {error && (
+                                <Alert variant="destructive">
+                                    <AlertDescription>{error}</AlertDescription>
+                                </Alert>
+                            )}
+                            {success && (
+                                <Alert variant="success">
+                                    <AlertDescription>{success}</AlertDescription>
+                                </Alert>
+                            )}
+                            <div className="space-y-2">
+                                <label className="font-semibold text-primary block mb-1">Bạn là?</label>
+                                <div className="flex gap-4">
+                                    <label className="flex items-center gap-2">
+                                        <input
+                                            type="radio"
                                             name="role"
-                                            value={formData.role}
+                                            value="candidate"
+                                            checked={formData.role === 'candidate'}
                                             onChange={handleChange}
-                                        >
-                                            <FormControlLabel value="candidate" control={<Radio color="primary" />} label="Ứng viên" />
-                                            <FormControlLabel value="employer" control={<Radio color="primary" />} label="Nhà tuyển dụng" />
-                                        </RadioGroup>
-                                    </FormControl>
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <TextField
-                                        required
-                                        fullWidth
-                                        id="email"
-                                        label="Địa chỉ Email"
-                                        name="email"
-                                        autoComplete="email"
-                                        value={formData.email}
-                                        onChange={handleChange}
-                                    />
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <TextField
-                                        required
-                                        fullWidth
-                                        name="password"
-                                        label="Mật khẩu (tối thiểu 8 ký tự)"
-                                        type="password"
-                                        id="password"
-                                        value={formData.password}
-                                        onChange={handleChange}
-                                    />
-                                </Grid>
-                                <Grid item xs={12}>
-                                    <TextField
-                                        required
-                                        fullWidth
-                                        name="passwordConfirm"
-                                        label="Xác nhận mật khẩu"
-                                        type="password"
-                                        id="passwordConfirm"
-                                        error={formData.passwordConfirm !== '' && formData.password !== formData.passwordConfirm}
-                                        helperText={formData.passwordConfirm !== '' && formData.password !== formData.passwordConfirm ? "Mật khẩu không khớp" : ""}
-                                        value={formData.passwordConfirm}
-                                        onChange={handleChange}
-                                    />
-                                </Grid>
-                            </Grid>
+                                            className="accent-primary"
+                                        />
+                                        Ứng viên
+                                    </label>
+                                    <label className="flex items-center gap-2">
+                                        <input
+                                            type="radio"
+                                            name="role"
+                                            value="employer"
+                                            checked={formData.role === 'employer'}
+                                            onChange={handleChange}
+                                            className="accent-primary"
+                                        />
+                                        Nhà tuyển dụng
+                                    </label>
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <Input
+                                    required
+                                    id="email"
+                                    placeholder="Địa chỉ Email"
+                                    name="email"
+                                    type="email"
+                                    autoComplete="email"
+                                    value={formData.email}
+                                    onChange={handleChange}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Input
+                                    required
+                                    name="password"
+                                    placeholder="Mật khẩu (tối thiểu 8 ký tự)"
+                                    type="password"
+                                    id="password"
+                                    value={formData.password}
+                                    onChange={handleChange}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Input
+                                    required
+                                    name="passwordConfirm"
+                                    placeholder="Xác nhận mật khẩu"
+                                    type="password"
+                                    id="passwordConfirm"
+                                    value={formData.passwordConfirm}
+                                    onChange={handleChange}
+                                />
+                                {formData.passwordConfirm !== '' && formData.password !== formData.passwordConfirm && (
+                                    <span className="text-xs text-red-500">Mật khẩu không khớp</span>
+                                )}
+                            </div>
                             <Button
                                 type="submit"
-                                fullWidth
-                                variant="contained"
-                                sx={{ mt: 4, mb: 2, borderRadius: 2, fontWeight: 700, fontSize: 18, py: 1.5, boxShadow: 2 }}
+                                className="w-full py-6 text-lg font-bold"
                                 disabled={loading}
                             >
-                                {loading ? <CircularProgress size={24} color="inherit" /> : 'Đăng ký'}
+                                {loading ? 'Đang xử lý...' : 'Đăng ký'}
                             </Button>
-                            <Grid container justifyContent="flex-end">
-                                <Grid item>
-                                    <Link component={RouterLink} to="/login" variant="body2" sx={{ fontWeight: 600, color: '#1976d2' }}>
-                                        Đã có tài khoản? Đăng nhập
-                                    </Link>
-                                </Grid>
-                            </Grid>
-                        </Box>
-                    </Box>
-                </Paper>
-            </Container>
-        </Box>
+                            <p className="text-center text-sm">
+                                Đã có tài khoản?{' '}
+                                <RouterLink to="/login" className="font-semibold text-primary hover:underline">
+                                    Đăng nhập
+                                </RouterLink>
+                            </p>
+                        </form>
+                    </div>
+                </Card>
+            </div>
+        </div>
     );
 }
 

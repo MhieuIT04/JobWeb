@@ -2,10 +2,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom'; // Import useParams
 import axiosClient from '../api/axiosClient';
-import {
-    Container, Typography, Box, TextField, Button, Grid,
-    FormControl, InputLabel, Select, MenuItem, CircularProgress, Alert, Paper
-} from '@mui/material';
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 function JobForm() {
     const { jobId } = useParams();
@@ -99,47 +99,44 @@ function JobForm() {
     };
 
     if (isLoading) {
-        return <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}><CircularProgress /></Box>;
+        return <div className="flex justify-center items-center min-h-[60vh]"><span className="animate-spin w-12 h-12 border-4 border-blue-300 border-t-transparent rounded-full block" /></div>;
     }
-
     return (
-        <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
-            <Typography variant="h4" component="h1" sx={{ mb: 4 }}>
-                {isEditMode ? 'Chỉnh sửa tin tuyển dụng' : 'Đăng tin tuyển dụng mới'}
-            </Typography>
-            <Paper sx={{ p: 4 }}>
-                <Box component="form" onSubmit={handleSubmit} encType="multipart/form-data">
-                    {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-                    <Grid container spacing={3}>
-                        <Grid item xs={12}><TextField name="title" label="Chức danh công việc" value={formData.title} onChange={handleChange} fullWidth required /></Grid>
-                        <Grid item xs={12}><TextField name="description" label="Mô tả công việc" value={formData.description} onChange={handleChange} fullWidth required multiline rows={6} /></Grid>
-                        <Grid item xs={12} sm={4}><FormControl fullWidth required><InputLabel>Ngành nghề</InputLabel><Select name="category" value={formData.category} label="Ngành nghề" onChange={handleChange}>{dropdownData.categories.map(cat => <MenuItem key={cat.id} value={cat.id}>{cat.name}</MenuItem>)}</Select></FormControl></Grid>
-                        <Grid item xs={12} sm={4}><FormControl fullWidth required><InputLabel>Địa điểm</InputLabel><Select name="city" value={formData.city} label="Địa điểm" onChange={handleChange}>{dropdownData.cities.map(city => <MenuItem key={city.id} value={city.id}>{city.name}</MenuItem>)}</Select></FormControl></Grid>
-                        <Grid item xs={12} sm={4}><FormControl fullWidth required><InputLabel>Loại hình công việc</InputLabel><Select name="work_type" value={formData.work_type} label="Loại hình công việc" onChange={handleChange}>{dropdownData.workTypes.map(wt => <MenuItem key={wt.id} value={wt.id}>{wt.name}</MenuItem>)}</Select></FormControl></Grid>
-                        <Grid item xs={12} sm={6}><TextField name="min_salary" label="Lương tối thiểu" type="number" value={formData.min_salary} onChange={handleChange} fullWidth /></Grid>
-                        <Grid item xs={12} sm={6}><TextField name="max_salary" label="Lương tối đa" type="number" value={formData.max_salary} onChange={handleChange} fullWidth /></Grid>
-                        <Grid item xs={12} sm={6}><TextField name="expires_at" label="Ngày hết hạn" type="date" value={formData.expires_at} onChange={handleChange} fullWidth InputLabelProps={{ shrink: true }} /></Grid>
-                        {/* Thêm upload logo công ty/công việc */}
-                        <Grid item xs={12} sm={6}>
-                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-                                <Button variant="outlined" component="label" fullWidth sx={{ borderRadius: 2, fontWeight: 600 }}>
-                                    {logoPreview ? 'Thay đổi logo công việc/công ty' : 'Tải lên logo công việc/công ty'}
-                                    <input type="file" accept="image/*" hidden onChange={handleLogoChange} />
-                                </Button>
-                                {logoPreview && (
-                                    <img src={logoPreview} alt="Logo preview" style={{ width: 80, height: 80, objectFit: 'contain', borderRadius: 8, marginTop: 8, border: '1px solid #eee', background: '#fff' }} />
-                                )}
-                            </Box>
-                        </Grid>
-                        <Grid item xs={12}>
-                            <Button type="submit" variant="contained" size="large" disabled={isSubmitting} fullWidth sx={{ mt: 2 }}>
-                                {isSubmitting ? <CircularProgress size={24} /> : (isEditMode ? 'Lưu thay đổi' : 'Đăng tin')}
-                            </Button>
-                        </Grid>
-                    </Grid>
-                </Box>
-            </Paper>
-        </Container>
+        <Card className="p-6 max-w-2xl mx-auto bg-white/95 rounded-xl shadow-lg">
+            <h1 className="text-2xl font-bold mb-6">{isEditMode ? 'Chỉnh sửa tin tuyển dụng' : 'Đăng tin tuyển dụng mới'}</h1>
+            <form onSubmit={handleSubmit} encType="multipart/form-data" className="space-y-4">
+                {error && <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>}
+                <Input name="title" placeholder="Chức danh công việc" value={formData.title} onChange={handleChange} required />
+                <textarea name="description" placeholder="Mô tả công việc" value={formData.description} onChange={handleChange} required rows={6} className="w-full rounded border border-gray-300 p-3" />
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <select name="category" value={formData.category} onChange={handleChange} required className="w-full px-4 py-3 rounded border border-gray-300 focus:outline-primary">
+                        <option value="">Ngành nghề</option>
+                        {dropdownData.categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
+                    </select>
+                    <select name="city" value={formData.city} onChange={handleChange} required className="w-full px-4 py-3 rounded border border-gray-300 focus:outline-primary">
+                        <option value="">Địa điểm</option>
+                        {dropdownData.cities.map(city => <option key={city.id} value={city.id}>{city.name}</option>)}
+                    </select>
+                    <select name="work_type" value={formData.work_type} onChange={handleChange} required className="w-full px-4 py-3 rounded border border-gray-300 focus:outline-primary">
+                        <option value="">Loại hình công việc</option>
+                        {dropdownData.workTypes.map(wt => <option key={wt.id} value={wt.id}>{wt.name}</option>)}
+                    </select>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                    <Input name="min_salary" placeholder="Lương tối thiểu" type="number" value={formData.min_salary} onChange={handleChange} />
+                    <Input name="max_salary" placeholder="Lương tối đa" type="number" value={formData.max_salary} onChange={handleChange} />
+                </div>
+                <Input name="expires_at" type="date" value={formData.expires_at} onChange={handleChange} />
+                <div>
+                    <label className="block font-semibold mb-1">Logo công việc/công ty</label>
+                    <Input type="file" accept="image/*" onChange={handleLogoChange} />
+                    {logoPreview && <img src={logoPreview} alt="Logo preview" className="w-20 h-20 object-contain rounded mt-2 border" />}
+                </div>
+                <Button type="submit" className="w-full py-3 text-lg font-bold" disabled={isSubmitting}>
+                    {isSubmitting ? 'Đang xử lý...' : (isEditMode ? 'Lưu thay đổi' : 'Đăng tin')}
+                </Button>
+            </form>
+        </Card>
     );
 }
 export default JobForm;

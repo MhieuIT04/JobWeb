@@ -3,18 +3,15 @@ import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 
-// Import component từ MUI
-import { 
-    Container, 
-    Box, 
-    TextField, 
-    Button, 
-    Typography, 
-    Alert, 
-    Paper, 
-    Avatar
-} from '@mui/material';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+// Import Shadcn components
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Avatar, AvatarFallback} from "@/components/ui/avatar";
+
+// Import Lucide icons
+import { Lock } from 'lucide-react';
 
 function Login() {
     const [email, setEmail] = useState('');
@@ -36,73 +33,82 @@ function Login() {
             return;
         }
 
-        const result = await login(email, password);
-
-        if (result.success) {
-            navigate('/'); // Chuyển hướng về trang chủ sau khi đăng nhập thành công
-        } else {
-            setError(result.message);
+        try {
+            const result = await login(email, password);
+            if (result.success) {
+                navigate('/');
+            } else {
+                setError(result.error || "Đăng nhập thất bại");
+            }
+        } catch (error) {
+            setError(error.message || "Đã xảy ra lỗi");
+        } finally {
             setLoading(false);
         }
     };
 
     return (
-        <Box sx={{ background: 'linear-gradient(120deg, #e3f2fd 60%, #fff 100%)', minHeight: '100vh', pb: 6 }}>
-            <Container component="main" maxWidth="xs" sx={{ pt: 8, pb: 8 }}>
-                <Paper elevation={6} sx={{ p: { xs: 2, sm: 4 }, borderRadius: 4, boxShadow: 6, background: 'rgba(255,255,255,0.97)' }}>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                        <Avatar sx={{ m: 1, bgcolor: 'secondary.main', width: 64, height: 64 }}>
-                            <LockOutlinedIcon fontSize="large" />
+        <div className="min-h-screen pb-6 bg-gradient-to-br from-blue-50 to-white">
+            <div className="container max-w-md mx-auto pt-8 pb-8">
+                <Card className="p-6 sm:p-8 shadow-lg bg-white/95">
+                    <div className="flex flex-col items-center">
+                        <Avatar className="w-16 h-16 mb-4 bg-primary">
+                            <AvatarFallback>
+                                <Lock className="w-8 h-8" />
+                            </AvatarFallback>
                         </Avatar>
-                        <Typography component="h1" variant="h5" sx={{ fontWeight: 700, mb: 2 }}>
+                        <h1 className="text-2xl font-bold mb-4">
                             Đăng nhập
-                        </Typography>
-                        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1, width: '100%' }}>
-                            {error && <Alert severity="error" sx={{ width: '100%', mb: 2 }}>{error}</Alert>}
-                            <TextField
-                                margin="normal"
-                                required
-                                fullWidth
-                                id="email"
-                                label="Địa chỉ Email"
-                                name="email"
-                                autoComplete="email"
-                                autoFocus
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                            />
-                            <TextField
-                                margin="normal"
-                                required
-                                fullWidth
-                                name="password"
-                                label="Mật khẩu"
-                                type="password"
-                                id="password"
-                                autoComplete="current-password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                            />
+                        </h1>
+                        <form onSubmit={handleSubmit} className="w-full space-y-4">
+                            {error && (
+                                <Alert variant="destructive">
+                                    <AlertDescription>{error}</AlertDescription>
+                                </Alert>
+                            )}
+                            <div className="space-y-2">
+                                <Input
+                                    required
+                                    id="email"
+                                    placeholder="Địa chỉ Email"
+                                    name="email"
+                                    type="email"
+                                    autoComplete="email"
+                                    autoFocus
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Input
+                                    required
+                                    name="password"
+                                    placeholder="Mật khẩu"
+                                    type="password"
+                                    id="password"
+                                    autoComplete="current-password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                />
+                            </div>
                             <Button
                                 type="submit"
-                                fullWidth
-                                variant="contained"
-                                sx={{ mt: 3, mb: 2, borderRadius: 2, fontWeight: 700, fontSize: 18, py: 1.5, boxShadow: 2 }}
+                                className="w-full py-6 text-lg font-bold"
                                 disabled={loading}
                             >
                                 {loading ? 'Đang xử lý...' : 'Đăng nhập'}
                             </Button>
-                            <Typography variant="body2" align="center">
+                            <p className="text-center text-sm">
                                 Chưa có tài khoản?{' '}
-                                <RouterLink to="/register" style={{ textDecoration: 'none', fontWeight: 600, color: '#1976d2' }}>
+                                <RouterLink to="/register" className="font-semibold text-primary hover:underline">
                                     Đăng ký ngay
                                 </RouterLink>
-                            </Typography>
-                        </Box>
-                    </Box>
-                </Paper>
-            </Container>
-        </Box>
+                            </p>
+                        </form>
+                    </div>
+                </Card>
+            </div>
+        </div>
     );
 }
 

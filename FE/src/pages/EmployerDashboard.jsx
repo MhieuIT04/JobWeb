@@ -3,28 +3,15 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 
-// Import các component từ MUI
-import {
-    Container,
-    Typography,
-    Button,
-    Box,
-    CircularProgress,
-    Alert,
-    Paper,
-    List,
-    ListItem,
-    ListItemText,
-    IconButton,
-    Divider,
-    Tooltip // Thêm Tooltip để giải thích icon
-} from '@mui/material';
+// Import Shadcn/ui components
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Card } from "@/components/ui/card";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-// Import các Icon
-import AddIcon from '@mui/icons-material/Add';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
+// Import Lucide Icons (thay thế MUI Icons)
+import { Plus, Eye, Pencil, Trash2 } from 'lucide-react';
 
 function EmployerDashboard() {
     const [jobs, setJobs] = useState([]);
@@ -62,72 +49,113 @@ function EmployerDashboard() {
     };
 
     if (isLoading) {
-        return <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}><CircularProgress /></Box>;
+        return (
+            <div className="flex justify-center items-center min-h-[200px]">
+                <Progress />
+            </div>
+        );
     }
 
     return (
-        <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
+        <div className="container mx-auto py-8">
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-2xl font-bold">
                     Quản lý tin tuyển dụng
-                </Typography>
+                </h1>
                 <Button
-                    variant="contained"
-                    startIcon={<AddIcon />}
-                    onClick={() => navigate('/employer/jobs/new')} // Sẽ làm chức năng này sau
+                    onClick={() => navigate('/employer/jobs/new')}
+                    className="flex items-center gap-2"
                 >
+                    <Plus className="h-4 w-4" />
                     Đăng tin mới
                 </Button>
-            </Box>
+            </div>
 
-            {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+            {error && (
+                <Alert variant="destructive" className="mb-6">
+                    <AlertDescription>{error}</AlertDescription>
+                </Alert>
+            )}
 
-            <Paper elevation={3}>
-                <List>
-                    {jobs.length > 0 ? jobs.map((job, index) => (
-                        <React.Fragment key={job.id}>
-                            <ListItem>
-                                <ListItemText
-                                    primary={
-                                        <Typography variant="h6" component="p">
-                                            {job.title}
-                                        </Typography>
-                                    }
-                                    secondary={`Trạng thái: ${job.status} | Ngày tạo: ${new Date(job.created_at).toLocaleDateString('vi-VN')}`}
-                                />
-                                <Box>
-                                    <Tooltip title="Xem các ứng viên">
-                                        <IconButton edge="end" color="primary" onClick={() => navigate(`/employer/jobs/${job.id}/applicants`)}>
-                                            <VisibilityIcon />
-                                        </IconButton>
-                                    </Tooltip>
-                                    <Tooltip title="Chỉnh sửa">
-                                        {/* KÍCH HOẠT NÚT NÀY */}
-                                        <IconButton
-                                            edge="end"
-                                            sx={{ mx: 1 }}
-                                            onClick={() => navigate(`/employer/jobs/${job.id}/edit`)}
-                                        >
-                                            <EditIcon />
-                                        </IconButton>
-                                    </Tooltip>
-                                    <Tooltip title="Xóa">
-                                        <IconButton edge="end" color="error" onClick={() => handleDelete(job.id)}>
-                                            <DeleteIcon />
-                                        </IconButton>
-                                    </Tooltip>
-                                </Box>
-                            </ListItem>
-                            {index < jobs.length - 1 && <Divider />}
-                        </React.Fragment>
-                    )) : (
-                        <ListItem>
-                            <ListItemText primary="Bạn chưa đăng tin tuyển dụng nào." />
-                        </ListItem>
+            <Card className="p-6">
+                <div className="divide-y">
+                    {jobs.length > 0 ? (
+                        jobs.map((job) => (
+                            <div 
+                                key={job.id}
+                                className="py-4 flex justify-between items-center hover:bg-slate-50 transition-colors"
+                            >
+                                <div>
+                                    <h2 className="text-lg font-semibold">
+                                        {job.title}
+                                    </h2>
+                                    <p className="text-sm text-gray-600 mt-1">
+                                        Trạng thái: {job.status} | Ngày tạo: {new Date(job.created_at).toLocaleDateString('vi-VN')}
+                                    </p>
+                                </div>
+                                <div className="flex gap-2">
+                                    <TooltipProvider>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    onClick={() => navigate(`/employer/jobs/${job.id}/applicants`)}
+                                                >
+                                                    <Eye className="h-4 w-4" />
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                <p>Xem ứng viên</p>
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    </TooltipProvider>
+
+                                    <TooltipProvider>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    onClick={() => navigate(`/employer/jobs/${job.id}/edit`)}
+                                                >
+                                                    <Pencil className="h-4 w-4" />
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                <p>Chỉnh sửa</p>
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    </TooltipProvider>
+
+                                    <TooltipProvider>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    onClick={() => handleDelete(job.id)}
+                                                    className="text-red-500 hover:text-red-600"
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                <p>Xóa</p>
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    </TooltipProvider>
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        <p className="text-center py-6 text-gray-500">
+                            Bạn chưa đăng tin tuyển dụng nào.
+                        </p>
                     )}
-                </List>
-            </Paper>
-        </Container>
+                </div>
+            </Card>
+        </div>
     );
 }
 

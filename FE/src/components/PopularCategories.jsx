@@ -1,23 +1,17 @@
 // src/components/PopularCategories.jsx
-
 import React, { useState, useEffect } from 'react';
-import { Grid, Typography, Box, Card, CardActionArea } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
-
-// Import các Icon (tùy chọn, để làm đẹp)
-import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
-import ComputerIcon from '@mui/icons-material/Computer';
-import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
-import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Briefcase, Monitor, Building2, Stethoscope } from 'lucide-react';
 
 // Ánh xạ tên ngành nghề với một icon cụ thể
 const categoryIcons = {
-    'công nghệ': <ComputerIcon fontSize="large" color="primary" />,
-    'kinh tế': <AccountBalanceIcon fontSize="large" color="primary" />,
-    'dược phẩm': <LocalHospitalIcon fontSize="large" color="primary" />,
-    // Thêm các icon khác cho các ngành nghề khác
-    'default': <BusinessCenterIcon fontSize="large" color="primary" />
+    'công nghệ': <Monitor className="h-8 w-8 text-primary" />,
+    'kinh tế': <Building2 className="h-8 w-8 text-primary" />,
+    'dược phẩm': <Stethoscope className="h-8 w-8 text-primary" />,
+    'default': <Briefcase className="h-8 w-8 text-primary" />
 };
 
 const getCategoryIcon = (categoryName) => {
@@ -30,7 +24,6 @@ const getCategoryIcon = (categoryName) => {
     return categoryIcons['default'];
 };
 
-
 function PopularCategories() {
     const [categories, setCategories] = useState([]);
     const navigate = useNavigate();
@@ -39,68 +32,45 @@ function PopularCategories() {
         const fetchPopularCategories = async () => {
             try {
                 const response = await axiosClient.get('/api/jobs/top-categories/');
-                setCategories(response.data.slice(0, 8)); 
-            } catch (error) { 
-                console.error("Lỗi tải ngành nghề:", error); 
+                setCategories(response.data.slice(0, 8));
+            } catch (error) {
+                console.error("Lỗi tải ngành nghề:", error);
             }
         };
         fetchPopularCategories();
     }, []);
 
     const handleCategoryClick = (categoryId) => {
-        // Khi người dùng nhấp vào, điều hướng đến trang chủ
-        // và đặt tham số lọc 'category' trên URL
         navigate(`/?category=${categoryId}`);
     };
 
     if (categories.length === 0) {
-        return null; // Ẩn section nếu không có dữ liệu
+        return null;
     }
 
     return (
-        <Box sx={{ my: 4 }}>
-            <Typography variant="h5" sx={{ mb: 3, fontWeight: 'bold' }}>
-                📖 Ngành nghề được quan tâm nhất
-            </Typography>
-            <Grid container spacing={2}>
+        <div className="my-8">
+            <h2 className="text-2xl font-bold mb-6">
+                Ngành nghề nổi bật
+            </h2>
+            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
                 {categories.map(category => (
-                    <Grid item key={category.id} xs={6} sm={4} md={3} lg={1.5}>
-                        <Card 
-                            sx={{ 
-                                height: '100%',
-                                transition: 'transform 0.2s, box-shadow 0.2s',
-                                '&:hover': {
-                                    transform: 'translateY(-5px)',
-                                    boxShadow: 6,
-                                }
-                            }}
-                        >
-                            <CardActionArea 
-                                onClick={() => handleCategoryClick(category.id)}
-                                sx={{ 
-                                    p: 2, 
-                                    display: 'flex', 
-                                    flexDirection: 'column', 
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    height: '100%',
-                                    textAlign: 'center'
-                                }}
-                            >
-                                {getCategoryIcon(category.name)}
-                                <Typography variant="body1" sx={{ mt: 1, fontWeight: 'medium' }}>
-                                    {category.name}
-                                </Typography>
-                                {/* Bạn có thể thêm API để đếm số công việc cho mỗi ngành */}
-                                {/* <Typography variant="body2" color="text.secondary">
-                                    {category.job_count} việc làm
-                                </Typography> */}
-                            </CardActionArea>
-                        </Card>
-                    </Grid>
+                    <Card
+                        key={category.id}
+                        className="transition-all hover:shadow-lg hover:-translate-y-1 cursor-pointer"
+                        onClick={() => handleCategoryClick(category.id)}
+                    >
+                        <CardContent className="flex flex-col items-center justify-center text-center p-4 h-full">
+                            {getCategoryIcon(category.name)}
+                            <p className="mt-2 font-semibold text-sm">
+                                {category.name}
+                            </p>
+                            {/* <p className="text-xs text-gray-500">{category.job_count} việc làm</p> */}
+                        </CardContent>
+                    </Card>
                 ))}
-            </Grid>
-        </Box>
+            </div>
+        </div>
     );
 }
 

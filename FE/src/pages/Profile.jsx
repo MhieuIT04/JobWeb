@@ -3,14 +3,30 @@
 import React, { useState, useEffect } from 'react';
 import axiosClient from '../api/axiosClient';
 import {
-    Container, Box, TextField, Button, Typography, 
-    CircularProgress, Grid, Avatar, Paper
-} from '@mui/material';
+    Card
+} from "@/components/ui/card";
+import {
+    Button
+} from "@/components/ui/button";
+import {
+    Input
+} from "@/components/ui/input";
+import {
+    Avatar,
+    AvatarImage,
+    AvatarFallback
+} from "@/components/ui/avatar";
+// import {
+//     Alert,
+//     AlertDescription
+// } from "@/components/ui/alert";
 import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'react-toastify'; // Sử dụng toast cho thông báo
 
 function Profile() {
-    const { user } = useAuth();
+    const {
+        user
+    } = useAuth();
     const [profile, setProfile] = useState({});
     const [avatarFile, setAvatarFile] = useState(null);
     const [avatarPreview, setAvatarPreview] = useState('');
@@ -18,7 +34,7 @@ function Profile() {
     const [logoPreview, setLogoPreview] = useState('');
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
-    
+
     useEffect(() => {
         const fetchProfile = async () => {
             setIsLoading(true);
@@ -48,7 +64,7 @@ function Profile() {
             setAvatarPreview(URL.createObjectURL(file));
         }
     };
-    
+
     const handleLogoChange = (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -62,7 +78,7 @@ function Profile() {
         setIsSaving(true);
 
         const formData = new FormData();
-        
+
         // --- LOGIC ĐÃ ĐƯỢC ĐƠN GIẢN HÓA ---
         // Gửi tất cả các trường text, backend sẽ tự xử lý
         formData.append('first_name', profile.first_name || '');
@@ -80,22 +96,22 @@ function Profile() {
         if (logoFile) {
             formData.append('logo', logoFile);
         }
-        
+
         try {
             const response = await axiosClient.patch('/api/users/profile/', formData);
             const updatedProfile = response.data;
-            
+
             // Cập nhật lại state sau khi lưu thành công
             setProfile(updatedProfile);
 
             // Reset các file state
             setAvatarFile(null);
             setLogoFile(null);
-            
+
             // Hiển thị URL ảnh mới từ server
             setAvatarPreview(updatedProfile.avatar);
             setLogoPreview(updatedProfile.logo);
-            
+
             toast.success('Cập nhật hồ sơ thành công!');
         } catch (err) {
             toast.error("Lỗi khi cập nhật hồ sơ. Vui lòng thử lại.");
@@ -105,69 +121,51 @@ function Profile() {
     };
 
     if (isLoading) {
-        return <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}><CircularProgress size={60} /></Box>;
+        return <div className="flex justify-center items-center min-h-[60vh]"><span className="animate-spin w-12 h-12 border-4 border-blue-300 border-t-transparent rounded-full block" /></div>;
     }
-
     return (
-        <Box sx={{ background: 'linear-gradient(120deg, #e3f2fd 60%, #fff 100%)', minHeight: '100vh', pb: 6 }}>
-            <Container component="main" maxWidth="md" sx={{ pt: 6, pb: 6 }}>
-                <Paper sx={{ p: { xs: 2, sm: 4 }, borderRadius: 4, boxShadow: 6, background: 'rgba(255,255,255,0.97)' }}>
-                    <Typography component="h1" variant="h4" align="center" sx={{ mb: 4, fontWeight: 800, color: '#1976d2', letterSpacing: 1 }}>
-                        Hồ sơ của bạn
-                    </Typography>
-                    <Box component="form" onSubmit={handleSubmit} noValidate>
-                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 4 }}>
-                            <Avatar sx={{ width: 140, height: 140, mb: 2, boxShadow: 3, border: '4px solid #e3f2fd' }} src={avatarPreview} />
-                            <Button variant="outlined" component="label" sx={{ borderRadius: 2, fontWeight: 600 }}>
-                                Thay đổi ảnh đại diện
-                                <input type="file" accept="image/*" hidden onChange={handleAvatarChange} />
-                            </Button>
-                        </Box>
-                        {user?.role === 'employer' && (
-                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 4, border: '1.5px dashed #90caf9', p: 2, borderRadius: 3, background: '#f5faff' }}>
-                                <Typography sx={{ mb: 2, fontWeight: 600, color: 'primary.main' }}>Logo công ty</Typography>
-                                <Avatar variant="rounded" sx={{ width: 150, height: 150, mb: 2, boxShadow: 2, border: '3px solid #e3f2fd' }} src={logoPreview} />
-                                <Button variant="outlined" component="label" sx={{ borderRadius: 2, fontWeight: 600 }}>
-                                    Thay đổi Logo
-                                    <input type="file" accept="image/*" hidden onChange={handleLogoChange} />
-                                </Button>
-                            </Box>
-                        )}
-                        <Grid container spacing={3}>
-                            <Grid item xs={12}>
-                                <TextField label="Địa chỉ Email" fullWidth value={profile.email || ''} disabled />
-                            </Grid>
-                            <Grid item xs={12} sm={6}>
-                                <TextField name="first_name" label="Tên" fullWidth value={profile.first_name || ''} onChange={handleChange} />
-                            </Grid>
-                            <Grid item xs={12} sm={6}>
-                                <TextField name="last_name" label="Họ" fullWidth value={profile.last_name || ''} onChange={handleChange} />
-                            </Grid>
-                            <Grid item xs={12}>
-                                <TextField name="phone_number" label="Số điện thoại" fullWidth value={profile.phone_number || ''} onChange={handleChange} />
-                            </Grid>
-                            {user?.role === 'employer' && (
-                                <Grid item xs={12}>
-                                    <TextField name="company_name" label="Tên công ty" fullWidth value={profile.company_name || ''} onChange={handleChange} />
-                                </Grid>
-                            )}
-                            <Grid item xs={12}>
-                                <TextField name="bio" label="Giới thiệu" fullWidth multiline rows={4} value={profile.bio || ''} onChange={handleChange} />
-                            </Grid>
-                        </Grid>
-                        <Button
-                            type="submit"
-                            fullWidth
-                            variant="contained"
-                            sx={{ mt: 4, mb: 2, borderRadius: 2, fontWeight: 700, fontSize: 18, py: 1.5, boxShadow: 2 }}
-                            disabled={isSaving}
-                        >
-                            {isSaving ? <CircularProgress size={24} color="inherit" /> : 'Lưu thay đổi'}
+        <Card className="p-6 max-w-2xl mx-auto bg-white/95 rounded-xl shadow-lg">
+            <h1 className="text-2xl font-bold mb-6 text-center text-primary">Hồ sơ của bạn</h1>
+            <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="flex flex-col items-center mb-4">
+                    <Avatar className="w-36 h-36 mb-2">
+                        <AvatarImage src={avatarPreview} />
+                        <AvatarFallback>AVT</AvatarFallback>
+                    </Avatar>
+                    <Button asChild variant="outline" className="mb-2">
+                        <label>
+                            Thay đổi ảnh đại diện
+                            <Input type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
+                        </label>
+                    </Button>
+                </div>
+                {user?.role === 'employer' && (
+                    <div className="flex flex-col items-center mb-4 border border-dashed border-blue-300 p-4 rounded bg-blue-50">
+                        <span className="font-semibold mb-2 text-primary">Logo công ty</span>
+                        <Avatar className="w-36 h-36 mb-2 rounded">
+                            <AvatarImage src={logoPreview} />
+                            <AvatarFallback>LOGO</AvatarFallback>
+                        </Avatar>
+                        <Button asChild variant="outline">
+                            <label>
+                                Thay đổi Logo
+                                <Input type="file" accept="image/*" className="hidden" onChange={handleLogoChange} />
+                            </label>
                         </Button>
-                    </Box>
-                </Paper>
-            </Container>
-        </Box>
+                    </div>
+                )}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Input name="first_name" placeholder="Tên" value={profile.first_name || ''} onChange={handleChange} />
+                    <Input name="last_name" placeholder="Họ" value={profile.last_name || ''} onChange={handleChange} />
+                </div>
+                <Input name="phone_number" placeholder="Số điện thoại" value={profile.phone_number || ''} onChange={handleChange} />
+                {user?.role === 'employer' && <Input name="company_name" placeholder="Tên công ty" value={profile.company_name || ''} onChange={handleChange} />}
+                <textarea name="bio" placeholder="Giới thiệu" value={profile.bio || ''} onChange={handleChange} rows={4} className="w-full rounded border border-gray-300 p-3" />
+                <Button type="submit" className="w-full py-3 text-lg font-bold" disabled={isSaving}>
+                    {isSaving ? 'Đang xử lý...' : 'Lưu thay đổi'}
+                </Button>
+            </form>
+        </Card>
     );
 }
 

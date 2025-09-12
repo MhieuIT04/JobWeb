@@ -4,12 +4,14 @@ import { useParams } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import { toast } from 'react-toastify';
 
-// Import các component MUI
-import {
-    Container, Typography, Box, CircularProgress, Alert, Paper,
-    Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-    Button, Select, MenuItem, FormControl, Chip, Avatar
-} from '@mui/material';
+// Import Shadcn/ui components
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 
 function JobApplicants() {
     const { jobId } = useParams();
@@ -63,82 +65,100 @@ function JobApplicants() {
         }
     };
 
-    const getStatusChipColor = (status) => {
+    const getStatusBadgeVariant = (status) => {
         switch (status) {
             case 'accepted': return 'success';
-            case 'rejected': return 'error';
-            default: return 'default';
+            case 'rejected': return 'destructive';
+            default: return 'secondary';
         }
     };
 
     if (isLoading) {
-        return <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}><CircularProgress /></Box>;
+        return (
+            <div className="flex justify-center items-center min-h-[200px]">
+                <Progress />
+            </div>
+        );
     }
 
     return (
-        <Box sx={{ background: 'linear-gradient(120deg, #e3f2fd 60%, #fff 100%)', minHeight: '100vh', pb: 6 }}>
-            <Container maxWidth="lg" sx={{ pt: 6, pb: 6 }}>
-                <Paper elevation={6} sx={{ p: { xs: 2, sm: 4 }, borderRadius: 4, boxShadow: 6, background: 'rgba(255,255,255,0.97)' }}>
-                    <Typography variant="h4" component="h1" sx={{ mb: 4, fontWeight: 800, color: '#1976d2', letterSpacing: 1 }}>
-                        Danh sách ứng viên cho: <strong>{jobTitle || `Công việc #${jobId}`}</strong>
-                    </Typography>
-                    {error && <Alert severity="error">{error}</Alert>}
-                    <TableContainer>
-                        <Table>
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell sx={{ fontWeight: 700, fontSize: 16 }}>Ứng viên</TableCell>
-                                    <TableCell sx={{ fontWeight: 700, fontSize: 16 }}>Ngày nộp</TableCell>
-                                    <TableCell sx={{ fontWeight: 700, fontSize: 16 }}>CV</TableCell>
-                                    <TableCell sx={{ fontWeight: 700, fontSize: 16 }}>Trạng thái</TableCell>
-                                    <TableCell align="right" sx={{ fontWeight: 700, fontSize: 16 }}>Hành động</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {applications.length > 0 ? applications.map(app => (
-                                    <TableRow key={app.id} hover sx={{ transition: 'background 0.2s', '&:hover': { background: '#e3f2fd33' } }}>
-                                        <TableCell>
-                                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                                <Avatar sx={{ mr: 2, width: 48, height: 48, boxShadow: 2 }} src={app.user_profile?.avatar} />
-                                                <Box>
-                                                    <Typography variant="body1" sx={{ fontWeight: 'bold', fontSize: 17 }}>
-                                                        {`${app.user_profile?.first_name || ''} ${app.user_profile?.last_name || ''}`.trim() || 'Chưa cập nhật'}
-                                                    </Typography>
-                                                    <Typography variant="body2" color="text.secondary">
-                                                        {app.user_profile?.email}
-                                                    </Typography>
-                                                </Box>
-                                            </Box>
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white pb-6">
+            <div className="container mx-auto py-6">
+                <div className="bg-white/95 rounded-lg shadow-lg p-6">
+                    <h1 className="text-2xl font-bold text-blue-600 mb-6">
+                        Danh sách ứng viên cho: <span className="font-extrabold">{jobTitle || `Công việc #${jobId}`}</span>
+                    </h1>
+                    
+                    {error && (
+                        <Alert variant="destructive" className="mb-4">
+                            <AlertDescription>{error}</AlertDescription>
+                        </Alert>
+                    )}
+
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className="font-bold">Ứng viên</TableHead>
+                                <TableHead className="font-bold">Ngày nộp</TableHead>
+                                <TableHead className="font-bold">CV</TableHead>
+                                <TableHead className="font-bold">Trạng thái</TableHead>
+                                <TableHead className="text-right font-bold">Hành động</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {applications.length > 0 ? applications.map(app => (
+                                <TableRow key={app.id} className="hover:bg-blue-50/20 transition-colors">
+                                        <TableCell className="flex items-center gap-3">
+                                            <Avatar className="h-12 w-12">
+                                                <AvatarImage src={app.user_profile?.avatar} />
+                                                <AvatarFallback>{app.user_profile?.first_name?.[0] || 'U'}</AvatarFallback>
+                                            </Avatar>
+                                            <div>
+                                                <div className="font-medium">
+                                                    {`${app.user_profile?.first_name || ''} ${app.user_profile?.last_name || ''}`.trim() || 'Chưa cập nhật'}
+                                                </div>
+                                                <div className="text-sm text-gray-500">
+                                                    {app.user_profile?.email}
+                                                </div>
+                                            </div>
                                         </TableCell>
                                         <TableCell>{new Date(app.applied_at).toLocaleDateString('vi-VN')}</TableCell>
                                         <TableCell>
-                                            <Button
-                                                variant="outlined"
-                                                size="small"
-                                                href={app.cv}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
+                                            <Button 
+                                                variant="outline" 
                                                 disabled={!app.cv}
-                                                sx={{ borderRadius: 2, fontWeight: 600 }}
+                                                className="rounded-md font-semibold"
+                                                asChild
                                             >
-                                                Xem CV
+                                                <a 
+                                                    href={app.cv} 
+                                                    target="_blank" 
+                                                    rel="noopener noreferrer"
+                                                >
+                                                    Xem CV
+                                                </a>
                                             </Button>
                                         </TableCell>
                                         <TableCell>
-                                            <Chip label={app.status} color={getStatusChipColor(app.status)} size="medium" sx={{ fontWeight: 600, textTransform: 'capitalize', fontSize: 15 }} />
+                                            <Badge variant={getStatusBadgeVariant(app.status)}>
+                                                {app.status === 'pending' ? 'Đang chờ' : 
+                                                app.status === 'accepted' ? 'Đã chấp nhận' : 'Đã từ chối'}
+                                            </Badge>
                                         </TableCell>
-                                        <TableCell align="right">
-                                            <FormControl size="small" sx={{ minWidth: 120 }}>
-                                                <Select
-                                                    value={app.status}
-                                                    onChange={(e) => handleStatusChange(app.id, e.target.value)}
-                                                    sx={{ borderRadius: 2 }}
-                                                >
-                                                    <MenuItem value="pending">Chờ duyệt</MenuItem>
-                                                    <MenuItem value="accepted">Chấp nhận</MenuItem>
-                                                    <MenuItem value="rejected">Từ chối</MenuItem>
-                                                </Select>
-                                            </FormControl>
+                                        <TableCell className="text-right">
+                                            <Select
+                                                value={app.status}
+                                                onValueChange={(value) => handleStatusChange(app.id, value)}
+                                            >
+                                                <SelectTrigger className="w-32">
+                                                    <SelectValue placeholder="Chọn trạng thái" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="pending">Chờ duyệt</SelectItem>
+                                                    <SelectItem value="accepted">Chấp nhận</SelectItem>
+                                                    <SelectItem value="rejected">Từ chối</SelectItem>
+                                                </SelectContent>
+                                            </Select>
                                         </TableCell>
                                     </TableRow>
                                 )) : (
@@ -150,10 +170,9 @@ function JobApplicants() {
                                 )}
                             </TableBody>
                         </Table>
-                    </TableContainer>
-                </Paper>
-            </Container>
-        </Box>
+                </div>
+            </div>
+        </div>
     );
 }
 

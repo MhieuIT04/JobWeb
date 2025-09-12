@@ -12,13 +12,18 @@ const axiosClient = axios.create({
 axiosClient.interceptors.request.use(
   (config) => {
     // Lấy tokens từ localStorage
-    const authTokens = localStorage.getItem('authTokens')
-      ? JSON.parse(localStorage.getItem('authTokens'))
-      : null;
-
-    // Luôn đính kèm token nếu có
-    if (authTokens?.access) {
-      config.headers['Authorization'] = `Bearer ${authTokens.access}`;
+    let authTokens = localStorage.getItem('authTokens');
+    
+    try {
+      if (authTokens) {
+        authTokens = JSON.parse(authTokens);
+        if (authTokens?.access) {
+          config.headers.Authorization = `Bearer ${authTokens.access}`;
+        }
+      }
+    } catch (error) {
+      console.error("Error parsing auth tokens:", error);
+      localStorage.removeItem('authTokens'); // Clear invalid tokens
     }
 
     // Xử lý Content-Type

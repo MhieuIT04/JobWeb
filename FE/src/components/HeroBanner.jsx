@@ -1,36 +1,15 @@
 // src/components/HeroBanner.jsx
 import React from 'react';
-import { Box, Typography, Container } from '@mui/material';
 
-const HeroBanner = ({ children }) => {
-    return (
-        <Box
-            sx={{
-                width: '100%',
-                minHeight: { xs: '40vh', md: '55vh' },
-                backgroundImage: ` url(/images/hero-background.jpg)`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'white',
-                textAlign: 'center',
-                position: 'relative',
-                py: { xs: 4, md: 0 },
-            }}
-        >
-            <Container maxWidth="md" sx={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-                <Typography variant="h2" component="h1" sx={{ fontWeight: 900, mb: 2, fontFamily: 'Montserrat, Roboto, Arial', letterSpacing: 1, fontSize: { xs: 28, md: 44 } }}>
-                    Khám phá Cơ hội, Kiến tạo Tương lai
-                </Typography>
-                <Typography variant="h5" component="p" sx={{ mb: 4, fontWeight: 500, fontFamily: 'Montserrat, Roboto, Arial', fontSize: { xs: 16, md: 24 } }}>
-                    Nền tảng tuyển dụng hàng đầu dành cho bạn.
-                </Typography>
-                {children}
-            </Container>
-        </Box>
-    );
-};
+const HeroBanner = ({ children }) => (
+  <div className="w-full min-h-[40vh] md:min-h-[55vh] bg-cover bg-center flex items-center justify-center text-white text-center relative" style={{ backgroundImage: "url(/images/hero-background.jpg)" }}>
+    <div className="container max-w-2xl mx-auto flex flex-col items-center justify-center h-full z-10">
+      <h1 className="font-extrabold mb-2 font-montserrat tracking-wide text-2xl md:text-4xl drop-shadow">Khám phá Cơ hội, Kiến tạo Tương lai</h1>
+      <p className="mb-4 font-medium font-montserrat text-base md:text-2xl drop-shadow">Nền tảng tuyển dụng hàng đầu dành cho bạn.</p>
+      {children}
+    </div>
+    <div className="absolute inset-0 bg-black/30 z-0" />
+  </div>
+);
 
 export default HeroBanner;

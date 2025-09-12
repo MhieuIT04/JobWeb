@@ -16,42 +16,71 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
-  // SỬA LẠI Ở ĐÂY: Đưa setAuthTokens trở lại
-  const [authTokens, setAuthTokens] = useState(() =>
-    localStorage.getItem("authTokens")
-      ? JSON.parse(localStorage.getItem("authTokens"))
-      : null
-  );
+  const [authTokens, setAuthTokens] = useState(() => {
+    const tokens = localStorage.getItem("authTokens");
+    try {
+      return tokens ? JSON.parse(tokens) : null;
+    } catch {
+      localStorage.removeItem("authTokens");
+      return null;
+    }
+  });
 
   const [favorites, setFavorites] = useState([]);
+
+  useEffect(() => {
+    if (authTokens) {
+      try {
+        const decoded = jwtDecode(authTokens.access);
+        setUser(decoded);
+      } catch (error) {
+        console.error("Token decode error:", error);
+        setAuthTokens(null);
+        setUser(null);
+        localStorage.removeItem("authTokens");
+      }
+    }
+  }, [authTokens]);
 
   // Logic đầy đủ cho hàm login
   const login = async (email, password) => {
     try {
-      const { data } = await axiosClient.post("/api/users/token/", {
+      const response = await axiosClient.post("/api/users/token/", {
         email,
         password,
       });
 
-      setAuthTokens(data);
-      setUser(jwtDecode(data.access));
-      localStorage.setItem("authTokens", JSON.stringify(data));
-      toast.success("Đăng nhập thành công!");
-      return { success: true };
-
+      if (response.data.access) {
+        localStorage.setItem("authTokens", JSON.stringify(response.data));
+        setAuthTokens(response.data);
+        const decoded = jwtDecode(response.data.access);
+        setUser(decoded);
+        toast.success("Đăng nhập thành công!");
+        return { success: true };
+      } else {
+        throw new Error("No access token received");
+      }
     } catch (error) {
-        console.error("Lỗi đăng nhập:", error);
-        const message = error.response?.data?.detail || "Email hoặc mật khẩu không đúng.";
-        toast.error(message);
-        return { success: false, message: message };;
+      console.error("Login error:", error);
+      const errorMessage = error.response?.data?.detail || "Email hoặc mật khẩu không chính xác!";
+      toast.error(errorMessage);
+      return { success: false, error: errorMessage };
     }
   };
 
   // Logic đầy đủ cho hàm logout
   const logout = () => {
-    setAuthTokens(null); // <-- SỬ DỤNG setAuthTokens
+    // Clear all auth-related state
+    setAuthTokens(null);
     setUser(null);
+    setFavorites([]);
+    setNotifications([]);
+    
+    // Clear localStorage
     localStorage.removeItem("authTokens");
+    
+    // Thêm một small delay để đảm bảo state đã được clear
+    return new Promise(resolve => setTimeout(resolve, 50));
   };
 
   // Bọc fetchFavorites trong useCallback để tối ưu

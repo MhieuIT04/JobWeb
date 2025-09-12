@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Grid, Typography, Box } from '@mui/material';
 import axiosClient from '../api/axiosClient';
-import JobCard from './JobCard'; // Tái sử dụng JobCard
+import JobCard from './JobCard';
 import { useAuth } from '../contexts/AuthContext';
+import { Flame } from 'lucide-react';
 
 function HotJobs() {
     const [jobs, setJobs] = useState([]);
@@ -21,21 +21,25 @@ function HotJobs() {
     if (jobs.length === 0) return null; // Ẩn section nếu không có job hot
 
     return (
-        <Box sx={{ my: 4 }}>
-            <Typography variant="h5" sx={{ mb: 3, fontWeight: 'bold' }}>🔥 Các công việc hot nhất</Typography>
-            <Grid container spacing={4}>
-                {jobs.map(job => (
-                    <Grid item key={job.id} xs={12} sm={6} md={4} lg={3}>
+        <section className="py-8">
+            <div className="container">
+                <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                    <Flame className="h-6 w-6 text-orange-500" />
+                    Các công việc hot nhất
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    {jobs.map(job => (
                         <JobCard 
+                            key={job.id}
                             job={job}
                             isAuthenticated={isAuthenticated}
                             isFavorited={isJobFavorited(job.id)}
                             onToggleFavorite={toggleFavorite}
                         />
-                    </Grid>
-                ))}
-            </Grid>
-        </Box>
+                    ))}
+                </div>
+            </div>
+        </section>
     );
 }
 

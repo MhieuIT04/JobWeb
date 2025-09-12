@@ -1,35 +1,48 @@
 // src/components/NotificationBell.jsx
-import React, { useState } from 'react';
-import { IconButton, Badge, Menu, MenuItem, Typography } from '@mui/material';
-import NotificationsIcon from '@mui/icons-material/Notifications';
+import React from 'react';
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
+import { Bell } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 function NotificationBell() {
     const { notifications, unreadCount } = useAuth();
 
     return (
-        <>
-            <IconButton color="inherit" onClick={handleClick}>
-                <Badge badgeContent={unreadCount} color="error">
-                    <NotificationsIcon />
-                </Badge>
-            </IconButton>
-            <Menu
-                anchorEl={anchorEl}
-                open={open}
-                onClose={handleClose}
-            >
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="relative">
+                    <Bell className="h-4 w-4" />
+                    {unreadCount > 0 && (
+                        <Badge 
+                            variant="destructive" 
+                            className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center text-[10px]"
+                        >
+                            {unreadCount}
+                        </Badge>
+                    )}
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-[300px]">
                 {notifications.length > 0 ? (
                     notifications.map(notif => (
-                        <MenuItem key={notif.id} onClick={handleClose}>
-                            <Typography variant="body2">{notif.message}</Typography>
-                        </MenuItem>
+                        <DropdownMenuItem key={notif.id} className="py-3">
+                            <span className="text-sm">{notif.message}</span>
+                        </DropdownMenuItem>
                     ))
                 ) : (
-                    <MenuItem onClick={handleClose}>Không có thông báo mới.</MenuItem>
+                    <DropdownMenuItem disabled>
+                        <span className="text-sm text-muted-foreground">Không có thông báo mới.</span>
+                    </DropdownMenuItem>
                 )}
-            </Menu>
-        </>
+            </DropdownMenuContent>
+        </DropdownMenu>
     );
 }
 

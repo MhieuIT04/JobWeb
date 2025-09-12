@@ -1,11 +1,11 @@
 // src/App.js
 import React from "react";
 import { Routes, Route } from "react-router-dom";
-import { Container, Box, CssBaseline } from "@mui/material";
+import "./index.css";
 
 // Import các component layout và trang
 import Navbar from "./components/Navbar";
-import Footer from "./components/Footer"; // Giả sử bạn đã tạo file này
+import Footer from "./components/Footer";
 import PrivateRoute from "./components/PrivateRoute";
 
 import JobList from "./pages/JobList";
@@ -25,44 +25,11 @@ import JobForm from "./pages/JobForm";
 
 function App() {
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        minHeight: "100vh",
-        background: {
-          xs: '#e3f2fd',
-          md: 'linear-gradient(90deg, #e3f2fd 60%, #fff 100%)',
-        },
-        position: 'relative',
-        overflowX: 'hidden',
-      }}
-    >
-      <CssBaseline />
+    <div className="flex flex-col min-h-screen bg-gradient-to-r from-blue-100 to-white relative overflow-x-hidden">
       {/* Ảnh trang trí hai bên */}
-      <Box sx={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: 120,
-        height: '100vh',
-        background: 'url(/images/side-bg-left.png) no-repeat left top',
-        backgroundSize: 'cover',
-        zIndex: 0,
-        display: { xs: 'none', md: 'block' }
-      }} />
-      <Box sx={{
-        position: 'fixed',
-        top: 0,
-        right: 0,
-        width: 120,
-        height: '100vh',
-        background: 'url(/images/side-bg-right.png) no-repeat right top',
-        backgroundSize: 'cover',
-        zIndex: 0,
-        display: { xs: 'none', md: 'block' }
-      }} />
-      <div className="App" style={{ zIndex: 2, position: 'relative' }}>
+      <div className="hidden md:block fixed top-0 left-0 w-[120px] h-full bg-left-top bg-cover z-0" style={{ backgroundImage: "url(/images/side-bg-left.png)" }} />
+      <div className="hidden md:block fixed top-0 right-0 w-[120px] h-full bg-right-top bg-cover z-0" style={{ backgroundImage: "url(/images/side-bg-right.png)" }} />
+      <div className="App relative z-10">
         <ToastContainer
           position="top-right"
           autoClose={3000}
@@ -76,13 +43,9 @@ function App() {
         />
       </div>
       <Navbar />
-      <Container component="main" sx={{ mt: 4, mb: 4, flexGrow: 1, zIndex: 2, position: 'relative' }}>
+      <main className="flex-grow container mx-auto mt-8 mb-8 px-4 z-10 relative">
         <Routes>
-          <Route path="/" element={
-            <>
-              <JobList />
-            </>
-          } />
+          <Route path="/" element={<JobList />} />
           <Route path="/jobs/:id" element={<JobDetail />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
@@ -94,9 +57,9 @@ function App() {
           <Route path="/my-applications" element={<PrivateRoute><MyApplications /></PrivateRoute>} />
           <Route path="/favorites" element={<PrivateRoute><FavoriteJobs /></PrivateRoute>} />
         </Routes>
-      </Container>
+      </main>
       <Footer />
-    </Box>
+    </div>
   );
 }
 
