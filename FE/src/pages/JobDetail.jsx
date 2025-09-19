@@ -148,7 +148,10 @@ function JobDetail() {
                         </div>
                         <div>
                             <Card className="p-4 bg-blue-50 rounded-lg sticky top-8">
-                                <div className="flex items-center mb-2"><DollarSign className="w-5 h-5 text-green-500 mr-2" /> <span className="font-bold">{job.min_salary && job.max_salary ? `${job.min_salary} - ${job.max_salary} ${job.currency}` : "Mức lương: Thương lượng"}</span></div>
+                                <div className="flex items-center mb-2"><DollarSign className="w-5 h-5 text-green-500 mr-2" />
+                                <span className="font-bold">{job.min_salary ? 
+                                `${new Intl.NumberFormat('vi-VN').format(job.min_salary)} - ${new Intl.NumberFormat('vi-VN').format(job.max_salary)} ${job.currency}` 
+                                : "Mức lương: Thương lượng"}</span></div>
                                 <div className="text-sm text-gray-500 mb-4">Ngày hết hạn: {job.expires_at ? new Date(job.expires_at).toLocaleDateString('vi-VN') : 'N/A'}</div>
                                 {isAuthenticated ? (
                                     <Button className="w-full font-bold py-3" onClick={() => setShowApplyModal(true)}>Ứng tuyển ngay</Button>

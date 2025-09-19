@@ -3,6 +3,7 @@ import React from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import NotificationBell from './NotificationBell';
+import { Button } from './ui/button';
 
 function Header() {
   const { isAuthenticated, user, logout } = useAuth();
@@ -13,6 +14,12 @@ function Header() {
     logout();
     navigate('/login');
   };
+
+  const navLinkClasses = "px-3 py-2 text-sm font-medium text-neutral-600 hover:text-primary transition-colors";
+  const navLinkItems = [
+    { label: 'Việc làm', to: '/' },
+    { label: 'Công ty', to: '/companies' }, // << Maybe add a companies link
+  ].filter(Boolean);
 
   const menuItems = [
     { label: 'Việc làm', to: '/' },
@@ -25,29 +32,47 @@ function Header() {
   ].filter(Boolean);
 
   return (
-    <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+    <header className="bg-white/80 backdrop-blur-sm border-b border-neutral-200 sticky top-0 z-50">
       <div className="container mx-auto flex items-center justify-between h-16 px-4">
-        <RouterLink to="/" className="flex items-center gap-2 font-bold text-primary text-xl">
-          <img src="/images/vnw-logo.png" alt="Logo" className="h-9" />
-          <span className="tracking-wide drop-shadow">JobBoard</span>
-        </RouterLink>
-        <nav className="hidden md:flex items-center gap-2 flex-1 justify-end">
-          {menuItems.map(item => (
-            <RouterLink key={item.to} to={item.to} className="px-3 py-2 font-semibold text-primary hover:underline">
+              <RouterLink to="/" className="flex items-center gap-2 text-primary" style={{ border: '2px solid red' }}>
+                    <img src="/logo192.png" alt="JobBoard Logo" className="h-8 w-8" /> 
+                    {/* Giả sử bạn có file logo.svg trong public */}
+                    <span className="text-xl font-bold tracking-wide">
+                        JobBoard
+                    </span>
+                </RouterLink>
+
+         <nav className="hidden md:flex items-center gap-4">
+          {navLinkItems.map(item => (
+            <RouterLink key={item.to} to={item.to} className={navLinkClasses}>
               {item.label}
             </RouterLink>
           ))}
-          {isAuthenticated && <NotificationBell />}
-          {isAuthenticated && (
-            <button onClick={handleLogout} className="ml-2 px-3 py-2 font-semibold text-primary hover:underline">Đăng xuất</button>
+          
+          {isAuthenticated ? (
+            <div className="flex items-center gap-2 border-l ml-4 pl-4">
+              {userMenuItems.map(item => (
+                 <RouterLink key={item.to} to={item.to} className={navLinkClasses}>
+                    {item.label}
+                 </RouterLink>
+              ))}
+              <NotificationBell />
+              <Button onClick={handleLogout} variant="outline" size="sm">Đăng xuất</Button>
+            </div>
+          ) : (
+             <div className="flex items-center gap-2 ml-4">
+                <Button variant="ghost" asChild><RouterLink to="/login">Đăng nhập</RouterLink></Button>
+                <Button asChild><RouterLink to="/register">Đăng ký</RouterLink></Button>
+             </div>
           )}
         </nav>
-        <button className="md:hidden p-2" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+          {/* mobile menu button */}
+        <button className="md:hidden " onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
           <span className="block w-6 h-0.5 bg-primary mb-1" />
           <span className="block w-6 h-0.5 bg-primary mb-1" />
           <span className="block w-6 h-0.5 bg-primary" />
         </button>
-        
+        {/* mobile menu */}
         {mobileMenuOpen && (
           <div className="absolute top-16 left-0 w-full bg-white border-b border-gray-200 shadow-md md:hidden z-50">
             <nav className="flex flex-col items-center py-2">

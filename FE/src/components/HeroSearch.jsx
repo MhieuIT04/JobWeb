@@ -47,7 +47,7 @@ function HeroSearch({ onSearch, cities = [] }) {
           </div>
 
           {/* Location Select */}
-          <div className="md:col-span-2 space-y-2">
+          {/* <div className="md:col-span-2 space-y-2">
             <Label htmlFor="location">Địa điểm</Label>
             <Select value={location} onValueChange={(value) => setLocation(value)}>
               <SelectTrigger id="location" className="w-full">
@@ -63,7 +63,7 @@ function HeroSearch({ onSearch, cities = [] }) {
               </SelectContent>
             </Select>
 
-          </div>
+          </div> */}
 
           {/* Search Button */}
           <div className="md:col-span-1 flex items-end">

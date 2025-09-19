@@ -30,7 +30,12 @@ function Navbar() {
 
     return (
         <nav className="bg-primary text-white px-4 py-2 flex items-center justify-between shadow">
-            <RouterLink to="/" className="font-bold text-xl text-white no-underline">JobBoard</RouterLink>
+             <RouterLink to="/" className="flex items-center gap-2 text-white hover:opacity-80 transition-opacity">
+                <img src="/logo192.png" alt="JobBoard Logo" className="h-8 w-8" /> 
+                <span className="text-xl font-bold tracking-wide">
+                    JobBoard
+                </span>
+            </RouterLink>
             <div className="flex items-center gap-2">
                 {isAuthenticated ? (
                     <>

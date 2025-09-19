@@ -98,22 +98,9 @@ function JobCard({ job, isFavorited, onToggleFavorite, isAuthenticated }) {
 
                     {/* Salary */}
                     <div className="text-green-600 font-medium text-sm">
-                        {job.min_salary || job.max_salary ? (
-                            <span>
-                                {job.min_salary &&
-                                    new Intl.NumberFormat("vi-VN").format(
-                                        job.min_salary
-                                    )}
-                                {job.min_salary && job.max_salary && " - "}
-                                {job.max_salary &&
-                                    new Intl.NumberFormat("vi-VN").format(
-                                        job.max_salary
-                                    )}{" "}
-                                {job.currency || "VNĐ"}
-                            </span>
-                        ) : (
-                            <span>Thương lượng</span>
-                        )}
+                        💰 {job.min_salary ? 
+                        `${new Intl.NumberFormat('vi-VN').format(job.min_salary)} - ${new Intl.NumberFormat('vi-VN').format(job.max_salary)} ${job.currency}` 
+                        : "Thương lượng"}
                     </div>
                 </div>
             </CardContent>

@@ -14,7 +14,8 @@ from .views import (
     WorkTypeListAPIView,
     TopCategoryAPIView,
     TopCompanyAPIView,
-    HotJobsListView
+    HotJobsListView,
+    JobRecommendationView
 )
 
 # Router chỉ dùng cho Favorite, nơi cần các hành động phức tạp
@@ -55,6 +56,7 @@ urlpatterns = [
     
     # Bao gồm URL của router cho favorites
     path('', include(router.urls)),
+    path('jobs/<int:job_id>/recommendations/', JobRecommendationView.as_view(), name='job-recommendations')
     
 
     

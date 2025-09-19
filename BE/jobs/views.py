@@ -19,6 +19,10 @@ from users.models import User
 from users.serializers import EmployerSerializer
 from rest_framework.views import APIView
 
+import pandas as pd
+import pickle
+from rest_framework.views import APIView
+
 
 class IsEmployerOrReadOnly(permissions.BasePermission):
     def has_permission(self, request, view):
@@ -354,3 +358,46 @@ class ApplicationUpdateView(generics.UpdateAPIView):
 
         return Response(serializer.data)
 
+
+class JobRecommendationView(APIView):
+        permission_classes = [permissions.AllowAny]
+
+        def get(self, request, job_id):
+            # Tải các ma trận đã được tính toán trước
+            try:
+                with open('recommendations/cosine_sim.pkl', 'rb') as f:
+                    cosine_sim = pickle.load(f)
+                with open('recommendations/indices.pkl', 'rb') as f:
+                    indices = pickle.load(f)
+                with open('recommendations/job_df.pkl', 'rb') as f:
+                    df = pickle.load(f)
+            except FileNotFoundError:
+                return Response({"error": "Recommendation data not found. Please run the generation command."}, status=500)
+            
+            recommended_jobs = get_recommendations(job_id, cosine_sim, indices, df)
+            serializer = JobSerializer(recommended_jobs, many=True)
+            return Response(serializer.data)
+
+def get_recommendations(job_id, cosine_sim, indices, df):
+        try:
+            # Lấy chỉ số của công việc hiện tại
+            idx = indices[job_id]
+
+            # Lấy điểm tương đồng của công việc này với tất cả các công việc khác
+            sim_scores = list(enumerate(cosine_sim[idx]))
+
+            # Sắp xếp các công việc dựa trên điểm tương đồng
+            sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
+
+            # Lấy 5 công việc có điểm cao nhất (bỏ qua công việc đầu tiên vì đó là chính nó)
+            sim_scores = sim_scores[1:6]
+
+            # Lấy chỉ số của các công việc được gợi ý
+            job_indices = [i[0] for i in sim_scores]
+
+            # Lấy ID của các công việc từ DataFrame và truy vấn CSDL
+            recommended_job_ids = df['id'].iloc[job_indices].tolist()
+            return Job.objects.filter(id__in=recommended_job_ids)
+        except (IOError, KeyError, IndexError) as e:
+            print(f"Recommendation error: {e}")
+            return Job.objects.none() # Trả về queryset rỗng nếu có lỗi
