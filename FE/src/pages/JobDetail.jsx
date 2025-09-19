@@ -18,6 +18,8 @@ import { Separator } from "@/components/ui/separator";
 // import { Alert, AlertDescription } from "@/components/ui/alert";
 import { MapPin, Briefcase, DollarSign, Star, Tag } from "lucide-react";
 
+import RecommendedJobs from '../components/RecommendedJobs';
+
 function JobDetail() {
     const { id } = useParams();
     const { isAuthenticated } = useAuth();
@@ -184,6 +186,7 @@ function JobDetail() {
                     isLoading={isApplying}
                 />
             )}
+            <RecommendedJobs currentJobId={job.id} />
         </div>
     );
 }
