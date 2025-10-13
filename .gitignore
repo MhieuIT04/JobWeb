@@ -1,0 +1,52 @@
+# Môi trường ảo
+    BE/.venv/
+    BE/venv/
+    
+    # Files cache của Python
+    __pycache__/
+    *.pyc
+    
+    # Files database cục bộ (nếu dùng SQLite)
+    *.sqlite3
+    db.sqlite3
+    
+    # Files media và static được tạo ra
+    BE/media/
+    BE/staticfiles/
+    
+    # Thư mục chứa các model AI đã được huấn luyện
+    BE/models/
+    BE/recommendations/
+
+    # Files log
+    *.log
+    
+    # Dữ liệu
+    BE/Data/
+
+    # Cấu hình IDE
+    .idea/
+    .vscode/
+
+
+    # ===================================================================
+    # Node.js / React (cho thư mục FE)
+    # ===================================================================
+
+    # Thư mục chứa các gói đã cài đặt
+    FE/node_modules/
+    
+    # Thư mục build cho production
+    FE/build/
+
+    # Files log
+    FE/npm-debug.log*
+    FE/yarn-debug.log*
+    FE/yarn-error.log*
+
+    # Biến môi trường
+    FE/.env*
+    !.env.example
+
+    # Misc
+    .DS_Store
