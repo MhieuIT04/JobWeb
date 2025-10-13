@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     
     'jobs.apps.JobsConfig',
     'notifications.apps.NotificationsConfig',
+ 
 ]
 
 MIDDLEWARE = [

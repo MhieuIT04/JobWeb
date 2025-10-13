@@ -5,7 +5,7 @@ from rest_framework import viewsets, permissions
 from rest_framework.response import Response
 from django.contrib.postgres.search import SearchVector, SearchQuery
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters,generics
+from rest_framework import generics
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from .models import Job, Application, Favorite,Category, WorkType
@@ -21,7 +21,7 @@ from rest_framework.views import APIView
 
 import pandas as pd
 import pickle
-from rest_framework.views import APIView
+
 
 
 class IsEmployerOrReadOnly(permissions.BasePermission):
@@ -363,6 +363,7 @@ class JobRecommendationView(APIView):
         permission_classes = [permissions.AllowAny]
 
         def get(self, request, job_id):
+            print(f"\n--- API /recommendations/ called for job_id: {job_id} ---")
             # Tải các ma trận đã được tính toán trước
             try:
                 with open('recommendations/cosine_sim.pkl', 'rb') as f:
@@ -375,7 +376,9 @@ class JobRecommendationView(APIView):
                 return Response({"error": "Recommendation data not found. Please run the generation command."}, status=500)
             
             recommended_jobs = get_recommendations(job_id, cosine_sim, indices, df)
-            serializer = JobSerializer(recommended_jobs, many=True)
+            # DEBUG: In ra số lượng gợi ý tìm thấy
+            print(f"--- Found {recommended_jobs.count()} recommendations in DB ---")
+            serializer = JobSerializer(recommended_jobs, many=True, context={'request': request})
             return Response(serializer.data)
 
 def get_recommendations(job_id, cosine_sim, indices, df):
@@ -388,7 +391,11 @@ def get_recommendations(job_id, cosine_sim, indices, df):
 
             # Sắp xếp các công việc dựa trên điểm tương đồng
             sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
-
+            
+            # DEBUG: In ra 10 điểm tương đồng cao nhất
+            print("--- Top 10 Similarity Scores ---")
+            for i, score in sim_scores[0:10]:
+                print(f"Job Index: {i}, Score: {score}")
             # Lấy 5 công việc có điểm cao nhất (bỏ qua công việc đầu tiên vì đó là chính nó)
             sim_scores = sim_scores[1:6]
 
@@ -397,7 +404,62 @@ def get_recommendations(job_id, cosine_sim, indices, df):
 
             # Lấy ID của các công việc từ DataFrame và truy vấn CSDL
             recommended_job_ids = df['id'].iloc[job_indices].tolist()
-            return Job.objects.filter(id__in=recommended_job_ids)
+            return Job.objects.filter(id__in=recommended_job_ids, status='approved')
         except (IOError, KeyError, IndexError) as e:
             print(f"Recommendation error: {e}")
             return Job.objects.none() # Trả về queryset rỗng nếu có lỗi
+
+class PredictCategoryView(APIView):
+        permission_classes = [permissions.IsAuthenticated] # Chỉ nhà tuyển dụng được dùng
+
+        model = None # Khởi tạo là None
+        try:
+            # Tải mô hình một lần duy nhất khi server Django khởi động
+            with open('models/category_classifier.pkl', 'rb') as f:
+                model = pickle.load(f)
+            print(">>> ✅ Category prediction model loaded successfully. <<<")
+        except FileNotFoundError:
+            print("!!! ⚠️ WARNING: Category prediction model (category_classifier.pkl) not found. API will not work.")
+        except Exception as e:
+            print(f"!!! ❌ ERROR loading category prediction model: {e}")
+
+        def post(self, request, *args, **kwargs):
+            if not self.model:
+                return Response(
+                    {"error": "Mô hình dự đoán hiện không sẵn sàng. Vui lòng liên hệ quản trị viên."}, 
+                    status=503 # Service Unavailable
+                )
+
+            # Lấy title và description từ request
+            title = request.data.get('title', '')
+            description = request.data.get('description', '')
+            
+            # Kết hợp lại giống như lúc huấn luyện
+            content = f"{title} {description}"
+
+            if len(content.strip()) < 50:
+                return Response({"error": "Tiêu đề và mô tả công việc quá ngắn để phân tích."}, status=400)
+
+            try:
+                # Mô hình (Pipeline) cần nhận một danh sách, dù chỉ có một phần tử
+                text_to_predict = [content]
+                
+                # Thực hiện dự đoán
+                predicted_category_id = self.model.predict(text_to_predict)[0]
+                
+                # Lấy thông tin ngành nghề từ CSDL
+                category = Category.objects.get(pk=predicted_category_id)
+                response_data = {
+                    'predicted_category_id': category.id,
+                    'predicted_category_name': category.name
+                }
+                return Response(response_data)
+
+            except Category.DoesNotExist:
+                return Response({"error": "Không tìm thấy ngành nghề tương ứng với kết quả dự đoán."}, status=404)
+            except Exception as e:
+                print(f"!!! ❌ ERROR during prediction: {e}")
+                return Response({"error": "Đã có lỗi xảy ra trong quá trình dự đoán."}, status=500)
+            
+
+       
