@@ -1,9 +1,15 @@
 /* src/index.css */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
+<<<<<<< HEAD
 @import "tailwindcss/base";
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
+=======
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+>>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a
 
 /* 2. Định nghĩa các biến CSS tùy chỉnh trong một layer */
 @layer base {
@@ -17,9 +23,14 @@
     --popover: 0 0% 100%;
     --popover-foreground: 224 71.4% 4.1%;
  
+<<<<<<< HEAD
   /* Softer primary blue for gentler contrast */
   --primary: 214 55% 43%; /* softer blue */
   --primary-foreground: 210 20% 98%;
+=======
+    --primary: 221 83% 53%; /* A nice, modern blue */
+    --primary-foreground: 210 20% 98%;
+>>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a
  
     --secondary: 215 27.9% 16.9%; /* Darker Blue */
     --secondary-foreground: 210 20% 98%;
@@ -41,6 +52,7 @@
   }
  
   .dark {
+<<<<<<< HEAD
   --background: 220 15% 10%; /* gần đen cho nền chính */
   --foreground: 0 0% 100%; /* trắng cho chữ */
 
@@ -72,6 +84,36 @@
   --destructive-foreground: 0 85.7% 97.3%;
 
   --ring: 200 40% 40%;
+=======
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+ 
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+ 
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+ 
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+ 
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+ 
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+ 
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+ 
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+ 
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 85.7% 97.3%;
+ 
+    --ring: 217.2 32.6% 17.5%;
+>>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a
   }
 
   /* 3. Thêm các style base cho body và các element khác */

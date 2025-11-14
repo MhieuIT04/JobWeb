@@ -162,6 +162,7 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
+<<<<<<< HEAD
   // Đánh dấu một thông báo là đã đọc (cập nhật cả server và local state)
   const markNotificationRead = async (id) => {
     try {
@@ -210,6 +211,8 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+=======
+>>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a
   // useEffect để quản lý trạng thái khi tải lại trang
   useEffect(() => {
     if (authTokens) {
@@ -245,9 +248,12 @@ export const AuthProvider = ({ children }) => {
     isJobFavorited: (jobId) => favorites.some((fav) => fav.jobId === jobId),
     notifications,
     unreadCount,
+<<<<<<< HEAD
     markNotificationRead,
     deleteNotification,
     markAllNotificationsRead,
+=======
+>>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a
   };
 
   return (

@@ -28,6 +28,7 @@
   color: #61dafb;
 }
 
+<<<<<<< HEAD
 :root {
   /* Softer primary color to reduce glare */
   --primary: #2b6cb0; /* softer blue */
@@ -77,6 +78,8 @@ body {
 [data-theme="dark"] .shadow-lg { box-shadow: 0 8px 30px rgba(2,6,23,0.6) !important; }
 
 
+=======
+>>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);

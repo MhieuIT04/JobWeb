@@ -7,6 +7,7 @@ When you open JobWeb, you turn on 2 terminal below to run website:
 - terminal 02 (run Frontend):
     + cd FE
     + npm start 
+<<<<<<< HEAD
 
 ## Rebuilding ML artifacts (category classifier & recommendations)
 
@@ -42,3 +43,5 @@ pip install "sentence-transformers" hnswlib numpy
 Notes:
 - If `sentence-transformers` and `hnswlib` are installed, `manage.py generate_recommendations` will build an ANN index (faster and more accurate for semantic similarity).
 - If those packages are not available, the command will fall back to TF-IDF + cosine similarity and save legacy artifacts.
+=======
+>>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a

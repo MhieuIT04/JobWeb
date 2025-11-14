@@ -5,16 +5,24 @@ import './index.css';
 import App from './App';
 import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext'; // Import AuthProvider
+<<<<<<< HEAD
 import { ThemeProvider } from './contexts/ThemeContext';
+=======
+>>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <BrowserRouter>
+<<<<<<< HEAD
       <AuthProvider>
         <ThemeProvider>
           <App />
         </ThemeProvider>
+=======
+      <AuthProvider> 
+        <App />
+>>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a
       </AuthProvider>
     </BrowserRouter>
   </React.StrictMode>

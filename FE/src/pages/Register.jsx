@@ -88,6 +88,7 @@ function Register() {
     };
 
     return (
+<<<<<<< HEAD
         <div className="min-h-screen pb-6 bg-gradient-to-br from-blue-50 to-white dark:from-gray-900 dark:to-gray-800">
             <div className="container max-w-md mx-auto pt-8 pb-8">
                 <Card className="p-6 sm:p-8 shadow-lg bg-white/95 dark:bg-gray-900 border-gray-200 dark:border-gray-700">
@@ -98,6 +99,18 @@ function Register() {
                             </AvatarFallback>
                         </Avatar>
                         <h1 className="text-2xl font-bold mb-4 text-gray-900 dark:text-blue-300">Đăng ký tài khoản</h1>
+=======
+        <div className="min-h-screen pb-6 bg-gradient-to-br from-blue-50 to-white">
+            <div className="container max-w-md mx-auto pt-8 pb-8">
+                <Card className="p-6 sm:p-8 shadow-lg bg-white/95">
+                    <div className="flex flex-col items-center">
+                        <Avatar className="w-16 h-16 mb-4 bg-primary">
+                            <AvatarFallback>
+                                <UserPlus className="w-8 h-8" />
+                            </AvatarFallback>
+                        </Avatar>
+                        <h1 className="text-2xl font-bold mb-4">Đăng ký tài khoản</h1>
+>>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a
                         <form onSubmit={handleSubmit} className="w-full space-y-4">
                             {error && (
                                 <Alert variant="destructive">
@@ -110,27 +123,45 @@ function Register() {
                                 </Alert>
                             )}
                             <div className="space-y-2">
+<<<<<<< HEAD
                                 <label className="font-semibold text-gray-900 dark:text-blue-300 block mb-1">Bạn là?</label>
                                 <div className="flex gap-4">
                                     <label className="flex items-center gap-2 text-gray-700 dark:text-blue-200">
+=======
+                                <label className="font-semibold text-primary block mb-1">Bạn là?</label>
+                                <div className="flex gap-4">
+                                    <label className="flex items-center gap-2">
+>>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a
                                         <input
                                             type="radio"
                                             name="role"
                                             value="candidate"
                                             checked={formData.role === 'candidate'}
                                             onChange={handleChange}
+<<<<<<< HEAD
                                             className="accent-blue-600 dark:accent-blue-500"
                                         />
                                         Ứng viên
                                     </label>
                                     <label className="flex items-center gap-2 text-gray-700 dark:text-blue-200">
+=======
+                                            className="accent-primary"
+                                        />
+                                        Ứng viên
+                                    </label>
+                                    <label className="flex items-center gap-2">
+>>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a
                                         <input
                                             type="radio"
                                             name="role"
                                             value="employer"
                                             checked={formData.role === 'employer'}
                                             onChange={handleChange}
+<<<<<<< HEAD
                                             className="accent-blue-600 dark:accent-blue-500"
+=======
+                                            className="accent-primary"
+>>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a
                                         />
                                         Nhà tuyển dụng
                                     </label>
@@ -175,14 +206,24 @@ function Register() {
                             </div>
                             <Button
                                 type="submit"
+<<<<<<< HEAD
                                 className="w-full py-6 text-lg font-bold bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
+=======
+                                className="w-full py-6 text-lg font-bold"
+>>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a
                                 disabled={loading}
                             >
                                 {loading ? 'Đang xử lý...' : 'Đăng ký'}
                             </Button>
+<<<<<<< HEAD
                             <p className="text-center text-sm text-gray-700 dark:text-blue-200">
                                 Đã có tài khoản?{' '}
                                 <RouterLink to="/login" className="font-semibold text-blue-600 dark:text-blue-400 hover:underline">
+=======
+                            <p className="text-center text-sm">
+                                Đã có tài khoản?{' '}
+                                <RouterLink to="/login" className="font-semibold text-primary hover:underline">
+>>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a
                                     Đăng nhập
                                 </RouterLink>
                             </p>

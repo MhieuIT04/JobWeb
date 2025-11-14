@@ -3,7 +3,10 @@ import React from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import NotificationBell from './NotificationBell';
+<<<<<<< HEAD
 import { Button } from './ui/button';
+=======
+>>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a
 
 function Header() {
   const { isAuthenticated, user, logout } = useAuth();
@@ -15,12 +18,15 @@ function Header() {
     navigate('/login');
   };
 
+<<<<<<< HEAD
   const navLinkClasses = "px-3 py-2 text-sm font-medium text-neutral-600 hover:text-primary transition-colors";
   const navLinkItems = [
     { label: 'Việc làm', to: '/' },
     { label: 'Công ty', to: '/companies' }, // << Maybe add a companies link
   ].filter(Boolean);
 
+=======
+>>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a
   const menuItems = [
     { label: 'Việc làm', to: '/' },
     user && user.role === 'employer' ? { label: 'Quản lý', to: '/employer/dashboard' } : null,
@@ -32,6 +38,7 @@ function Header() {
   ].filter(Boolean);
 
   return (
+<<<<<<< HEAD
     <header className="bg-white/80 backdrop-blur-sm border-b border-neutral-200 sticky top-0 z-50">
       <div className="container mx-auto flex items-center justify-between h-16 px-4">
               <RouterLink to="/" className="flex items-center gap-2 text-primary" style={{ border: '2px solid red' }}>
@@ -68,11 +75,35 @@ function Header() {
         </nav>
           {/* mobile menu button */}
         <button className="md:hidden " onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+=======
+    <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+      <div className="container mx-auto flex items-center justify-between h-16 px-4">
+        <RouterLink to="/" className="flex items-center gap-2 font-bold text-primary text-xl">
+          <img src="/images/vnw-logo.png" alt="Logo" className="h-9" />
+          <span className="tracking-wide drop-shadow">JobBoard</span>
+        </RouterLink>
+        <nav className="hidden md:flex items-center gap-2 flex-1 justify-end">
+          {menuItems.map(item => (
+            <RouterLink key={item.to} to={item.to} className="px-3 py-2 font-semibold text-primary hover:underline">
+              {item.label}
+            </RouterLink>
+          ))}
+          {isAuthenticated && <NotificationBell />}
+          {isAuthenticated && (
+            <button onClick={handleLogout} className="ml-2 px-3 py-2 font-semibold text-primary hover:underline">Đăng xuất</button>
+          )}
+        </nav>
+        <button className="md:hidden p-2" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+>>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a
           <span className="block w-6 h-0.5 bg-primary mb-1" />
           <span className="block w-6 h-0.5 bg-primary mb-1" />
           <span className="block w-6 h-0.5 bg-primary" />
         </button>
+<<<<<<< HEAD
         {/* mobile menu */}
+=======
+        
+>>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a
         {mobileMenuOpen && (
           <div className="absolute top-16 left-0 w-full bg-white border-b border-gray-200 shadow-md md:hidden z-50">
             <nav className="flex flex-col items-center py-2">

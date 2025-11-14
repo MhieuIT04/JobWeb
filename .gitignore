@@ -50,3 +50,11 @@
 
     # Misc
     .DS_Store
+
+    node_modules/
+media/
+*.pyc
+*.pkl
+*.joblib
+*.npy
+*.csv

@@ -59,12 +59,20 @@ function EmployerDashboard() {
     return (
         <div className="container mx-auto py-8">
             <div className="flex justify-between items-center mb-6">
+<<<<<<< HEAD
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-blue-300">
+=======
+                <h1 className="text-2xl font-bold">
+>>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a
                     Quản lý tin tuyển dụng
                 </h1>
                 <Button
                     onClick={() => navigate('/employer/jobs/new')}
+<<<<<<< HEAD
                     className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
+=======
+                    className="flex items-center gap-2"
+>>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a
                 >
                     <Plus className="h-4 w-4" />
                     Đăng tin mới
@@ -77,12 +85,18 @@ function EmployerDashboard() {
                 </Alert>
             )}
 
+<<<<<<< HEAD
             <Card className="p-6 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700">
                 <div className="divide-y dark:divide-gray-700">
+=======
+            <Card className="p-6">
+                <div className="divide-y">
+>>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a
                     {jobs.length > 0 ? (
                         jobs.map((job) => (
                             <div 
                                 key={job.id}
+<<<<<<< HEAD
                                 className="py-6 flex justify-between items-start transition-colors border-b border-gray-100 dark:border-gray-800 last:border-b-0"
                             >
                                 <div className="flex-1">
@@ -125,6 +139,19 @@ function EmployerDashboard() {
                                 </div>
 
                                 <div className="flex gap-2 ml-4">
+=======
+                                className="py-4 flex justify-between items-center hover:bg-slate-50 transition-colors"
+                            >
+                                <div>
+                                    <h2 className="text-lg font-semibold">
+                                        {job.title}
+                                    </h2>
+                                    <p className="text-sm text-gray-600 mt-1">
+                                        Trạng thái: {job.status} | Ngày tạo: {new Date(job.created_at).toLocaleDateString('vi-VN')}
+                                    </p>
+                                </div>
+                                <div className="flex gap-2">
+>>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a
                                     <TooltipProvider>
                                         <Tooltip>
                                             <TooltipTrigger asChild>
@@ -132,7 +159,10 @@ function EmployerDashboard() {
                                                     variant="ghost"
                                                     size="icon"
                                                     onClick={() => navigate(`/employer/jobs/${job.id}/applicants`)}
+<<<<<<< HEAD
                                                     className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30"
+=======
+>>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a
                                                 >
                                                     <Eye className="h-4 w-4" />
                                                 </Button>
@@ -150,7 +180,10 @@ function EmployerDashboard() {
                                                     variant="ghost"
                                                     size="icon"
                                                     onClick={() => navigate(`/employer/jobs/${job.id}/edit`)}
+<<<<<<< HEAD
                                                     className="text-gray-600 dark:text-blue-400 hover:text-gray-800 dark:hover:text-blue-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+=======
+>>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a
                                                 >
                                                     <Pencil className="h-4 w-4" />
                                                 </Button>
@@ -168,7 +201,11 @@ function EmployerDashboard() {
                                                     variant="ghost"
                                                     size="icon"
                                                     onClick={() => handleDelete(job.id)}
+<<<<<<< HEAD
                                                     className="text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/30"
+=======
+                                                    className="text-red-500 hover:text-red-600"
+>>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a
                                                 >
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>
@@ -182,7 +219,11 @@ function EmployerDashboard() {
                             </div>
                         ))
                     ) : (
+<<<<<<< HEAD
                         <p className="text-center py-6 text-gray-500 dark:text-blue-200">
+=======
+                        <p className="text-center py-6 text-gray-500">
+>>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a
                             Bạn chưa đăng tin tuyển dụng nào.
                         </p>
                     )}

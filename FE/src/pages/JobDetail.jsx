@@ -18,8 +18,11 @@ import { Separator } from "@/components/ui/separator";
 // import { Alert, AlertDescription } from "@/components/ui/alert";
 import { MapPin, Briefcase, DollarSign, Star, Tag } from "lucide-react";
 
+<<<<<<< HEAD
 import RecommendedJobs from '../components/RecommendedJobs';
 
+=======
+>>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a
 function JobDetail() {
     const { id } = useParams();
     const { isAuthenticated } = useAuth();
@@ -131,11 +134,19 @@ function JobDetail() {
                             <AvatarFallback>{job.employer?.company_name?.charAt(0)}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
+<<<<<<< HEAD
                             <h1 className="text-2xl font-bold text-primary dark:text-white">
                                 {job.title} {isNew && <Badge variant="default" className="ml-2"><Star className="w-4 h-4 mr-1" />Mới</Badge>}
                             </h1>
                             <h2 className="text-lg font-semibold text-primary dark:text-white">{job.employer?.company_name}</h2>
                             <div className="flex flex-wrap gap-4 mt-2 text-gray-500 dark:text-white">
+=======
+                            <h1 className="text-2xl font-bold text-primary">
+                                {job.title} {isNew && <Badge variant="default" className="ml-2"><Star className="w-4 h-4 mr-1" />Mới</Badge>}
+                            </h1>
+                            <h2 className="text-lg font-semibold text-primary">{job.employer?.company_name}</h2>
+                            <div className="flex flex-wrap gap-4 mt-2 text-gray-500">
+>>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a
                                 <span className="flex items-center gap-1"><MapPin className="w-4 h-4" />{job.city?.name || 'N/A'}</span>
                                 <span className="flex items-center gap-1"><Tag className="w-4 h-4" />{job.category?.name || 'N/A'}</span>
                                 <span className="flex items-center gap-1"><Briefcase className="w-4 h-4" />{job.work_type?.name || 'N/A'}</span>
@@ -150,10 +161,14 @@ function JobDetail() {
                         </div>
                         <div>
                             <Card className="p-4 bg-blue-50 rounded-lg sticky top-8">
+<<<<<<< HEAD
                                 <div className="flex items-center mb-2"><DollarSign className="w-5 h-5 text-green-500 mr-2" />
                                 <span className="font-bold">{job.min_salary ? 
                                 `${new Intl.NumberFormat('vi-VN').format(job.min_salary)} - ${new Intl.NumberFormat('vi-VN').format(job.max_salary)} ${job.currency}` 
                                 : "Mức lương: Thương lượng"}</span></div>
+=======
+                                <div className="flex items-center mb-2"><DollarSign className="w-5 h-5 text-green-500 mr-2" /> <span className="font-bold">{job.min_salary && job.max_salary ? `${job.min_salary} - ${job.max_salary} ${job.currency}` : "Mức lương: Thương lượng"}</span></div>
+>>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a
                                 <div className="text-sm text-gray-500 mb-4">Ngày hết hạn: {job.expires_at ? new Date(job.expires_at).toLocaleDateString('vi-VN') : 'N/A'}</div>
                                 {isAuthenticated ? (
                                     <Button className="w-full font-bold py-3" onClick={() => setShowApplyModal(true)}>Ứng tuyển ngay</Button>
@@ -186,7 +201,10 @@ function JobDetail() {
                     isLoading={isApplying}
                 />
             )}
+<<<<<<< HEAD
             <RecommendedJobs currentJobId={job.id} />
+=======
+>>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a
         </div>
     );
 }
