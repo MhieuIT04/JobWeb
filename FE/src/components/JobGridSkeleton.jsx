@@ -39,7 +39,9 @@ function JobGridSkeleton({ count = 6 }) {
     // - 3 cột trên màn hình lg (large) trở lên
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       {Array.from({ length: count }).map((_, index) => (
-        <SingleJobCardSkeleton key={index} />
+        <div key={index} className="animate-pulse">
+          <SingleJobCardSkeleton />
+        </div>
       ))}
     </div>
   );

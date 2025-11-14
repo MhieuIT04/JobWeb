@@ -107,3 +107,78 @@ def save_user_profile(sender, instance, **kwargs):
     Signal này sẽ tự động lưu Profile mỗi khi User được lưu.
     """
     instance.profile.save()
+
+# ===== EMPLOYER REVIEWS =====
+
+class EmployerReview(models.Model):
+    """Review/Ratings for employers (companies)."""
+    employer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='employer_reviews')
+    reviewer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='given_reviews')
+    # Structured ratings (1-5)
+    culture_rating = models.PositiveSmallIntegerField(default=0)
+    salary_rating = models.PositiveSmallIntegerField(default=0)
+    process_rating = models.PositiveSmallIntegerField(default=0)
+    overall_rating = models.FloatField(default=0)
+    comment = models.TextField(blank=True)
+    verified = models.BooleanField(default=False)  # true if reviewer applied to employer's jobs
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'employer_reviews'
+        unique_together = ('employer', 'reviewer')
+        indexes = [
+            models.Index(fields=['employer']),
+            models.Index(fields=['reviewer']),
+            models.Index(fields=['overall_rating']),
+            models.Index(fields=['verified']),
+        ]
+
+    def __str__(self):
+        return f"{self.reviewer.email} -> {self.employer.email} ({self.overall_rating})"
+
+# ===== CHAT / MESSAGING =====
+
+class ChatThread(models.Model):
+    participant_a = models.ForeignKey(User, on_delete=models.CASCADE, related_name='chat_threads_a')
+    participant_b = models.ForeignKey(User, on_delete=models.CASCADE, related_name='chat_threads_b')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'chat_threads'
+        unique_together = ('participant_a', 'participant_b')
+        indexes = [
+            models.Index(fields=['participant_a']),
+            models.Index(fields=['participant_b'])
+        ]
+
+    def __str__(self):
+        return f"Thread {self.id}"
+
+    def has_user(self, user):
+        return user_id(user) in [self.participant_a_id, self.participant_b_id]
+
+
+def user_id(u):
+    return getattr(u, 'id', u)
+
+
+def normalized_pair(u1, u2):
+    a, b = sorted([user_id(u1), user_id(u2)])
+    return a, b
+
+
+class ChatMessage(models.Model):
+    thread = models.ForeignKey(ChatThread, on_delete=models.CASCADE, related_name='messages')
+    sender = models.ForeignKey(User, on_delete=models.CASCADE)
+    text = models.TextField(blank=True)
+    file = models.FileField(upload_to='chat/', null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    read_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'chat_messages'
+        indexes = [
+            models.Index(fields=['thread']),
+            models.Index(fields=['created_at'])
+        ]

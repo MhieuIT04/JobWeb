@@ -232,8 +232,11 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = '2200003087@nttu.edu.vn' # <-- THAY BẰNG EMAIL CỦA BẠN
-EMAIL_HOST_PASSWORD = 'zewn sojn fznl tfka' # <-- THAY BẰNG MẬT KHẨU ỨNG DỤNG
+EMAIL_HOST_PASSWORD = 'Kcntt@10102004' # <-- THAY BẰNG MẬT KHẨU ỨNG DỤNG
 DEFAULT_FROM_EMAIL = 'JobBoard <2200003087@Nttu.edu.vn>'
+
+# Frontend URL for email links
+FRONTEND_URL = 'http://localhost:3000'
 
 # recruitment/settings.py
 

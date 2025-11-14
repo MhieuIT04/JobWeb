@@ -22,6 +22,8 @@ import Register from "./pages/Register";
 import EmployerDashboard from "./pages/EmployerDashboard";
 import JobApplicants from "./pages/JobApplicants";
 import JobForm from "./pages/JobForm";
+import EmployerAnalytics from "./pages/EmployerAnalytics";
+import CVMatch from "./pages/CVMatch";
 
 function App() {
   return (
@@ -36,8 +38,10 @@ function App() {
 
       {/* Container cho nội dung chính, có z-index cao hơn */}
       <div className="relative z-10 flex flex-col min-h-screen">
-        <Navbar />
-        <main className="flex-grow container mx-auto mt-8 mb-8 px-4">
+  <Navbar />
+  {/* spacer to account for fixed navbar height */}
+  <div className="h-16" aria-hidden="true" />
+  <main className="flex-grow container mx-auto mt-8 mb-8 px-4">
           <Routes>
             {/* Tất cả các Route của bạn */}
             <Route path="/" element={<JobList />} />
@@ -45,9 +49,11 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/employer/dashboard" element={<EmployerRoute><EmployerDashboard /></EmployerRoute>} />
+            <Route path="/employer/analytics" element={<EmployerRoute><EmployerAnalytics /></EmployerRoute>} />
             <Route path="/employer/jobs/:jobId/applicants" element={<EmployerRoute><JobApplicants /></EmployerRoute>} />
             <Route path="/employer/jobs/new" element={<EmployerRoute><JobForm /></EmployerRoute>} />
             <Route path="/employer/jobs/:jobId/edit" element={<EmployerRoute><JobForm /></EmployerRoute>} />
+            <Route path="/cv-match" element={<CVMatch />} />
             <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
             <Route path="/my-applications" element={<PrivateRoute><MyApplications /></PrivateRoute>} />
             <Route path="/favorites" element={<PrivateRoute><FavoriteJobs /></PrivateRoute>} />

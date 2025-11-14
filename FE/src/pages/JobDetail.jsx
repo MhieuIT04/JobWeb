@@ -131,11 +131,11 @@ function JobDetail() {
                             <AvatarFallback>{job.employer?.company_name?.charAt(0)}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
-                            <h1 className="text-2xl font-bold text-primary">
+                            <h1 className="text-2xl font-bold text-primary dark:text-white">
                                 {job.title} {isNew && <Badge variant="default" className="ml-2"><Star className="w-4 h-4 mr-1" />Mới</Badge>}
                             </h1>
-                            <h2 className="text-lg font-semibold text-primary">{job.employer?.company_name}</h2>
-                            <div className="flex flex-wrap gap-4 mt-2 text-gray-500">
+                            <h2 className="text-lg font-semibold text-primary dark:text-white">{job.employer?.company_name}</h2>
+                            <div className="flex flex-wrap gap-4 mt-2 text-gray-500 dark:text-white">
                                 <span className="flex items-center gap-1"><MapPin className="w-4 h-4" />{job.city?.name || 'N/A'}</span>
                                 <span className="flex items-center gap-1"><Tag className="w-4 h-4" />{job.category?.name || 'N/A'}</span>
                                 <span className="flex items-center gap-1"><Briefcase className="w-4 h-4" />{job.work_type?.name || 'N/A'}</span>

@@ -5,8 +5,9 @@ from .views import (
     JobViewSet, ApplicationListCreateView, FavoriteViewSet,
     CategoryListAPIView, EmployerJobViewSet, JobApplicationListView,
     ApplicationUpdateView, WorkTypeListAPIView, TopCategoryAPIView,
-    TopCompanyAPIView, HotJobsListView, JobRecommendationView,PredictCategoryView
+    TopCompanyAPIView, HotJobsListView, JobRecommendationView,PredictCategoryView, TrendingJobs24hView
 )
+from .dashboard_views import employer_dashboard_stats, candidate_dashboard_stats
 
 # Router chỉ dùng cho các ViewSet phức tạp
 router = DefaultRouter()
@@ -22,6 +23,7 @@ urlpatterns = [
     
     # GET /api/jobs/top-categories/
     path('top-categories/', TopCategoryAPIView.as_view(), name='top-categories'),
+    path('trending-24h/', TrendingJobs24hView.as_view(), name='trending-24h'),
     
     # GET /api/jobs/categories/
     path('categories/', CategoryListAPIView.as_view(), name='category-list-public'),
@@ -53,6 +55,10 @@ urlpatterns = [
     
     # GET, POST /api/jobs/applications/
     path('applications/', ApplicationListCreateView.as_view(), name='application-list-create'),
+    
+    # Dashboard Statistics APIs
+    path('dashboard/employer/stats/', employer_dashboard_stats, name='employer-dashboard-stats'),
+    path('dashboard/candidate/stats/', candidate_dashboard_stats, name='candidate-dashboard-stats'),
     
     # Include các URL của router (favorites, employer/jobs)
     path('', include(router.urls)),

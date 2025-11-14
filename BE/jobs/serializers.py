@@ -43,6 +43,17 @@ class JobSerializer(serializers.ModelSerializer):
     employer = EmployerSerializer(read_only=True)
     skills = SkillSerializer(many=True, read_only=True, source='skill_set')
     logo = serializers.ImageField(required=False, allow_null=True)
+    applicants_count = serializers.SerializerMethodField()
+    headline = serializers.SerializerMethodField()
+    employer_avg_rating = serializers.FloatField(read_only=True)
+    
+    def get_applicants_count(self, obj):
+        """Trả về số lượng ứng viên đã ứng tuyển"""
+        return obj.application_set.count()
+    
+    def get_headline(self, obj):
+        return getattr(obj, 'headline', None)
+    
     class Meta:
         model = Job
         fields = '__all__' # An toàn khi đã định nghĩa các field lồng nhau là read_only
@@ -71,10 +82,12 @@ class ApplicationSerializer(serializers.ModelSerializer):
     user_profile = ProfileSerializer(source='user.profile', read_only=True)
     job_title = serializers.CharField(source='job.title', read_only=True)
     job_id = serializers.IntegerField(source='job.id', read_only=True)
+    employer_id = serializers.IntegerField(source='job.employer.id', read_only=True)
+    employer_company = serializers.CharField(source='job.employer.profile.company_name', read_only=True)
 
     class Meta:
         model = Application
-        fields = ['id', 'user_profile', 'job_title', 'job_id','cover_letter', 'cv', 'status', 'applied_at']
+        fields = ['id', 'user_profile', 'job_title', 'job_id', 'employer_id', 'employer_company', 'cover_letter', 'cv', 'status', 'applied_at']
 
 
 class ApplicationCreateSerializer(serializers.ModelSerializer):

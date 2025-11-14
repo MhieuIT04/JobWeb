@@ -11,7 +11,7 @@ class WorkType(models.Model):
         return self.name
 
 class Category(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=225)
     name_en = models.CharField(max_length=100, null=True, blank=True)
     is_hot = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)

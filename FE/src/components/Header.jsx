@@ -51,7 +51,7 @@ function Header() {
           
           {isAuthenticated ? (
             <div className="flex items-center gap-2 border-l ml-4 pl-4">
-              {userMenuItems.map(item => (
+              {menuItems.map(item => (
                  <RouterLink key={item.to} to={item.to} className={navLinkClasses}>
                     {item.label}
                  </RouterLink>

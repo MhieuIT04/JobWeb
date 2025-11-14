@@ -28,6 +28,55 @@
   color: #61dafb;
 }
 
+:root {
+  /* Softer primary color to reduce glare */
+  --primary: #2b6cb0; /* softer blue */
+  --primary-foreground: #ffffff;
+  --app-bg: #f8fafc; /* softer page background to reduce glare */
+}
+
+/* Focus ring utility for elements that don't use Tailwind focus utilities */
+.focus-ring:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(37,99,235,0.12), 0 0 0 1px rgba(37,99,235,0.16);
+  border-radius: 6px;
+}
+
+/* Dark theme variables */
+[data-theme="dark"] {
+  --bg: #0f172a; /* slate-900 */
+  --surface: #0b1220;
+  --card: rgba(15,23,42,0.6);
+  --text: #e6eef8;
+  --muted: #9ca3af;
+}
+
+/* Apply basic dark background + text */
+[data-theme="dark"] body {
+  background-color: var(--bg);
+  color: var(--text);
+}
+
+/* Light mode default page background */
+body {
+  background-color: var(--app-bg);
+}
+
+/* Generic overrides for elements using Tailwind bg-white classes (best-effort) */
+[data-theme="dark"] [class*="bg-white"] {
+  background-color: var(--card) !important;
+  color: var(--text) !important;
+}
+
+/* Adjust neutral text colors in dark mode */
+[data-theme="dark"] .text-neutral-800 { color: var(--text) !important; }
+[data-theme="dark"] .text-neutral-700 { color: var(--text) !important; }
+[data-theme="dark"] .text-neutral-500 { color: var(--muted) !important; }
+
+/* Make dropdowns and cards stand out */
+[data-theme="dark"] .shadow-lg { box-shadow: 0 8px 30px rgba(2,6,23,0.6) !important; }
+
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);

@@ -88,16 +88,16 @@ function Register() {
     };
 
     return (
-        <div className="min-h-screen pb-6 bg-gradient-to-br from-blue-50 to-white">
+        <div className="min-h-screen pb-6 bg-gradient-to-br from-blue-50 to-white dark:from-gray-900 dark:to-gray-800">
             <div className="container max-w-md mx-auto pt-8 pb-8">
-                <Card className="p-6 sm:p-8 shadow-lg bg-white/95">
+                <Card className="p-6 sm:p-8 shadow-lg bg-white/95 dark:bg-gray-900 border-gray-200 dark:border-gray-700">
                     <div className="flex flex-col items-center">
-                        <Avatar className="w-16 h-16 mb-4 bg-primary">
-                            <AvatarFallback>
-                                <UserPlus className="w-8 h-8" />
+                        <Avatar className="w-16 h-16 mb-4 bg-primary dark:bg-blue-600">
+                            <AvatarFallback className="bg-blue-600 dark:bg-blue-500">
+                                <UserPlus className="w-8 h-8 text-white" />
                             </AvatarFallback>
                         </Avatar>
-                        <h1 className="text-2xl font-bold mb-4">Đăng ký tài khoản</h1>
+                        <h1 className="text-2xl font-bold mb-4 text-gray-900 dark:text-blue-300">Đăng ký tài khoản</h1>
                         <form onSubmit={handleSubmit} className="w-full space-y-4">
                             {error && (
                                 <Alert variant="destructive">
@@ -110,27 +110,27 @@ function Register() {
                                 </Alert>
                             )}
                             <div className="space-y-2">
-                                <label className="font-semibold text-primary block mb-1">Bạn là?</label>
+                                <label className="font-semibold text-gray-900 dark:text-blue-300 block mb-1">Bạn là?</label>
                                 <div className="flex gap-4">
-                                    <label className="flex items-center gap-2">
+                                    <label className="flex items-center gap-2 text-gray-700 dark:text-blue-200">
                                         <input
                                             type="radio"
                                             name="role"
                                             value="candidate"
                                             checked={formData.role === 'candidate'}
                                             onChange={handleChange}
-                                            className="accent-primary"
+                                            className="accent-blue-600 dark:accent-blue-500"
                                         />
                                         Ứng viên
                                     </label>
-                                    <label className="flex items-center gap-2">
+                                    <label className="flex items-center gap-2 text-gray-700 dark:text-blue-200">
                                         <input
                                             type="radio"
                                             name="role"
                                             value="employer"
                                             checked={formData.role === 'employer'}
                                             onChange={handleChange}
-                                            className="accent-primary"
+                                            className="accent-blue-600 dark:accent-blue-500"
                                         />
                                         Nhà tuyển dụng
                                     </label>
@@ -175,14 +175,14 @@ function Register() {
                             </div>
                             <Button
                                 type="submit"
-                                className="w-full py-6 text-lg font-bold"
+                                className="w-full py-6 text-lg font-bold bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
                                 disabled={loading}
                             >
                                 {loading ? 'Đang xử lý...' : 'Đăng ký'}
                             </Button>
-                            <p className="text-center text-sm">
+                            <p className="text-center text-sm text-gray-700 dark:text-blue-200">
                                 Đã có tài khoản?{' '}
-                                <RouterLink to="/login" className="font-semibold text-primary hover:underline">
+                                <RouterLink to="/login" className="font-semibold text-blue-600 dark:text-blue-400 hover:underline">
                                     Đăng nhập
                                 </RouterLink>
                             </p>

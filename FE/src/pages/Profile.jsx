@@ -124,15 +124,15 @@ function Profile() {
         return <div className="flex justify-center items-center min-h-[60vh]"><span className="animate-spin w-12 h-12 border-4 border-blue-300 border-t-transparent rounded-full block" /></div>;
     }
     return (
-        <Card className="p-6 max-w-2xl mx-auto bg-white/95 rounded-xl shadow-lg">
-            <h1 className="text-2xl font-bold mb-6 text-center text-primary">Hồ sơ của bạn</h1>
+        <Card className="p-6 max-w-2xl mx-auto bg-white/95 dark:bg-gray-900 rounded-xl shadow-lg border-gray-200 dark:border-gray-700">
+            <h1 className="text-2xl font-bold mb-6 text-center text-gray-900 dark:text-blue-300">Hồ sơ của bạn</h1>
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="flex flex-col items-center mb-4">
-                    <Avatar className="w-36 h-36 mb-2">
+                    <Avatar className="w-36 h-36 mb-2 border-4 border-gray-200 dark:border-gray-700">
                         <AvatarImage src={avatarPreview} />
-                        <AvatarFallback>AVT</AvatarFallback>
+                        <AvatarFallback className="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-blue-300">AVT</AvatarFallback>
                     </Avatar>
-                    <Button asChild variant="outline" className="mb-2">
+                    <Button asChild variant="outline" className="mb-2 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-blue-300 hover:bg-gray-100 dark:hover:bg-gray-800">
                         <label>
                             Thay đổi ảnh đại diện
                             <Input type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
@@ -140,13 +140,13 @@ function Profile() {
                     </Button>
                 </div>
                 {user?.role === 'employer' && (
-                    <div className="flex flex-col items-center mb-4 border border-dashed border-blue-300 p-4 rounded bg-blue-50">
-                        <span className="font-semibold mb-2 text-primary">Logo công ty</span>
-                        <Avatar className="w-36 h-36 mb-2 rounded">
+                    <div className="flex flex-col items-center mb-4 border border-dashed border-blue-300 dark:border-blue-600 p-4 rounded bg-blue-50 dark:bg-gray-800">
+                        <span className="font-semibold mb-2 text-blue-600 dark:text-blue-300">Logo công ty</span>
+                        <Avatar className="w-36 h-36 mb-2 rounded border-4 border-gray-200 dark:border-gray-700">
                             <AvatarImage src={logoPreview} />
-                            <AvatarFallback>LOGO</AvatarFallback>
+                            <AvatarFallback className="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-blue-300">LOGO</AvatarFallback>
                         </Avatar>
-                        <Button asChild variant="outline">
+                        <Button asChild variant="outline" className="border-gray-300 dark:border-gray-600 text-gray-900 dark:text-blue-300 hover:bg-gray-100 dark:hover:bg-gray-800">
                             <label>
                                 Thay đổi Logo
                                 <Input type="file" accept="image/*" className="hidden" onChange={handleLogoChange} />
@@ -160,8 +160,8 @@ function Profile() {
                 </div>
                 <Input name="phone_number" placeholder="Số điện thoại" value={profile.phone_number || ''} onChange={handleChange} />
                 {user?.role === 'employer' && <Input name="company_name" placeholder="Tên công ty" value={profile.company_name || ''} onChange={handleChange} />}
-                <textarea name="bio" placeholder="Giới thiệu" value={profile.bio || ''} onChange={handleChange} rows={4} className="w-full rounded border border-gray-300 p-3" />
-                <Button type="submit" className="w-full py-3 text-lg font-bold" disabled={isSaving}>
+                <textarea name="bio" placeholder="Giới thiệu" value={profile.bio || ''} onChange={handleChange} rows={4} className="w-full rounded border border-gray-300 dark:border-gray-600 p-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-blue-200 placeholder:text-gray-500 dark:placeholder:text-gray-400" />
+                <Button type="submit" className="w-full py-3 text-lg font-bold bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600" disabled={isSaving}>
                     {isSaving ? 'Đang xử lý...' : 'Lưu thay đổi'}
                 </Button>
             </form>

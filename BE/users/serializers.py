@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 import uuid
 # Import các model từ file models.py của app này
-from .models import Profile, City, Skill
+from .models import Profile, City, Skill, EmployerReview, ChatThread, ChatMessage
 
 # Lấy Custom User Model một cách an toàn
 User = get_user_model()
@@ -114,8 +114,73 @@ class ProfileSerializer(serializers.ModelSerializer):
 class EmployerSerializer(serializers.ModelSerializer):
     company_name = serializers.CharField(source='profile.company_name', read_only=True)
     logo = serializers.ImageField(source='profile.logo', read_only=True)
-    job_count = serializers.IntegerField(read_only=True) # <-- THÊM DÒNG NÀY
+    job_count = serializers.IntegerField(read_only=True)
+    avg_rating = serializers.FloatField(read_only=True)
+    review_count = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = User
-        fields = ['id', 'company_name', 'logo', 'email', 'job_count']
+        fields = ['id', 'company_name', 'logo', 'email', 'job_count', 'avg_rating', 'review_count']
+
+
+class EmployerReviewSerializer(serializers.ModelSerializer):
+    reviewer_email = serializers.EmailField(source='reviewer.email', read_only=True)
+
+    class Meta:
+        model = EmployerReview
+        fields = [
+            'id', 'employer', 'reviewer', 'reviewer_email',
+            'culture_rating', 'salary_rating', 'process_rating', 'overall_rating',
+            'comment', 'verified', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['employer', 'reviewer', 'verified', 'created_at', 'updated_at']
+
+    def _validate_star(self, value, field):
+        if value is None:
+            return 0
+        if value < 0 or value > 5:
+            raise serializers.ValidationError({field: 'Rating must be between 0 and 5'})
+        return value
+
+    def validate(self, attrs):
+        # Validate each star field
+        attrs['culture_rating'] = self._validate_star(attrs.get('culture_rating', 0), 'culture_rating')
+        attrs['salary_rating'] = self._validate_star(attrs.get('salary_rating', 0), 'salary_rating')
+        attrs['process_rating'] = self._validate_star(attrs.get('process_rating', 0), 'process_rating')
+        # Require at least one criterion > 0
+        if not any(v > 0 for v in [attrs['culture_rating'], attrs['salary_rating'], attrs['process_rating']]):
+            raise serializers.ValidationError('At least one rating must be greater than 0')
+
+        # Auto compute overall if not provided
+        overall = attrs.get('overall_rating')
+        if not overall or overall <= 0:
+            parts = [v for v in [attrs['culture_rating'], attrs['salary_rating'], attrs['process_rating']] if v > 0]
+            if parts:
+                attrs['overall_rating'] = round(sum(parts) / len(parts), 2)
+        return attrs
+
+
+class ChatThreadSerializer(serializers.ModelSerializer):
+    other_user_email = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ChatThread
+        fields = ['id', 'participant_a', 'participant_b', 'other_user_email', 'created_at']
+        read_only_fields = ['participant_a', 'participant_b', 'created_at']
+
+    def get_other_user_email(self, obj):
+        req = self.context.get('request')
+        if not req:
+            return None
+        me = req.user.id
+        other = obj.participant_b if obj.participant_a_id == me else obj.participant_a
+        return getattr(other, 'email', None)
+
+
+class ChatMessageSerializer(serializers.ModelSerializer):
+    sender_email = serializers.EmailField(source='sender.email', read_only=True)
+
+    class Meta:
+        model = ChatMessage
+        fields = ['id', 'thread', 'sender', 'sender_email', 'text', 'file', 'created_at', 'read_at']
+        read_only_fields = ['thread', 'sender', 'created_at', 'read_at']

@@ -1,5 +1,3 @@
-// src/pages/JobList.jsx
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
@@ -8,24 +6,32 @@ import { useAuth } from '../contexts/AuthContext';
 // Import các component của shadcn/ui
 import { Button } from "@/components/ui/button";
 import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-
+import HeroBanner from '../components/HeroBanner'; 
 // Import các component con tùy chỉnh
-import HorizontalJobFilters from '../components/HorizontalJobFilters';
+import HorizontalJobFilters from '../components/home/HorizontalJobFilters';
 import JobGrid from '../components/JobGrid';
-import JobGridSkeleton from '../components/JobGridSkeleton';
+import JobGridSkeleton from '../components/JobGridSkeleton'; // Đảm bảo import này đúng
+import HotJobs from '../components/home/HotJobs';
+import TopCompanies from '../components/home/TopCompanies';
+import HomeFooter from '../components/HomeFooter';
+// import PopularCategories from '../components/home/PopularCategories';
 
 function JobList() {
   const [searchParams, setSearchParams] = useSearchParams();
 
+  // States cho dữ liệu
   const [jobs, setJobs] = useState([]);
-  const [totalJobs, setTotalJobs] = useState(0);
+  // totalJobs removed (was unused) — pageCount controls pagination
   const [categories, setCategories] = useState([]);
   const [cities, setCities] = useState([]);
   const [workTypes, setWorkTypes] = useState([]);
+  
+  // States cho UI
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [pageCount, setPageCount] = useState(0);
 
+  // Gộp tất cả state bộ lọc vào một object, khởi tạo từ URL
   const [filters, setFilters] = useState(() => {
     const params = {};
     for (const [key, value] of searchParams.entries()) {
@@ -65,7 +71,7 @@ function JobList() {
     try {
       const response = await axiosClient.get(`/api/jobs/`, { params });
       setJobs(response.data.results || []);
-      setTotalJobs(response.data.count || 0);
+  // totalJobs not used; pageCount is derived below
       setPageCount(Math.ceil((response.data.count || 0) / 10));
     } catch (err) {
       setError("Không thể tải danh sách công việc.");
@@ -76,15 +82,21 @@ function JobList() {
 
   // useEffect để gọi API và cập nhật URL khi `filters` thay đổi
   useEffect(() => {
-    setSearchParams(filters, { replace: true });
+    // Loại bỏ các key có giá trị rỗng để tránh gửi param rỗng về API
+    const cleanedFilters = Object.fromEntries(
+      Object.entries(filters).filter(([, v]) => v !== '' && v !== null && v !== undefined)
+    );
+
+    setSearchParams(cleanedFilters, { replace: true });
+
     const debounceTimer = setTimeout(() => {
-      fetchJobs(filters);
+      fetchJobs(cleanedFilters);
     }, 500);
     return () => clearTimeout(debounceTimer);
   }, [filters, fetchJobs, setSearchParams]);
   
   const handleFilterChange = (newFilters) => {
-    setFilters({ ...newFilters, page: 1 }); // Reset về trang 1 khi lọc
+    setFilters({ ...newFilters, page: 1 });
   };
 
   const handlePageChange = (newPage) => {
@@ -97,55 +109,37 @@ function JobList() {
     setFilters({});
   };
 
-  return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="bg-white">
-        <div className="container mx-auto px-4 pt-8">
-          <div className="max-w-4xl mx-auto mb-8 text-center">
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-              Tìm công việc phù hợp với bạn
-            </h1>
-            <p className="text-lg text-gray-600">
-              Khám phá hàng nghìn cơ hội việc làm tại các công ty hàng đầu
-            </p>
-            {/* ĐÃ XÓA TEXTFIELD THỪA */}
-          </div>
+  // --- HÀM RENDER NỘI DUNG CHÍNH ---
+  const renderJobContent = () => {
+    if (isLoading) {
+      // SỬ DỤNG JobGridSkeleton KHI ĐANG TẢI
+      return <JobGridSkeleton />;
+    }
+
+    if (error) {
+      return <div className="text-center py-8"><p className="text-red-500">{error}</p></div>;
+    }
+
+    if (jobs.length === 0) {
+      return (
+        <div className="text-center py-12">
+          <p className="text-lg text-gray-500">Không tìm thấy công việc nào phù hợp.</p>
+          <Button variant="link" onClick={handleClearFilters} className="mt-2">Xóa tất cả bộ lọc</Button>
         </div>
-
-        <HorizontalJobFilters
-          categories={categories}
-          cities={cities}
-          workTypes={workTypes}
-          initialFilters={filters}
-          onFilterChange={handleFilterChange}
-        />
-      </div>
-
-      <main className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-gray-800">
-            {totalJobs} việc làm phù hợp
-          </h2>
-        </div>
-
-        {error && (<div className="text-center py-8"><p className="text-red-500">{error}</p></div>)}
-        
+      );
+    }
+    
+    // Chỉ render JobGrid khi có dữ liệu
+    return (
+      <>
         <JobGrid
           jobs={jobs}
-          isLoading={isLoading}
+          // không cần truyền isLoading nữa
           onToggleFavorite={toggleFavorite}
           isJobFavorited={isJobFavorited}
           isAuthenticated={isAuthenticated}
         />
-
-        {!isLoading && !error && jobs.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-lg text-gray-500">Không tìm thấy công việc nào phù hợp.</p>
-            <Button variant="link" onClick={handleClearFilters} className="mt-2">Xóa tất cả bộ lọc</Button>
-          </div>
-        )}
-        
-        {pageCount > 1 && !isLoading && (
+        {pageCount > 1 && (
           <div className="mt-8 flex justify-center">
             <Pagination>
               <PaginationContent>
@@ -156,7 +150,48 @@ function JobList() {
             </Pagination>
           </div>
         )}
+      </>
+    );
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50">
+      <div className="bg-white">
+        <div className="container mx-auto px-4 pt-8">
+           <HeroBanner />
+        </div>
+      
+
+        <HorizontalJobFilters
+          categories={categories}
+          cities={cities}
+          workTypes={workTypes}
+          initialFilters={filters}
+          onFilterChange={handleFilterChange}
+          onClearFilters={handleClearFilters}
+        />
+        
+      </div>
+
+      <main className="container mx-auto px-4 py-8">
+        {Object.keys(filters).length === 0 && (
+          <>
+            <TopCompanies />
+            <HotJobs />
+            {/* <PopularCategories />  */}
+          </>
+        )}
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-semibold text-gray-800">
+             {Object.keys(filters).length > 0 ? 'Kết quả tìm kiếm' : 'Tất cả công việc'}
+          </h2>
+        </div>
+
+        {renderJobContent()}
       </main>
+      {/* Homepage-specific footer */}
+      <HomeFooter />
+      
     </div>
   );
 }

@@ -4,6 +4,7 @@ import axiosClient from '../api/axiosClient';
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 
 function MyApplications() {
     const [applications, setApplications] = useState([]);
@@ -39,8 +40,18 @@ function MyApplications() {
                         <div>
                             <RouterLink to={`/jobs/${app.job_id}`} className="font-semibold text-lg hover:underline">{app.job_title}</RouterLink>
                             <div className="text-sm text-gray-500">Ngày nộp: {new Date(app.applied_at).toLocaleDateString('vi-VN')}</div>
+                            {app.employer_id && (
+                              <div className="text-sm mt-1">Công ty: <RouterLink className="underline" to={`/companies/${app.employer_id}`}>{app.employer_company || `#${app.employer_id}`}</RouterLink></div>
+                            )}
                         </div>
-                        <Badge variant={app.status === 'accepted' ? 'success' : app.status === 'rejected' ? 'destructive' : 'secondary'} className="capitalize text-base font-semibold">{app.status}</Badge>
+                        <div className="flex items-center gap-3">
+                          <Badge variant={app.status === 'accepted' ? 'success' : app.status === 'rejected' ? 'destructive' : 'secondary'} className="capitalize text-base font-semibold">{app.status}</Badge>
+                          {app.employer_id && (
+                            <RouterLink to={`/companies/${app.employer_id}`}>
+                              <Button size="sm" variant="outline">Đánh giá</Button>
+                            </RouterLink>
+                          )}
+                        </div>
                     </li>
                 )) : (
                     <li className="text-center text-gray-500 py-6">Bạn chưa ứng tuyển vào công việc nào.</li>

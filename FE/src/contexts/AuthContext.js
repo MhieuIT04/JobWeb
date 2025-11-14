@@ -162,6 +162,54 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
+  // Đánh dấu một thông báo là đã đọc (cập nhật cả server và local state)
+  const markNotificationRead = async (id) => {
+    try {
+      // Thử cập nhật trên server
+      await axiosClient.patch(`/api/notifications/${id}/`, { is_read: true });
+      // Cập nhật local state ngay lập tức
+      setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, is_read: true } : n)));
+    } catch (err) {
+      console.error('Lỗi khi đánh dấu thông báo là đã đọc:', err);
+      // Nếu server lỗi, vẫn cố gắng cập nhật local để UX mượt hơn
+      setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, is_read: true } : n)));
+    }
+  };
+
+  // Xóa một thông báo (xoá trên server nếu có, fallback là xóa local)
+  const deleteNotification = async (id) => {
+    try {
+      await axiosClient.delete(`/api/notifications/${id}/`);
+      setNotifications((prev) => prev.filter((n) => n.id !== id));
+    } catch (err) {
+      console.error('Lỗi khi xóa thông báo:', err);
+      // fallback: remove locally so user thấy thay đổi
+      setNotifications((prev) => prev.filter((n) => n.id !== id));
+    }
+  };
+
+  // Đánh dấu tất cả thông báo là đã đọc (cố gắng cập nhật server, nhưng cập nhật local ngay)
+  const markAllNotificationsRead = async () => {
+    try {
+      // Cập nhật local ngay để UX mượt
+      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+
+      // Cố gắng cập nhật trên server từng thông báo chưa đọc
+      for (const n of notifications) {
+        if (!n.is_read) {
+          try {
+            await axiosClient.patch(`/api/notifications/${n.id}/`, { is_read: true });
+          } catch (err) {
+            // nếu lỗi, bỏ qua và tiếp tục
+            console.error('Không thể cập nhật thông báo trên server:', n.id, err);
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Lỗi khi đánh dấu tất cả thông báo là đã đọc:', err);
+    }
+  };
+
   // useEffect để quản lý trạng thái khi tải lại trang
   useEffect(() => {
     if (authTokens) {
@@ -197,6 +245,9 @@ export const AuthProvider = ({ children }) => {
     isJobFavorited: (jobId) => favorites.some((fav) => fav.jobId === jobId),
     notifications,
     unreadCount,
+    markNotificationRead,
+    deleteNotification,
+    markAllNotificationsRead,
   };
 
   return (

@@ -3,7 +3,6 @@
 import React from 'react';
 import { motion } from "framer-motion";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { BookmarkIcon } from 'lucide-react';
 import { Button } from "@/components/ui/button"; // << 1. IMPORT THÊM BUTTON
 import { Link as RouterLink } from 'react-router-dom'; // << 2. IMPORT THÊM LINK
@@ -20,21 +19,28 @@ const JobCard = ({ job, isFavorited, onToggleFavorite }) => {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
+      whileHover={{ scale: 1.02, y: -6 }}
+      transition={{ duration: 0.28 }}
     >
       {/* << Thêm border-primary khi hover vào Card */}
-      <Card className="group hover:border-primary transition-all duration-300 flex flex-col h-full">
+      <Card className="group hover:border-primary transition-all duration-300 flex flex-col h-full hover:shadow-xl rounded-xl border border-gray-100">
         <div className="p-5 flex-grow">
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-lg overflow-hidden border p-1 bg-white">
-                <img 
-                  src={job.logo || '/placeholder-company.png'} 
-                  alt={job.company_name}
-                  className="w-full h-full object-contain"
-                />
+              <div className="w-14 h-14 rounded-lg overflow-hidden border p-1 bg-white flex items-center justify-center">
+                {job.logo ? (
+                  <img 
+                    src={job.logo} 
+                    alt={job.company_name}
+                    className="w-full h-full object-contain"
+                  />
+                ) : (
+                  <div className="flex items-center justify-center w-10 h-10 rounded bg-gray-100 text-gray-600 font-semibold">
+                    {job.company_name ? job.company_name.charAt(0).toUpperCase() : 'C'}
+                  </div>
+                )}
               </div>
               <div>
                 <h3 className="font-bold text-lg text-neutral-800 group-hover:text-primary transition-colors">
@@ -102,11 +108,11 @@ const JobGrid = ({ jobs, isLoading, onToggleFavorite, isJobFavorited }) => {
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {jobs.map(job => (
         <JobCard
-          key={job.id}
-          job={job}
-          isFavorited={isJobFavorited(job.id)}
-          onToggleFavorite={onToggleFavorite}
-        />
+            key={job.id}
+            job={job}
+            isFavorited={isJobFavorited(job.id)}
+            onToggleFavorite={onToggleFavorite}
+          />
       ))}
     </div>
   );

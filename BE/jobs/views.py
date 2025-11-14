@@ -1,9 +1,9 @@
-from django.db.models import Count
+from django.db.models import Count, Q
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import viewsets, permissions
 from rest_framework.response import Response
-from django.contrib.postgres.search import SearchVector, SearchQuery
+from django.contrib.postgres.search import SearchVector, SearchQuery, SearchHeadline
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics
 from django.views.decorators.csrf import csrf_exempt
@@ -18,10 +18,113 @@ from notifications.utils import create_and_send_notification
 from users.models import User
 from users.serializers import EmployerSerializer
 from rest_framework.views import APIView
+from django.utils import timezone
 
 import pandas as pd
 import pickle
+import joblib
+import logging
+import os
 
+logger = logging.getLogger(__name__)
+
+# Recommendation artifacts cached in memory to avoid reloading on each request
+COSINE_SIM = None
+INDICES = None
+JOB_DF = None
+
+def load_recommendation_artifacts():
+    """Load recommendation pickle artifacts into module-level variables once.
+    If files are missing, set variables to None and log a clear message.
+    """
+    global COSINE_SIM, INDICES, JOB_DF
+    # Already loaded
+    if COSINE_SIM is not None and INDICES is not None and JOB_DF is not None:
+        return
+    # Prefer ANN artifacts (hnswlib + vectors) if present
+    try:
+        # ANN artifacts: try to import lightweight libs, but do not hard-fail if they're absent
+        import numpy as _np
+        try:
+            import hnswlib as _hnsw  # type: ignore
+        except Exception:
+            _hnsw = None
+
+        hnsw_path = 'recommendations/hnsw_index.bin'
+        vecs_path = 'recommendations/job_vectors.npy'
+        indices_path = 'recommendations/indices.pkl'
+        jobdf_path = 'recommendations/job_df.pkl'
+        if _hnsw is not None and os.path.exists(hnsw_path) and os.path.exists(vecs_path) and os.path.exists(indices_path) and os.path.exists(jobdf_path):
+            JOB_VEC = _np.load(vecs_path)
+            p = _hnsw.Index(space='cosine', dim=JOB_VEC.shape[1])
+            p.load_index(hnsw_path)
+            # Store ANN objects under different names in module globals
+            globals()['HNSW_INDEX'] = p
+            globals()['JOB_VECTORS'] = JOB_VEC
+            with open(indices_path, 'rb') as f:
+                globals()['INDICES'] = pickle.load(f)
+            with open(jobdf_path, 'rb') as f:
+                globals()['JOB_DF'] = pickle.load(f)
+            logger.info('Loaded ANN recommendation artifacts (hnsw index + vectors).')
+            return
+        # else: ANN not available or files missing -> fallthrough
+    except Exception as e:
+        # if ANN libs missing or artifacts not present, fallthrough to TF-IDF loading
+        logger.debug(f'ANN artifacts not loaded: {e}')
+
+    # TF-IDF / cosine fallback
+    try:
+        # Prefer nearest-neighbors arrays if available (avoids dense matrix)
+        nn_idx_path = 'recommendations/nn_indices.npy'
+        nn_dist_path = 'recommendations/nn_distances.npy'
+        indices_path = 'recommendations/indices.pkl'
+        jobdf_path = 'recommendations/job_df.pkl'
+        if os.path.exists(nn_idx_path) and os.path.exists(indices_path) and os.path.exists(jobdf_path):
+            try:
+                import numpy as _np
+                globals()['NN_INDICES'] = _np.load(nn_idx_path)
+                globals()['NN_DISTANCES'] = _np.load(nn_dist_path) if os.path.exists(nn_dist_path) else None
+                with open(indices_path, 'rb') as f:
+                    globals()['INDICES'] = pickle.load(f)
+                with open(jobdf_path, 'rb') as f:
+                    globals()['JOB_DF'] = pickle.load(f)
+                logger.info('Loaded TF-IDF nearest-neighbors artifacts (nn_indices).')
+                return
+            except Exception as e:
+                logger.error(f'Error loading NN artifacts: {e}')
+
+        # legacy dense cosine matrix (should not be used for large corpora)
+        with open('recommendations/cosine_sim.pkl', 'rb') as f:
+            COSINE_SIM = pickle.load(f)
+        with open('recommendations/indices.pkl', 'rb') as f:
+            INDICES = pickle.load(f)
+        with open('recommendations/job_df.pkl', 'rb') as f:
+            JOB_DF = pickle.load(f)
+        logger.info('Recommendation artifacts (cosine matrix) loaded into memory.')
+    except FileNotFoundError:
+        COSINE_SIM = INDICES = JOB_DF = None
+        logger.warning('Recommendation artifacts not found. Run `python manage.py generate_recommendations` to create them.')
+    except Exception as e:
+        COSINE_SIM = INDICES = JOB_DF = None
+        logger.error(f'Error loading recommendation artifacts: {e}')
+
+# Load category classifier model (joblib) into memory at import time
+CATEGORY_CLASSIFIER = None
+try:
+    CATEGORY_CLASSIFIER = joblib.load('models/category_classifier.joblib')
+    logger.info('Category classifier model loaded successfully from models/category_classifier.joblib')
+except FileNotFoundError:
+    CATEGORY_CLASSIFIER = None
+    logger.warning('Category classifier not found: models/category_classifier.joblib. Run `python manage.py train_category_classifier` to create it.')
+except Exception as e:
+    CATEGORY_CLASSIFIER = None
+    logger.error(f'Error loading category classifier: {e}')
+
+# Eager-load recommendation artifacts at import time
+try:
+    load_recommendation_artifacts()
+except Exception as _e:
+    logger.warning(f'Unable to eager-load recommendation artifacts at import time: {_e}')
 
 
 class IsEmployerOrReadOnly(permissions.BasePermission):
@@ -50,8 +153,31 @@ class JobViewSet(viewsets.ModelViewSet):
             search_query = self.request.query_params.get('search', None)
             if search_query:
                 queryset = queryset.annotate(
-                    search=SearchVector('title', 'title_en', 'description', 'description_en')
+                    search=SearchVector('title', 'title_en', 'description', 'description_en'),
+                    headline=SearchHeadline('description', SearchQuery(search_query))
                 ).filter(search=SearchQuery(search_query))
+
+            # Salary filter via predefined ranges e.g., "min-max" in millions
+            salary = self.request.query_params.get('salary')
+            if salary:
+                try:
+                    smin, smax = salary.split('-')
+                    smin_v = float(smin) * 1_000_000
+                    smax_v = float(smax) * 1_000_000
+                    queryset = queryset.filter(min_salary__gte=smin_v, max_salary__lte=smax_v)
+                except Exception:
+                    pass
+
+            # Rating filter (from verified employer reviews)
+            rating_gte = self.request.query_params.get('rating_gte')
+            if rating_gte:
+                try:
+                    from django.db.models import Avg, Q
+                    queryset = queryset.annotate(
+                        employer_avg_rating=Avg('employer__employer_reviews__overall_rating', filter=Q(employer__employer_reviews__verified=True))
+                    ).filter(employer_avg_rating__gte=float(rating_gte))
+                except Exception:
+                    pass
             
             # Optimize queries with select_related and prefetch_related
             queryset = queryset.select_related(
@@ -225,6 +351,17 @@ class TopCategoryAPIView(generics.ListAPIView):
             return [Cat(1, 'Công nghệ', 'IT', True, 10), Cat(2, 'Kinh tế', 'Economics', False, 7)]
         return qs
 
+class TrendingJobs24hView(generics.ListAPIView):
+    serializer_class = JobSerializer
+    permission_classes = [permissions.AllowAny]
+    pagination_class = None
+
+    def get_queryset(self):
+        since = timezone.now() - timezone.timedelta(hours=24)
+        return Job.objects.filter(status='approved', application__applied_at__gte=since).annotate(
+            applications_24h=Count('application', filter=Q(application__applied_at__gte=since))
+        ).order_by('-applications_24h', '-created_at')[:12]
+
 class EmployerJobViewSet(viewsets.ModelViewSet):
     """
     API endpoint cho phép nhà tuyển dụng (employer) quản lý các công việc của họ.
@@ -363,65 +500,84 @@ class JobRecommendationView(APIView):
         permission_classes = [permissions.AllowAny]
 
         def get(self, request, job_id):
-            print(f"\n--- API /recommendations/ called for job_id: {job_id} ---")
-            # Tải các ma trận đã được tính toán trước
+            logger.info(f"API /recommendations/ called for job_id: {job_id}")
+            # Ensure artifacts are loaded into memory once
+            load_recommendation_artifacts()
+            if COSINE_SIM is None or INDICES is None or JOB_DF is None:
+                logger.warning('Recommendation artifacts missing when handling request.')
+                return Response({"error": "Recommendation data not found. Please run `python manage.py generate_recommendations` on the server."}, status=500)
+
+            recommended_jobs = get_recommendations(job_id, COSINE_SIM, INDICES, JOB_DF)
+            # DEBUG: log number of recommendations found
             try:
-                with open('recommendations/cosine_sim.pkl', 'rb') as f:
-                    cosine_sim = pickle.load(f)
-                with open('recommendations/indices.pkl', 'rb') as f:
-                    indices = pickle.load(f)
-                with open('recommendations/job_df.pkl', 'rb') as f:
-                    df = pickle.load(f)
-            except FileNotFoundError:
-                return Response({"error": "Recommendation data not found. Please run the generation command."}, status=500)
-            
-            recommended_jobs = get_recommendations(job_id, cosine_sim, indices, df)
-            # DEBUG: In ra số lượng gợi ý tìm thấy
-            print(f"--- Found {recommended_jobs.count()} recommendations in DB ---")
+                logger.info(f"Found {recommended_jobs.count()} recommendations in DB")
+            except Exception:
+                # recommended_jobs may be empty or not a queryset in some error cases
+                logger.info('Found recommendations (count unavailable)')
+
             serializer = JobSerializer(recommended_jobs, many=True, context={'request': request})
             return Response(serializer.data)
 
 def get_recommendations(job_id, cosine_sim, indices, df):
         try:
-            # Lấy chỉ số của công việc hiện tại
+            # If ANN index is available, use it
+            if 'HNSW_INDEX' in globals() and globals().get('HNSW_INDEX') is not None:
+                try:
+                    import numpy as _np
+                    idx_map = globals().get('INDICES')
+                    hnsw = globals().get('HNSW_INDEX')
+                    job_df = globals().get('JOB_DF')
+                    # map job_id -> internal index
+                    internal_idx = idx_map[job_id]
+                    # query hnsw for neighbors (include the query itself)
+                    labels, distances = hnsw.knn_query(globals().get('JOB_VECTORS')[internal_idx].reshape(1, -1), k=6)
+                    # labels is array shape (1,k)
+                    neighbor_idxs = labels[0].tolist()
+                    # remove the first if it's the same job
+                    neighbor_idxs = [i for i in neighbor_idxs if i != internal_idx][:5]
+                    recommended_job_ids = job_df['id'].iloc[neighbor_idxs].tolist()
+                    return Job.objects.filter(id__in=recommended_job_ids, status='approved')
+                except Exception as e:
+                    logger.error(f'ANN recommendation error: {e}')
+                    return Job.objects.none()
+
+            # Fallback to NearestNeighbors arrays if available (TF-IDF fallback saved nn_indices)
+            if 'NN_INDICES' in globals() and globals().get('NN_INDICES') is not None:
+                try:
+                    idx_map = globals().get('INDICES')
+                    nn_arr = globals().get('NN_INDICES')
+                    job_df = globals().get('JOB_DF')
+                    internal_idx = idx_map[job_id]
+                    neighbor_idxs = nn_arr[internal_idx].tolist()
+                    # remove the query itself if present and take top 5
+                    neighbor_idxs = [i for i in neighbor_idxs if i != internal_idx][:5]
+                    recommended_job_ids = job_df['id'].iloc[neighbor_idxs].tolist()
+                    return Job.objects.filter(id__in=recommended_job_ids, status='approved')
+                except Exception as e:
+                    logger.error(f'NN-based recommendation error: {e}')
+                    return Job.objects.none()
+
+            # Fallback to dense cosine matrix (legacy - not recommended for large corpora)
             idx = indices[job_id]
-
-            # Lấy điểm tương đồng của công việc này với tất cả các công việc khác
             sim_scores = list(enumerate(cosine_sim[idx]))
-
-            # Sắp xếp các công việc dựa trên điểm tương đồng
             sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
-            
-            # DEBUG: In ra 10 điểm tương đồng cao nhất
-            print("--- Top 10 Similarity Scores ---")
+
+            logger.info('Top 10 Similarity Scores:')
             for i, score in sim_scores[0:10]:
-                print(f"Job Index: {i}, Score: {score}")
-            # Lấy 5 công việc có điểm cao nhất (bỏ qua công việc đầu tiên vì đó là chính nó)
+                logger.info(f"Job Index: {i}, Score: {score}")
+
             sim_scores = sim_scores[1:6]
-
-            # Lấy chỉ số của các công việc được gợi ý
             job_indices = [i[0] for i in sim_scores]
-
-            # Lấy ID của các công việc từ DataFrame và truy vấn CSDL
             recommended_job_ids = df['id'].iloc[job_indices].tolist()
             return Job.objects.filter(id__in=recommended_job_ids, status='approved')
         except (IOError, KeyError, IndexError) as e:
-            print(f"Recommendation error: {e}")
+            logger.error(f"Recommendation error: {e}")
             return Job.objects.none() # Trả về queryset rỗng nếu có lỗi
 
 class PredictCategoryView(APIView):
         permission_classes = [permissions.IsAuthenticated] # Chỉ nhà tuyển dụng được dùng
-
-        model = None # Khởi tạo là None
-        try:
-            # Tải mô hình một lần duy nhất khi server Django khởi động
-            with open('models/category_classifier.pkl', 'rb') as f:
-                model = pickle.load(f)
-            print(">>> ✅ Category prediction model loaded successfully. <<<")
-        except FileNotFoundError:
-            print("!!! ⚠️ WARNING: Category prediction model (category_classifier.pkl) not found. API will not work.")
-        except Exception as e:
-            print(f"!!! ❌ ERROR loading category prediction model: {e}")
+        # Use module-level CATEGORY_CLASSIFIER loaded at import time
+        model = CATEGORY_CLASSIFIER
 
         def post(self, request, *args, **kwargs):
             if not self.model:

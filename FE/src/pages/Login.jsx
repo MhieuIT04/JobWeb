@@ -48,16 +48,16 @@ function Login() {
     };
 
     return (
-        <div className="min-h-screen pb-6 bg-gradient-to-br from-blue-50 to-white">
+        <div className="min-h-screen pb-6 bg-gradient-to-br from-blue-50 to-white dark:from-gray-900 dark:to-gray-800">
             <div className="container max-w-md mx-auto pt-8 pb-8">
-                <Card className="p-6 sm:p-8 shadow-lg bg-white/95">
+                <Card className="p-6 sm:p-8 shadow-lg bg-white/95 dark:bg-gray-900 border-gray-200 dark:border-gray-700">
                     <div className="flex flex-col items-center">
-                        <Avatar className="w-16 h-16 mb-4 bg-primary">
-                            <AvatarFallback>
-                                <Lock className="w-8 h-8" />
+                        <Avatar className="w-16 h-16 mb-4 bg-primary dark:bg-blue-600">
+                            <AvatarFallback className="bg-blue-600 dark:bg-blue-500">
+                                <Lock className="w-8 h-8 text-white" />
                             </AvatarFallback>
                         </Avatar>
-                        <h1 className="text-2xl font-bold mb-4">
+                        <h1 className="text-2xl font-bold mb-4 text-gray-900 dark:text-blue-300">
                             Đăng nhập
                         </h1>
                         <form onSubmit={handleSubmit} className="w-full space-y-4">
@@ -93,14 +93,14 @@ function Login() {
                             </div>
                             <Button
                                 type="submit"
-                                className="w-full py-6 text-lg font-bold"
+                                className="w-full py-6 text-lg font-bold bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
                                 disabled={loading}
                             >
                                 {loading ? 'Đang xử lý...' : 'Đăng nhập'}
                             </Button>
-                            <p className="text-center text-sm">
+                            <p className="text-center text-sm text-gray-700 dark:text-blue-200">
                                 Chưa có tài khoản?{' '}
-                                <RouterLink to="/register" className="font-semibold text-primary hover:underline">
+                                <RouterLink to="/register" className="font-semibold text-blue-600 dark:text-blue-400 hover:underline">
                                     Đăng ký ngay
                                 </RouterLink>
                             </p>
