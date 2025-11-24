@@ -79,25 +79,25 @@ function HorizontalJobFilters({
     };
 
     return (
-        <div className="bg-white/80 backdrop-blur-sm border-b sticky top-16 z-30">
+        <div className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm border-b dark:border-gray-700 sticky top-16 z-30">
             <div className="container mx-auto px-4">
                 <div className="flex items-center gap-2 py-3 overflow-x-auto">
                     <Input
                         placeholder="Tên công việc, vị trí, kỹ năng..."
-                        className="w-full md:w-64 bg-white dark:bg-[hsl(var(--card))] text-gray-700 dark:text-neutral-200"
+                        className="w-full md:w-64 bg-white dark:bg-slate-700 text-gray-700 dark:text-amber-100 border-gray-300 dark:border-gray-600 placeholder:dark:text-amber-300/50"
                         value={filters.search || ''} // Dùng key 'search'
                         onChange={(e) => handleFilterUpdate('search', e.target.value)}
                     />
                     {/* Categories Dropdown */}
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="outline" className="min-w-[120px] flex justify-between bg-white text-gray-700 border border-gray-200 shadow-sm dark:bg-[hsl(var(--card))] dark:text-neutral-200 dark:border-gray-700">
+                            <Button variant="outline" className="min-w-[120px] flex justify-between bg-white text-gray-700 border border-gray-300 shadow-sm dark:bg-slate-700 dark:text-amber-100 dark:border-amber-600/50 hover:bg-gray-50 dark:hover:bg-slate-600">
                                 <span>{getSelectedItemName(categories, filters.category) || 'Ngành nghề'}</span>
                                 <ChevronDown className="w-4 h-4" />
                             </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="start" className="w-56 max-h-60 overflow-y-auto shadow rounded-md bg-white">
-                            <DropdownMenuItem onClick={() => handleFilterUpdate('category', '')}>Tất cả ngành nghề</DropdownMenuItem>
+                        <DropdownMenuContent align="start" className="w-56 max-h-60 overflow-y-auto shadow rounded-md bg-white dark:bg-slate-800 dark:border-gray-700">
+                            <DropdownMenuItem onClick={() => handleFilterUpdate('category', '')} className="dark:text-amber-100 dark:hover:bg-slate-700">Tất cả ngành nghề</DropdownMenuItem>
                             <DropdownMenuGroup>
                                 {categories.map(category => (
                                     <DropdownMenuItem key={category.id} onClick={() => handleFilterUpdate('category', category.id)}>{category.name}</DropdownMenuItem>
@@ -109,13 +109,13 @@ function HorizontalJobFilters({
                     {/* Cities Dropdown */}
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="outline" className="min-w-[120px] flex justify-between bg-white text-gray-700 border border-gray-200 shadow-sm dark:bg-[hsl(var(--card))] dark:text-neutral-200 dark:border-gray-700">
+                            <Button variant="outline" className="min-w-[120px] flex justify-between bg-white text-gray-700 border border-gray-300 shadow-sm dark:bg-slate-700 dark:text-amber-100 dark:border-amber-600/50 hover:bg-gray-50 dark:hover:bg-slate-600">
                                 <span>{getSelectedItemName(cities, filters.city) || 'Địa điểm'}</span>
                                 <ChevronDown className="w-4 h-4" />
                             </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="start" className="w-56 max-h-60 overflow-y-auto shadow rounded-md bg-white">
-                            <DropdownMenuItem onClick={() => handleFilterUpdate('city', '')}>Tất cả địa điểm</DropdownMenuItem>
+                        <DropdownMenuContent align="start" className="w-56 max-h-60 overflow-y-auto shadow rounded-md bg-white dark:bg-slate-800 dark:border-gray-700">
+                            <DropdownMenuItem onClick={() => handleFilterUpdate('city', '')} className="dark:text-amber-100 dark:hover:bg-slate-700">Tất cả địa điểm</DropdownMenuItem>
                             <DropdownMenuGroup>
                                 {cities.map(city => (
                                     <DropdownMenuItem key={city.id} onClick={() => handleFilterUpdate('city', city.id)}>{city.name}</DropdownMenuItem>

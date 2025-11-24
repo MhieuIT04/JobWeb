@@ -11,6 +11,7 @@ from .views import (
     SkillListAPIView,
     TopCompaniesListView,
     AllCompaniesListView,
+    EmployerDetailView,
     CVParseView,
     CVMatchJobsView,
     EmployerReviewListCreateView,
@@ -33,6 +34,7 @@ urlpatterns = [
     path('skills/', SkillListAPIView.as_view(), name='skill-list'),
     path('companies/top/', TopCompaniesListView.as_view(), name='top-company-list'),
     path('companies/', AllCompaniesListView.as_view(), name='company-list'),
+    path('employers/<int:pk>/', EmployerDetailView.as_view(), name='employer-detail'),
 
     # CV parsing & matching
     path('cv/parse/', CVParseView.as_view(), name='cv-parse'),

@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import RatingStars from '../components/RatingStars';
+import HomeFooter from '../components/HomeFooter';
 
 export default function Companies() {
   const [companies, setCompanies] = useState([]);
@@ -34,21 +37,27 @@ export default function Companies() {
       {loading ? <p>Đang tải...</p> : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
           {companies.map(c => (
-            <Card key={c.id} className="text-center p-4 bg-white dark:bg-gray-900">
-              <div className="w-16 h-16 mx-auto rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-2 text-gray-700 dark:text-blue-300 font-semibold">
-                {c.company_name?.charAt(0)}
-              </div>
-              <div className="font-semibold text-sm truncate">{c.company_name}</div>
-              <div className="text-xs text-muted-foreground">{c.job_count} việc làm</div>
-              <div className="flex items-center justify-center gap-1 mt-1">
-                <RatingStars value={c.avg_rating || 0} size={14} />
-                <span className="text-xs">{(c.avg_rating||0).toFixed(1)} ({c.review_count||0})</span>
-              </div>
-            </Card>
+            <Link key={c.id} to={`/companies/${c.id}`}>
+              <Card className="text-center p-4 bg-white dark:bg-gray-900 hover:shadow-lg transition-shadow cursor-pointer">
+                <Avatar className="w-16 h-16 mx-auto mb-2">
+                  <AvatarImage src={c.logo} alt={c.company_name} />
+                  <AvatarFallback className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-blue-300 font-semibold">
+                    {c.company_name?.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="font-semibold text-sm truncate text-gray-900 dark:text-blue-300">{c.company_name}</div>
+                <div className="text-xs text-muted-foreground dark:text-blue-200">{c.job_count} việc làm</div>
+                <div className="flex items-center justify-center gap-1 mt-1">
+                  <RatingStars value={c.avg_rating || 0} size={14} />
+                  <span className="text-xs text-gray-600 dark:text-gray-400">{(c.avg_rating||0).toFixed(1)} ({c.review_count||0})</span>
+                </div>
+              </Card>
+            </Link>
           ))}
         </div>
       )}
       {next && <div className="mt-4 text-center"><Button onClick={()=>fetchPage(next)}>Tải thêm</Button></div>}
+      <HomeFooter />
     </div>
   );
 }

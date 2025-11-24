@@ -4,10 +4,7 @@ import axiosClient from '../api/axiosClient';
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-<<<<<<< HEAD
 import { Button } from "@/components/ui/button";
-=======
->>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a
 
 function MyApplications() {
     const [applications, setApplications] = useState([]);
@@ -16,13 +13,12 @@ function MyApplications() {
 
     useEffect(() => {
         const fetchApplications = async () => {
-            setIsLoading(true);
             try {
-                const response = await axiosClient.get('/api/jobs/applications/');
-                setApplications(response.data.results || response.data);
+                const response = await axiosClient.get('/api/jobs/my-applications/');
+                setApplications(response.data);
             } catch (err) {
-                console.error("Lỗi tải danh sách ứng tuyển:", err);
-                setError("Không thể tải dữ liệu.");
+                console.error('Lỗi khi tải danh sách ứng tuyển:', err);
+                setError('Không thể tải danh sách ứng tuyển.');
             } finally {
                 setIsLoading(false);
             }
@@ -30,36 +26,53 @@ function MyApplications() {
         fetchApplications();
     }, []);
 
+    const getStatusBadge = (status) => {
+        const statusMap = {
+            'pending': { label: 'Chờ duyệt', variant: 'secondary' },
+            'accepted': { label: 'Chấp nhận', variant: 'default' },
+            'rejected': { label: 'Từ chối', variant: 'destructive' }
+        };
+        const config = statusMap[status] || { label: status, variant: 'secondary' };
+        return <Badge variant={config.variant}>{config.label}</Badge>;
+    };
+
     if (isLoading) {
-        return <div className="flex justify-center items-center min-h-[60vh]"><span className="animate-spin w-12 h-12 border-4 border-blue-300 border-t-transparent rounded-full block" /></div>;
+        return <div className="text-center py-8">Đang tải...</div>;
     }
+
+    if (error) {
+        return (
+            <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+            </Alert>
+        );
+    }
+
     return (
-        <Card className="p-6 max-w-2xl mx-auto bg-white/95 rounded-xl shadow-lg">
-            <h1 className="text-2xl font-bold mb-6 text-primary">Lịch sử ứng tuyển</h1>
-            {error && <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>}
-            <ul>
+        <Card className="p-6 max-w-4xl mx-auto">
+            <h1 className="text-2xl font-bold mb-6">Lịch sử ứng tuyển</h1>
+            <ul className="space-y-4">
                 {applications.length > 0 ? applications.map(app => (
-                    <li key={app.id} className="flex items-center justify-between py-3 border-b">
-                        <div>
-                            <RouterLink to={`/jobs/${app.job_id}`} className="font-semibold text-lg hover:underline">{app.job_title}</RouterLink>
-                            <div className="text-sm text-gray-500">Ngày nộp: {new Date(app.applied_at).toLocaleDateString('vi-VN')}</div>
-<<<<<<< HEAD
-                            {app.employer_id && (
-                              <div className="text-sm mt-1">Công ty: <RouterLink className="underline" to={`/companies/${app.employer_id}`}>{app.employer_company || `#${app.employer_id}`}</RouterLink></div>
-                            )}
+                    <li key={app.id} className="border-b pb-4">
+                        <div className="flex justify-between items-start">
+                            <div>
+                                <RouterLink to={`/jobs/${app.job_id}`} className="font-semibold text-lg hover:underline">{app.job_title}</RouterLink>
+                                <div className="text-sm text-gray-500">Ngày nộp: {new Date(app.applied_at).toLocaleDateString('vi-VN')}</div>
+                                {app.employer_id && (
+                                  <div className="text-sm mt-1">Công ty: <RouterLink className="underline" to={`/companies/${app.employer_id}`}>{app.employer_company || `#${app.employer_id}`}</RouterLink></div>
+                                )}
+                            </div>
+                            <div>{getStatusBadge(app.status)}</div>
                         </div>
-                        <div className="flex items-center gap-3">
-                          <Badge variant={app.status === 'accepted' ? 'success' : app.status === 'rejected' ? 'destructive' : 'secondary'} className="capitalize text-base font-semibold">{app.status}</Badge>
-                          {app.employer_id && (
-                            <RouterLink to={`/companies/${app.employer_id}`}>
-                              <Button size="sm" variant="outline">Đánh giá</Button>
-                            </RouterLink>
-                          )}
-                        </div>
-=======
-                        </div>
-                        <Badge variant={app.status === 'accepted' ? 'success' : app.status === 'rejected' ? 'destructive' : 'secondary'} className="capitalize text-base font-semibold">{app.status}</Badge>
->>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a
+                        {app.cover_letter && (
+                            <details className="mt-2">
+                                <summary className="cursor-pointer text-sm text-primary">Xem thư xin việc</summary>
+                                <p className="text-sm mt-2 whitespace-pre-line">{app.cover_letter}</p>
+                            </details>
+                        )}
+                        {app.cv && (
+                            <Button variant="outline" size="sm" asChild className="mt-2"><a href={app.cv} target="_blank" rel="noopener noreferrer">Xem CV</a></Button>
+                        )}
                     </li>
                 )) : (
                     <li className="text-center text-gray-500 py-6">Bạn chưa ứng tuyển vào công việc nào.</li>

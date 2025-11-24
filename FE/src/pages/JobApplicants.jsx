@@ -82,18 +82,10 @@ function JobApplicants() {
     }
 
     return (
-<<<<<<< HEAD
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white dark:from-gray-900 dark:to-gray-800 pb-6">
             <div className="container mx-auto py-6">
                 <div className="bg-white/95 dark:bg-gray-900 rounded-lg shadow-lg p-6 border border-gray-200 dark:border-gray-700">
-                    <h1 className="text-2xl font-bold text-blue-600 dark:text-blue-300 mb-6">
-=======
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white pb-6">
-            <div className="container mx-auto py-6">
-                <div className="bg-white/95 rounded-lg shadow-lg p-6">
-                    <h1 className="text-2xl font-bold text-blue-600 mb-6">
->>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a
-                        Danh sách ứng viên cho: <span className="font-extrabold">{jobTitle || `Công việc #${jobId}`}</span>
+                    <h1 className="text-2xl font-bold text-blue-600 dark:text-blue-300 mb-6">                        Danh sách ứng viên cho: <span className="font-extrabold">{jobTitle || `Công việc #${jobId}`}</span>
                     </h1>
                     
                     {error && (
@@ -104,26 +96,15 @@ function JobApplicants() {
 
                     <Table>
                         <TableHeader>
-<<<<<<< HEAD
                             <TableRow className="border-b dark:border-gray-700">
                                 <TableHead className="font-bold text-gray-900 dark:text-blue-300">Ứng viên</TableHead>
                                 <TableHead className="font-bold text-gray-900 dark:text-blue-300">Ngày nộp</TableHead>
                                 <TableHead className="font-bold text-gray-900 dark:text-blue-300">CV</TableHead>
                                 <TableHead className="font-bold text-gray-900 dark:text-blue-300">Trạng thái</TableHead>
-                                <TableHead className="text-right font-bold text-gray-900 dark:text-blue-300">Hành động</TableHead>
-=======
-                            <TableRow>
-                                <TableHead className="font-bold">Ứng viên</TableHead>
-                                <TableHead className="font-bold">Ngày nộp</TableHead>
-                                <TableHead className="font-bold">CV</TableHead>
-                                <TableHead className="font-bold">Trạng thái</TableHead>
-                                <TableHead className="text-right font-bold">Hành động</TableHead>
->>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a
-                            </TableRow>
+                                <TableHead className="text-right font-bold text-gray-900 dark:text-blue-300">Hành động</TableHead>                            </TableRow>
                         </TableHeader>
                         <TableBody>
                             {applications.length > 0 ? applications.map(app => (
-<<<<<<< HEAD
                                 <TableRow key={app.id} className="transition-colors border-b dark:border-gray-700">
                                         <TableCell className="flex items-center gap-3">
                                             <Avatar className="h-12 w-12 border-2 border-gray-200 dark:border-gray-700">
@@ -134,39 +115,15 @@ function JobApplicants() {
                                                 <div className="font-medium text-gray-900 dark:text-blue-300">
                                                     {`${app.user_profile?.first_name || ''} ${app.user_profile?.last_name || ''}`.trim() || 'Chưa cập nhật'}
                                                 </div>
-                                                <div className="text-sm text-gray-500 dark:text-blue-200">
-=======
-                                <TableRow key={app.id} className="hover:bg-blue-50/20 transition-colors">
-                                        <TableCell className="flex items-center gap-3">
-                                            <Avatar className="h-12 w-12">
-                                                <AvatarImage src={app.user_profile?.avatar} />
-                                                <AvatarFallback>{app.user_profile?.first_name?.[0] || 'U'}</AvatarFallback>
-                                            </Avatar>
-                                            <div>
-                                                <div className="font-medium">
-                                                    {`${app.user_profile?.first_name || ''} ${app.user_profile?.last_name || ''}`.trim() || 'Chưa cập nhật'}
-                                                </div>
-                                                <div className="text-sm text-gray-500">
->>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a
-                                                    {app.user_profile?.email}
+                                                <div className="text-sm text-gray-500 dark:text-blue-200">                                                    {app.user_profile?.email}
                                                 </div>
                                             </div>
                                         </TableCell>
-<<<<<<< HEAD
-                                        <TableCell className="text-gray-700 dark:text-blue-200">{new Date(app.applied_at).toLocaleDateString('vi-VN')}</TableCell>
-=======
-                                        <TableCell>{new Date(app.applied_at).toLocaleDateString('vi-VN')}</TableCell>
->>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a
-                                        <TableCell>
+                                        <TableCell className="text-gray-700 dark:text-blue-200">{new Date(app.applied_at).toLocaleDateString('vi-VN')}</TableCell>                                        <TableCell>
                                             <Button 
                                                 variant="outline" 
                                                 disabled={!app.cv}
-<<<<<<< HEAD
-                                                className="rounded-md font-semibold border-gray-300 dark:border-gray-600 text-gray-900 dark:text-blue-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-=======
-                                                className="rounded-md font-semibold"
->>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a
-                                                asChild
+                                                className="rounded-md font-semibold border-gray-300 dark:border-gray-600 text-gray-900 dark:text-blue-300 hover:bg-gray-100 dark:hover:bg-gray-800"                                                asChild
                                             >
                                                 <a 
                                                     href={app.cv} 
@@ -201,12 +158,7 @@ function JobApplicants() {
                                     </TableRow>
                                 )) : (
                                     <TableRow>
-<<<<<<< HEAD
-                                        <TableCell colSpan={5} align="center" className="text-gray-500 dark:text-blue-200 py-8">
-=======
-                                        <TableCell colSpan={5} align="center">
->>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a
-                                            Chưa có ứng viên nào cho công việc này.
+                                        <TableCell colSpan={5} align="center" className="text-gray-500 dark:text-blue-200 py-8">                                            Chưa có ứng viên nào cho công việc này.
                                         </TableCell>
                                     </TableRow>
                                 )}

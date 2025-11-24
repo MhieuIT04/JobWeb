@@ -10,20 +10,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-<<<<<<< HEAD
 import { User, Sun, Moon } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
 
 function Navbar() {
     const { isAuthenticated, user, logout } = useAuth();
-    const { theme, toggleTheme } = useTheme();
-=======
-import { User } from 'lucide-react';
-
-function Navbar() {
-    const { isAuthenticated, user, logout } = useAuth();
->>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a
-    const navigate = useNavigate();
+    const { theme, toggleTheme } = useTheme();    const navigate = useNavigate();
 
     const handleLogout = async () => {
         try {
@@ -38,7 +30,6 @@ function Navbar() {
     };
 
     return (
-<<<<<<< HEAD
     <nav className="bg-white text-gray-800 px-4 py-3 flex items-center justify-between shadow-sm fixed top-0 left-0 w-full z-50 border-b dark:bg-[hsl(var(--card))] dark:text-white">
             <div className="flex items-center gap-4">
                 <RouterLink to="/" className="flex items-center gap-3 text-primary hover:opacity-90 transition-opacity dark:text-[hsl(var(--primary-foreground))]">
@@ -63,49 +54,21 @@ function Navbar() {
             <div className="flex items-center gap-2">
                 {isAuthenticated ? (
                     <>
-                        <Button variant="secondary" asChild>
-                            <RouterLink to="/">Gợi ý</RouterLink>
-                        </Button>
-                        <Button variant="secondary" asChild>
-                            <RouterLink to="/cv-match">Phân tích CV</RouterLink>
-                        </Button>
+                        <Button variant="secondary" asChild><RouterLink to="/">Gợi ý</RouterLink></Button>
+                        <Button variant="secondary" asChild><RouterLink to="/cv-match">Phân tích CV</RouterLink></Button>
                         {user && user.role === 'employer' && (
                             <>
-                                <Button variant="secondary" asChild>
-                                    <RouterLink to="/employer/dashboard">Quản lý</RouterLink>
-                                </Button>
-                                <Button variant="secondary" asChild>
-                                    <RouterLink to="/employer/analytics">Thống kê</RouterLink>
-                                </Button>
+                                <Button variant="secondary" asChild><RouterLink to="/employer/dashboard">Quản lý</RouterLink></Button>
+                                <Button variant="secondary" asChild><RouterLink to="/employer/analytics">Thống kê</RouterLink></Button>
                             </>
-=======
-        <nav className="bg-primary text-white px-4 py-2 flex items-center justify-between shadow">
-            <RouterLink to="/" className="font-bold text-xl text-white no-underline">JobBoard</RouterLink>
-            <div className="flex items-center gap-2">
-                {isAuthenticated ? (
-                    <>
-                        {user && user.role === 'employer' && (
-                            <Button variant="secondary" asChild>
-                                <RouterLink to="/employer/dashboard">Quản lý</RouterLink>
-                            </Button>
->>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a
                         )}
-                        <Button variant="secondary" asChild>
-                            <RouterLink to="/profile">Hồ sơ</RouterLink>
-                        </Button>
-                        <Button variant="secondary" asChild>
-                            <RouterLink to="/my-applications">Đã ứng tuyển</RouterLink>
-                        </Button>
-                        <Button variant="secondary" asChild>
-                            <RouterLink to="/favorites">Việc đã lưu</RouterLink>
-                        </Button>
+                        <Button variant="secondary" asChild><RouterLink to="/profile">Hồ sơ</RouterLink></Button>
+                        <Button variant="secondary" asChild><RouterLink to="/my-applications">Đã ứng tuyển</RouterLink></Button>
+                        <Button variant="secondary" asChild><RouterLink to="/favorites">Việc đã lưu</RouterLink></Button>
                         <NotificationBell />
-<<<<<<< HEAD
                                 <Button variant="ghost" size="icon" onClick={toggleTheme} title="Chuyển chế độ sáng/tối">
                                     {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
                                 </Button>
-=======
->>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" className="relative rounded-full">
@@ -124,12 +87,8 @@ function Navbar() {
                     </>
                 ) : (
                     <>
-                        <Button variant="secondary" asChild>
-                            <RouterLink to="/login">Đăng nhập</RouterLink>
-                        </Button>
-                        <Button variant="secondary" asChild>
-                            <RouterLink to="/register">Đăng ký</RouterLink>
-                        </Button>
+                        <Button variant="secondary" asChild><RouterLink to="/login">Đăng nhập</RouterLink></Button>
+                        <Button variant="secondary" asChild><RouterLink to="/register">Đăng ký</RouterLink></Button>
                     </>
                 )}
             </div>

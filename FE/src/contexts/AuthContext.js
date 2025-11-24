@@ -162,7 +162,6 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-<<<<<<< HEAD
   // Đánh dấu một thông báo là đã đọc (cập nhật cả server và local state)
   const markNotificationRead = async (id) => {
     try {
@@ -211,49 +210,40 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-=======
->>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a
-  // useEffect để quản lý trạng thái khi tải lại trang
-  useEffect(() => {
-    if (authTokens) {
-      // 1. Cập nhật user state từ token
-      setUser(jwtDecode(authTokens.access));
+  const isAuthenticated = !!authTokens;
 
-      // 2. Tải dữ liệu ban đầu cho user này
-      fetchFavorites();
-      fetchNotifications();
-
-      // 3. (Tùy chọn) Thiết lập interval để tự động cập nhật
-      const interval = setInterval(fetchNotifications, 60000); // 1 phút
-
-      // 4. Dọn dẹp interval khi component unmount hoặc authTokens thay đổi
-      return () => clearInterval(interval);
-    } else {
-      // Nếu không có token, reset mọi thứ
-      setUser(null);
-      setFavorites([]);
-      setNotifications([]);
+  const register = async (email, password, role) => {
+    try {
+      await axiosClient.post('/api/users/register/', { email, password, role });
+      return { success: true };
+    } catch (error) {
+      console.error('Registration error:', error);
+      throw error;
     }
-    // 5. Mảng dependency đúng là [authTokens, fetchFavorites, fetchNotifications]
-  }, [authTokens, fetchFavorites, fetchNotifications]);
+  };
+
+  const isJobFavorited = (jobId) => {
+    return favorites.some((fav) => fav.jobId === jobId);
+  };
+
+  const markAllAsRead = markAllNotificationsRead;
 
   const contextData = {
     user,
     authTokens,
-    isAuthenticated: !!user,
+    isAuthenticated,
     login,
     logout,
+    register,
     favorites,
+    fetchFavorites,
     toggleFavorite,
-    isJobFavorited: (jobId) => favorites.some((fav) => fav.jobId === jobId),
+    isJobFavorited,
     notifications,
     unreadCount,
-<<<<<<< HEAD
     markNotificationRead,
     deleteNotification,
-    markAllNotificationsRead,
-=======
->>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a
+    markAllAsRead
   };
 
   return (

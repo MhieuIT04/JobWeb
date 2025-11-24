@@ -8,46 +8,26 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-<<<<<<< HEAD
 import { Bell, Trash2 } from 'lucide-react';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from '../contexts/AuthContext';
 
 function NotificationBell() {
     const { notifications, unreadCount, markNotificationRead, deleteNotification, markAllNotificationsRead } = useAuth();
-=======
-import { Bell } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
-
-function NotificationBell() {
-    const { notifications, unreadCount } = useAuth();
->>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a
-
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-<<<<<<< HEAD
-                <Button variant="ghost" size="icon" className="relative focus-ring" aria-label="Thông báo">
-=======
-                <Button variant="ghost" size="icon" className="relative">
->>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a
-                    <Bell className="h-4 w-4" />
+                <Button variant="ghost" size="icon" className="relative focus-ring" aria-label="Thông báo">                    <Bell className="h-4 w-4" />
                     {unreadCount > 0 && (
                         <Badge 
                             variant="destructive" 
-<<<<<<< HEAD
                             className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center text-[10px] animate-pulse"
-                            aria-live="polite"
-=======
-                            className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center text-[10px]"
->>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a
-                        >
+                            aria-live="polite"                        >
                             {unreadCount}
                         </Badge>
                     )}
                 </Button>
             </DropdownMenuTrigger>
-<<<<<<< HEAD
             <DropdownMenuContent align="end" className="w-[320px] bg-white shadow-lg rounded-lg">
                 {notifications.length > 0 ? (
                     notifications.map(notif => (
@@ -94,22 +74,13 @@ function NotificationBell() {
                                 aria-label="Xóa thông báo"
                             >
                                 <Trash2 className="w-4 h-4" />
-                            </button>
-=======
-            <DropdownMenuContent align="end" className="w-[300px]">
-                {notifications.length > 0 ? (
-                    notifications.map(notif => (
-                        <DropdownMenuItem key={notif.id} className="py-3">
-                            <span className="text-sm">{notif.message}</span>
->>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a
-                        </DropdownMenuItem>
+                            </button>                        </DropdownMenuItem>
                     ))
                 ) : (
                     <DropdownMenuItem disabled>
                         <span className="text-sm text-muted-foreground">Không có thông báo mới.</span>
                     </DropdownMenuItem>
                 )}
-<<<<<<< HEAD
                 {/* Xóa tất cả (tùy backend hỗ trợ): show only when there are notifications */}
                 {notifications.length > 0 && (
                     <div className="px-3 py-2 border-t flex items-center justify-between gap-2">
@@ -147,8 +118,6 @@ function NotificationBell() {
                         </div>
                     </div>
                 )}
-=======
->>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a
             </DropdownMenuContent>
         </DropdownMenu>
     );

@@ -140,6 +140,20 @@ class AllCompaniesListView(generics.ListAPIView):
         return qs
 
 
+class EmployerDetailView(generics.RetrieveAPIView):
+    """API để lấy thông tin chi tiết của một employer"""
+    serializer_class = EmployerSerializer
+    permission_classes = [permissions.AllowAny]
+    lookup_field = 'pk'
+
+    def get_queryset(self):
+        return User.objects.filter(role='employer', is_active=True).annotate(
+            job_count=Count('job'),
+            avg_rating=Avg('employer_reviews__overall_rating', filter=Q(employer_reviews__verified=True)),
+            review_count=Count('employer_reviews', filter=Q(employer_reviews__verified=True))
+        )
+
+
 class CVParseView(APIView):
     permission_classes = [permissions.AllowAny]
     parser_classes = (MultiPartParser, FormParser)

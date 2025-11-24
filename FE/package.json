@@ -30,10 +30,7 @@
     "react-router-dom": "^7.7.0",
     "react-scripts": "5.0.1",
     "react-toastify": "^11.0.5",
-<<<<<<< HEAD
     "recharts": "^2.5.0",
-=======
->>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a
     "tailwind-merge": "^1.14.0",
     "tailwindcss-animate": "^1.0.7",
     "web-vitals": "^2.1.4"
@@ -42,12 +39,8 @@
     "start": "craco start",
     "build": "craco build",
     "test": "craco test",
-<<<<<<< HEAD
     "eject": "craco eject",
     "lint": "eslint src --ext .js,.jsx"
-=======
-    "eject": "craco eject"
->>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a
   },
   "eslintConfig": {
     "extends": [
@@ -69,16 +62,9 @@
   },
   "devDependencies": {
     "@craco/craco": "^7.1.0",
-<<<<<<< HEAD
     "autoprefixer": "^10.4.21",
     "postcss": "^8.5.6",
     "postcss-import": "^16.1.1",
     "tailwindcss": "^3.4.18"
-=======
-    "autoprefixer": "^10.4.18",
-    "postcss": "^8.4.35",
-    "postcss-import": "^16.1.1",
-    "tailwindcss": "^3.4.1"
->>>>>>> 6f28acc886b08ac850b9b237ed7c2a8010966d5a
   }
 }
