@@ -4,5 +4,6 @@
     "python.analysis.extraPaths": [
         "${workspaceFolder}\\.venv\\Lib\\site-packages",
         "${workspaceFolder}\\BE"
-    ]
+    ],
+    "javascript.autoClosingTags": false
 }

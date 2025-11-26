@@ -2,12 +2,16 @@
 import React, { useState, useEffect } from 'react';
 import axiosClient from '../api/axiosClient';
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer 
 } from 'recharts';
-import { Briefcase, Users, FileText, TrendingUp } from 'lucide-react';
+import { Briefcase, Users, FileText, TrendingUp, Download, Calendar, FileSpreadsheet } from 'lucide-react';
+import { toast } from 'react-toastify';
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
 
@@ -15,21 +19,104 @@ function EmployerAnalytics() {
   const [stats, setStats] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // Date range state
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
 
   useEffect(() => {
-    fetchDashboardStats();
+    // Set default date range (last 30 days)
+    const end = new Date();
+    const start = new Date();
+    start.setDate(start.getDate() - 30);
+    
+    setStartDate(start.toISOString().split('T')[0]);
+    setEndDate(end.toISOString().split('T')[0]);
   }, []);
+
+  useEffect(() => {
+    if (startDate && endDate) {
+      fetchDashboardStats();
+    }
+  }, [startDate, endDate]);
 
   const fetchDashboardStats = async () => {
     setIsLoading(true);
     try {
-      const response = await axiosClient.get('/api/jobs/dashboard/employer/stats/');
+      const params = new URLSearchParams();
+      if (startDate) params.append('start_date', startDate);
+      if (endDate) params.append('end_date', endDate);
+      
+      const response = await axiosClient.get(`/api/jobs/dashboard/employer/stats/?${params}`);
       setStats(response.data);
     } catch (err) {
       console.error('Error fetching dashboard stats:', err);
       setError('Không thể tải thống kê');
     } finally {
       setIsLoading(false);
+    }
+  };
+  
+  const exportToCSV = () => {
+    if (!stats) return;
+    
+    try {
+      let csv = 'Báo cáo thống kê tuyển dụng\n\n';
+      csv += `Từ ngày: ${startDate}\n`;
+      csv += `Đến ngày: ${endDate}\n\n`;
+      
+      csv += 'Tổng quan\n';
+      csv += 'Chỉ số,Giá trị\n';
+      csv += `Tổng số tin,${stats.total_jobs}\n`;
+      csv += `Tổng ứng viên,${stats.total_applications}\n`;
+      csv += `Tin đã duyệt,${stats.jobs_by_status?.approved || 0}\n`;
+      csv += `Chờ xử lý,${stats.applications_by_status?.pending || 0}\n\n`;
+      
+      csv += 'Top công việc\n';
+      csv += 'Tiêu đề,Số ứng viên\n';
+      (stats.top_jobs || []).forEach(job => {
+        csv += `"${job.title}",${job.applications_count}\n`;
+      });
+      
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `analytics_${startDate}_${endDate}.csv`;
+      link.click();
+      
+      toast.success('Đã xuất báo cáo CSV!');
+    } catch (err) {
+      console.error('Export error:', err);
+      toast.error('Không thể xuất báo cáo');
+    }
+  };
+  
+  const exportToJSON = () => {
+    if (!stats) return;
+    
+    try {
+      const data = {
+        period: { start: startDate, end: endDate },
+        summary: {
+          total_jobs: stats.total_jobs,
+          total_applications: stats.total_applications,
+          jobs_by_status: stats.jobs_by_status,
+          applications_by_status: stats.applications_by_status
+        },
+        top_jobs: stats.top_jobs,
+        timeline: stats.applications_timeline
+      };
+      
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `analytics_${startDate}_${endDate}.json`;
+      link.click();
+      
+      toast.success('Đã xuất báo cáo JSON!');
+    } catch (err) {
+      console.error('Export error:', err);
+      toast.error('Không thể xuất báo cáo');
     }
   };
 
@@ -75,12 +162,79 @@ function EmployerAnalytics() {
       <div className="container mx-auto py-8 px-4">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-blue-300 mb-2">
-            📊 Dashboard & Analytics
-          </h1>
-          <p className="text-gray-600 dark:text-blue-200">
-            Tổng quan về hoạt động tuyển dụng của bạn
-          </p>
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-blue-300 mb-2">
+                📊 Dashboard & Analytics
+              </h1>
+              <p className="text-gray-600 dark:text-blue-200">
+                Tổng quan về hoạt động tuyển dụng của bạn
+              </p>
+            </div>
+            
+            {/* Export Buttons */}
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={exportToCSV}
+                className="flex items-center gap-2"
+              >
+                <FileSpreadsheet className="w-4 h-4" />
+                Xuất CSV
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={exportToJSON}
+                className="flex items-center gap-2"
+              >
+                <Download className="w-4 h-4" />
+                Xuất JSON
+              </Button>
+            </div>
+          </div>
+          
+          {/* Date Range Picker */}
+          <Card className="p-4 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700">
+            <div className="flex flex-col md:flex-row gap-4 items-end">
+              <div className="flex-1">
+                <Label htmlFor="start-date" className="flex items-center gap-2 mb-2">
+                  <Calendar className="w-4 h-4" />
+                  Từ ngày
+                </Label>
+                <Input 
+                  id="start-date"
+                  type="date" 
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  max={endDate}
+                />
+              </div>
+              
+              <div className="flex-1">
+                <Label htmlFor="end-date" className="flex items-center gap-2 mb-2">
+                  <Calendar className="w-4 h-4" />
+                  Đến ngày
+                </Label>
+                <Input 
+                  id="end-date"
+                  type="date" 
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  min={startDate}
+                  max={new Date().toISOString().split('T')[0]}
+                />
+              </div>
+              
+              <Button 
+                onClick={fetchDashboardStats}
+                className="md:w-auto w-full"
+              >
+                Áp dụng
+              </Button>
+            </div>
+          </Card>
         </div>
 
         {/* Stats Cards */}

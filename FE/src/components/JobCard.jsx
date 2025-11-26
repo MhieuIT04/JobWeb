@@ -35,9 +35,10 @@ function JobCard({ job, isFavorited, onToggleFavorite, isAuthenticated }) {
             : job.experience_level;
 
     return (
-        <Card className="flex flex-col h-full transition-all duration-200 hover:-translate-y-2 hover:shadow-xl bg-white dark:bg-[hsl(var(--card))] rounded-xl border border-gray-100 dark:border-gray-700">
-            <CardContent className="flex-grow pt-4">
-                    <div className="flex items-start gap-3 mb-3">
+        <RouterLink to={`/jobs/${job.id}`} className="block h-full">
+            <Card className="flex flex-col h-full transition-all duration-200 hover:-translate-y-2 hover:shadow-xl bg-white dark:bg-[hsl(var(--card))] rounded-xl border border-gray-100 dark:border-gray-700 cursor-pointer">
+                <CardContent className="flex-grow pt-4">
+                        <div className="flex items-start gap-3 mb-3">
                         <div className="w-14 h-14 rounded-lg overflow-hidden border p-1 bg-white flex items-center justify-center">
                             {job.employer?.logo ? (
                                 <img
@@ -110,7 +111,13 @@ function JobCard({ job, isFavorited, onToggleFavorite, isAuthenticated }) {
 
             <CardFooter className="pt-4 border-t border-gray-700">
                 <div className="flex items-center gap-2 w-full">
-                    <Button size="sm" asChild className="flex-1 bg-white/10 text-white hover:bg-white/20"><RouterLink to={`/jobs/${job.id}`}><span>Xem chi tiết</span></RouterLink></Button>
+                    <Button 
+                        size="sm" 
+                        className="flex-1 bg-white/10 text-white hover:bg-white/20"
+                        onClick={(e) => e.preventDefault()}
+                    >
+                        <span>Xem chi tiết</span>
+                    </Button>
                     <Button
                         size="icon"
                         variant="ghost"
@@ -127,7 +134,8 @@ function JobCard({ job, isFavorited, onToggleFavorite, isAuthenticated }) {
                     </Button>
                 </div>
             </CardFooter>
-        </Card>
+            </Card>
+        </RouterLink>
     );
 }
 

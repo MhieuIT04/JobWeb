@@ -41,6 +41,11 @@ def load_recommendation_artifacts():
     # Already loaded
     if COSINE_SIM is not None and INDICES is not None and JOB_DF is not None:
         return
+    
+    # Get base directory (BE folder)
+    from django.conf import settings
+    base_dir = settings.BASE_DIR
+    
     # Prefer ANN artifacts (hnswlib + vectors) if present
     try:
         # ANN artifacts: try to import lightweight libs, but do not hard-fail if they're absent
@@ -50,10 +55,10 @@ def load_recommendation_artifacts():
         except Exception:
             _hnsw = None
 
-        hnsw_path = 'recommendations/hnsw_index.bin'
-        vecs_path = 'recommendations/job_vectors.npy'
-        indices_path = 'recommendations/indices.pkl'
-        jobdf_path = 'recommendations/job_df.pkl'
+        hnsw_path = os.path.join(base_dir, 'recommendations', 'hnsw_index.bin')
+        vecs_path = os.path.join(base_dir, 'recommendations', 'job_vectors.npy')
+        indices_path = os.path.join(base_dir, 'recommendations', 'indices.pkl')
+        jobdf_path = os.path.join(base_dir, 'recommendations', 'job_df.pkl')
         if _hnsw is not None and os.path.exists(hnsw_path) and os.path.exists(vecs_path) and os.path.exists(indices_path) and os.path.exists(jobdf_path):
             JOB_VEC = _np.load(vecs_path)
             p = _hnsw.Index(space='cosine', dim=JOB_VEC.shape[1])
@@ -75,10 +80,13 @@ def load_recommendation_artifacts():
     # TF-IDF / cosine fallback
     try:
         # Prefer nearest-neighbors arrays if available (avoids dense matrix)
-        nn_idx_path = 'recommendations/nn_indices.npy'
-        nn_dist_path = 'recommendations/nn_distances.npy'
-        indices_path = 'recommendations/indices.pkl'
-        jobdf_path = 'recommendations/job_df.pkl'
+        nn_idx_path = os.path.join(base_dir, 'recommendations', 'nn_indices.npy')
+        nn_dist_path = os.path.join(base_dir, 'recommendations', 'nn_distances.npy')
+        indices_path = os.path.join(base_dir, 'recommendations', 'indices.pkl')
+        jobdf_path = os.path.join(base_dir, 'recommendations', 'job_df.pkl')
+        
+        logger.info(f'Checking NN artifacts: nn_idx={os.path.exists(nn_idx_path)}, indices={os.path.exists(indices_path)}, jobdf={os.path.exists(jobdf_path)}')
+        
         if os.path.exists(nn_idx_path) and os.path.exists(indices_path) and os.path.exists(jobdf_path):
             try:
                 import numpy as _np
@@ -88,43 +96,65 @@ def load_recommendation_artifacts():
                     globals()['INDICES'] = pickle.load(f)
                 with open(jobdf_path, 'rb') as f:
                     globals()['JOB_DF'] = pickle.load(f)
-                logger.info('Loaded TF-IDF nearest-neighbors artifacts (nn_indices).')
+                logger.info('✅ Loaded TF-IDF nearest-neighbors artifacts (nn_indices).')
                 return
             except Exception as e:
-                logger.error(f'Error loading NN artifacts: {e}')
+                logger.error(f'❌ Error loading NN artifacts: {e}')
 
         # legacy dense cosine matrix (should not be used for large corpora)
-        with open('recommendations/cosine_sim.pkl', 'rb') as f:
+        cosine_path = os.path.join(base_dir, 'recommendations', 'cosine_sim.pkl')
+        logger.info(f'Trying to load cosine matrix from: {cosine_path}')
+        
+        with open(cosine_path, 'rb') as f:
             COSINE_SIM = pickle.load(f)
-        with open('recommendations/indices.pkl', 'rb') as f:
+        with open(os.path.join(base_dir, 'recommendations', 'indices.pkl'), 'rb') as f:
             INDICES = pickle.load(f)
-        with open('recommendations/job_df.pkl', 'rb') as f:
+        with open(os.path.join(base_dir, 'recommendations', 'job_df.pkl'), 'rb') as f:
             JOB_DF = pickle.load(f)
-        logger.info('Recommendation artifacts (cosine matrix) loaded into memory.')
-    except FileNotFoundError:
+        logger.info('✅ Recommendation artifacts (cosine matrix) loaded into memory.')
+    except FileNotFoundError as e:
         COSINE_SIM = INDICES = JOB_DF = None
-        logger.warning('Recommendation artifacts not found. Run `python manage.py generate_recommendations` to create them.')
+        logger.warning(f'❌ Recommendation artifacts not found: {e}. Run `python manage.py generate_recommendations` to create them.')
     except Exception as e:
         COSINE_SIM = INDICES = JOB_DF = None
-        logger.error(f'Error loading recommendation artifacts: {e}')
+        logger.error(f'❌ Error loading recommendation artifacts: {e}')
 
 # Load category classifier model (joblib) into memory at import time
 CATEGORY_CLASSIFIER = None
+print("=" * 80)
+print("🤖 ATTEMPTING TO LOAD CATEGORY CLASSIFIER...")
+print("=" * 80)
 try:
-    CATEGORY_CLASSIFIER = joblib.load('models/category_classifier.joblib')
-    logger.info('Category classifier model loaded successfully from models/category_classifier.joblib')
-except FileNotFoundError:
+    from django.conf import settings
+    model_path = os.path.join(settings.BASE_DIR, 'models', 'category_classifier.joblib')
+    print(f"Loading from: {model_path}")
+    CATEGORY_CLASSIFIER = joblib.load(model_path)
+    print(f'✅ Category classifier model loaded successfully!')
+    logger.info(f'Category classifier model loaded successfully from {model_path}')
+except FileNotFoundError as e:
     CATEGORY_CLASSIFIER = None
+    print(f'❌ Category classifier not found: {e}')
     logger.warning('Category classifier not found: models/category_classifier.joblib. Run `python manage.py train_category_classifier` to create it.')
 except Exception as e:
     CATEGORY_CLASSIFIER = None
+    print(f'❌ Error loading category classifier: {e}')
+    import traceback
+    traceback.print_exc()
     logger.error(f'Error loading category classifier: {e}')
+print("=" * 80)
 
 # Eager-load recommendation artifacts at import time
+print("=" * 80)
+print("🚀 ATTEMPTING TO LOAD RECOMMENDATION ARTIFACTS...")
+print("=" * 80)
 try:
     load_recommendation_artifacts()
+    print("✅ Recommendation artifacts loaded successfully!")
 except Exception as _e:
-    logger.warning(f'Unable to eager-load recommendation artifacts at import time: {_e}')
+    print(f"❌ Unable to eager-load recommendation artifacts at import time: {_e}")
+    import traceback
+    traceback.print_exc()
+print("=" * 80)
 
 
 class IsEmployerOrReadOnly(permissions.BasePermission):
@@ -503,7 +533,12 @@ class JobRecommendationView(APIView):
             logger.info(f"API /recommendations/ called for job_id: {job_id}")
             # Ensure artifacts are loaded into memory once
             load_recommendation_artifacts()
-            if COSINE_SIM is None or INDICES is None or JOB_DF is None:
+            
+            # Check if any recommendation artifacts are available
+            has_nn = 'NN_INDICES' in globals() and globals().get('NN_INDICES') is not None
+            has_cosine = COSINE_SIM is not None and INDICES is not None and JOB_DF is not None
+            
+            if not has_nn and not has_cosine:
                 logger.warning('Recommendation artifacts missing when handling request.')
                 return Response({"error": "Recommendation data not found. Please run `python manage.py generate_recommendations` on the server."}, status=500)
 

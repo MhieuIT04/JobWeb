@@ -26,14 +26,13 @@ function JobForm() {
     const [dropdownData, setDropdownData] = useState({ categories: [], cities: [], workTypes: [] });
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [isPredicting, setIsPredicting] = useState(false);
     const [error, setError] = useState('');
 
     const fetchInitialData = useCallback(async () => {
         try {
             const [catRes, cityRes, workTypeRes] = await Promise.all([
                 axiosClient.get('/api/jobs/categories/'),
-                axiosClient.get('/api/jobs/cities/'),
+                axiosClient.get('/api/users/cities/'),
                 axiosClient.get('/api/jobs/work-types/')
             ]);
             setDropdownData({
@@ -60,12 +59,64 @@ function JobForm() {
     }, [isEditMode, jobId]);
 
     useEffect(() => { fetchInitialData(); }, [fetchInitialData]);
+    
+    // Debounce for predict category
+    const [predictTimeout, setPredictTimeout] = useState(null);
+    const [isPredicting, setIsPredicting] = useState(false);
+    const [suggestedCategory, setSuggestedCategory] = useState(null);
+    
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+        
+        // DISABLED: Auto-predict causing lag
+        // Will implement manual predict button instead
+    };
+    
+    const predictCategory = async (title, description) => {
+        if (!title && !description) return;
+        
+        setIsPredicting(true);
+        try {
+            const response = await axiosClient.post('/api/jobs/predict-category/', {
+                title: title || formData.title,
+                description: description || formData.description
+            });
+            
+            if (response.data.predicted_category_id) {
+                setSuggestedCategory({
+                    id: response.data.predicted_category_id,
+                    name: response.data.predicted_category_name
+                });
+            }
+        } catch (error) {
+            console.error('Lỗi khi dự đoán ngành nghề:', error);
+        } finally {
+            setIsPredicting(false);
+        }
+    };
+    
+    const applySuggestedCategory = () => {
+        if (suggestedCategory) {
+            setFormData(prev => ({ ...prev, category: suggestedCategory.id.toString() }));
+            setSuggestedCategory(null);
+        }
     };
 
     const handleSelectChange = (name, value) => {
         setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleLogoChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setLogoFile(file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setLogoPreview(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -117,13 +168,80 @@ function JobForm() {
                     <div className="space-y-2">
                         <Label htmlFor="description">Mô tả công việc</Label>
                         <Textarea id="description" name="description" value={formData.description} onChange={handleChange} required rows={8} />
-                        {isPredicting && <p className="text-sm text-muted-foreground">Đang phân tích ngành nghề...</p>}
                     </div>
 
+                    {/* AI Category Prediction */}
+                    {!isEditMode && (
+                        <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <h3 className="font-semibold text-blue-900 dark:text-blue-100">🤖 AI Gợi ý ngành nghề</h3>
+                                    <p className="text-sm text-blue-700 dark:text-blue-300">Hệ thống sẽ phân tích và gợi ý ngành nghề phù hợp</p>
+                                </div>
+                                <Button 
+                                    type="button" 
+                                    variant="default" 
+                                    onClick={() => predictCategory(formData.title, formData.description)}
+                                    disabled={isPredicting || !formData.title || !formData.description}
+                                >
+                                    {isPredicting ? '🤖 Đang phân tích...' : '💡 Gợi ý ngay'}
+                                </Button>
+                            </div>
+                            {suggestedCategory && (
+                                <div className="mt-3 flex items-center gap-2 p-3 bg-white dark:bg-gray-800 rounded border border-green-200 dark:border-green-800">
+                                    <span className="text-sm text-green-700 dark:text-green-300 flex-1">
+                                        ✅ Gợi ý: <strong>{suggestedCategory.name}</strong>
+                                    </span>
+                                    <Button 
+                                        type="button" 
+                                        size="sm" 
+                                        variant="outline"
+                                        onClick={applySuggestedCategory}
+                                    >
+                                        Áp dụng
+                                    </Button>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="space-y-2"><Label>Ngành nghề</Label><Select name="category" value={formData.category} onValueChange={(value) => handleSelectChange('category', value)}><SelectTrigger><SelectValue placeholder="Chọn ngành nghề" /></SelectTrigger><SelectContent>{dropdownData.categories.map(cat => <SelectItem key={cat.id} value={cat.id.toString()}>{cat.name}</SelectItem>)}</SelectContent></Select></div>
-                        <div className="space-y-2"><Label>Địa điểm</Label><Select name="city" value={formData.city} onValueChange={(value) => handleSelectChange('city', value)}><SelectTrigger><SelectValue placeholder="Chọn địa điểm" /></SelectTrigger><SelectContent>{dropdownData.cities.map(city => <SelectItem key={city.id} value={city.id.toString()}>{city.name}</SelectItem>)}</SelectContent></Select></div>
-                        <div className="space-y-2"><Label>Loại hình công việc</Label><Select name="work_type" value={formData.work_type} onValueChange={(value) => handleSelectChange('work_type', value)}><SelectTrigger><SelectValue placeholder="Chọn loại hình" /></SelectTrigger><SelectContent>{dropdownData.workTypes.map(wt => <SelectItem key={wt.id} value={wt.id.toString()}>{wt.name}</SelectItem>)}</SelectContent></Select></div>
+                        <div className="space-y-2">
+                            <Label>Ngành nghề</Label>
+                            <Select name="category" value={formData.category} onValueChange={(value) => handleSelectChange('category', value)}>
+                                <SelectTrigger><SelectValue placeholder="Chọn ngành nghề" /></SelectTrigger>
+                                <SelectContent className="max-h-[300px]">
+                                    {dropdownData.categories.slice(0, 100).map(cat => (
+                                        <SelectItem key={cat.id} value={cat.id.toString()}>{cat.name}</SelectItem>
+                                    ))}
+                                    {dropdownData.categories.length > 100 && (
+                                        <SelectItem disabled value="more">... và {dropdownData.categories.length - 100} ngành nghề khác</SelectItem>
+                                    )}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Địa điểm</Label>
+                            <Select name="city" value={formData.city} onValueChange={(value) => handleSelectChange('city', value)}>
+                                <SelectTrigger><SelectValue placeholder="Chọn địa điểm" /></SelectTrigger>
+                                <SelectContent>
+                                    {dropdownData.cities.map(city => (
+                                        <SelectItem key={city.id} value={city.id.toString()}>{city.name}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Loại hình công việc</Label>
+                            <Select name="work_type" value={formData.work_type} onValueChange={(value) => handleSelectChange('work_type', value)}>
+                                <SelectTrigger><SelectValue placeholder="Chọn loại hình" /></SelectTrigger>
+                                <SelectContent>
+                                    {dropdownData.workTypes.map(wt => (
+                                        <SelectItem key={wt.id} value={wt.id.toString()}>{wt.name}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">

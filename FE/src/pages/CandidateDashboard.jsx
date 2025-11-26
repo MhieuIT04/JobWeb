@@ -19,21 +19,26 @@ const COLORS = {
 
 function CandidateDashboard() {
   const [stats, setStats] = useState(null);
+  const [recommendedJobs, setRecommendedJobs] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchDashboardStats();
+    fetchDashboardData();
   }, []);
 
-  const fetchDashboardStats = async () => {
+  const fetchDashboardData = async () => {
     setIsLoading(true);
     try {
-      const response = await axiosClient.get('/api/jobs/dashboard/candidate/stats/');
-      setStats(response.data);
+      const [statsRes, jobsRes] = await Promise.all([
+        axiosClient.get('/api/jobs/dashboard/candidate/stats/'),
+        axiosClient.get('/api/jobs/?page_size=6') // Get 6 recommended jobs
+      ]);
+      setStats(statsRes.data);
+      setRecommendedJobs(jobsRes.data.results || jobsRes.data);
     } catch (err) {
-      console.error('Error fetching dashboard stats:', err);
+      console.error('Error fetching dashboard data:', err);
       setError('Không thể tải thống kê');
     } finally {
       setIsLoading(false);
@@ -77,12 +82,31 @@ function CandidateDashboard() {
       <div className="container mx-auto py-8 px-4">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-blue-300 mb-2">
-            📊 Dashboard của tôi
-          </h1>
-          <p className="text-gray-600 dark:text-blue-200">
-            Theo dõi quá trình ứng tuyển của bạn
-          </p>
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-blue-300 mb-2">
+                📊 Dashboard của tôi
+              </h1>
+              <p className="text-gray-600 dark:text-blue-200">
+                Theo dõi quá trình ứng tuyển của bạn
+              </p>
+            </div>
+            
+            {/* Quick Actions */}
+            <div className="flex gap-2">
+              <Button 
+                variant="outline"
+                onClick={() => navigate('/jobs')}
+              >
+                Tìm việc làm
+              </Button>
+              <Button 
+                onClick={() => navigate('/profile')}
+              >
+                Cập nhật hồ sơ
+              </Button>
+            </div>
+          </div>
         </div>
 
         {/* Stats Cards */}
@@ -293,6 +317,46 @@ function CandidateDashboard() {
             </div>
           )}
         </Card>
+
+        {/* Recommended Jobs */}
+        {recommendedJobs.length > 0 && (
+          <Card className="p-6 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 mt-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-blue-300">
+                Việc làm phù hợp với bạn
+              </h3>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => navigate('/jobs')}
+              >
+                Xem tất cả →
+              </Button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {recommendedJobs.slice(0, 6).map((job) => (
+                <div 
+                  key={job.id}
+                  className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:shadow-md transition-shadow cursor-pointer"
+                  onClick={() => navigate(`/jobs/${job.id}`)}
+                >
+                  <h4 className="font-semibold text-gray-900 dark:text-blue-300 mb-2 line-clamp-2">
+                    {job.title}
+                  </h4>
+                  <p className="text-sm text-gray-600 dark:text-blue-200 mb-2">
+                    {job.employer?.company_name || 'Công ty'}
+                  </p>
+                  <div className="flex items-center justify-between text-xs text-gray-500 dark:text-blue-300">
+                    <span>📍 {job.city?.name || 'N/A'}</span>
+                    <span className="text-green-600 dark:text-green-400 font-medium">
+                      {job.min_salary ? `${(job.min_salary / 1000000).toFixed(0)}M+` : 'Thỏa thuận'}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
       </div>
     </div>
   );

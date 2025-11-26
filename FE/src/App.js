@@ -12,6 +12,7 @@ import PrivateRoute from "./components/PrivateRoute";
 import EmployerRoute from "./components/EmployerRoute";
 
 // Import các trang
+import HomePage from "./pages/HomePage";
 import JobList from "./pages/JobList";
 import JobDetail from "./pages/JobDetail";
 import Profile from "./pages/Profile";
@@ -26,6 +27,8 @@ import EmployerAnalytics from "./pages/EmployerAnalytics";
 import CVMatch from "./pages/CVMatch";
 import Companies from "./pages/Companies";
 import Company from "./pages/Company";
+import Messages from "./pages/Messages";
+import CandidateDashboard from "./pages/CandidateDashboard";
 
 function App() {
   return (
@@ -45,22 +48,29 @@ function App() {
               <div className="h-16" aria-hidden="true" />
         <main className="flex-grow mt-8 mb-8">
           <Routes>
-            {/* Tất cả các Route của bạn */}
-            <Route path="/" element={<JobList />} />
+            {/* Public Routes */}
+            <Route path="/" element={<HomePage />} />
+            <Route path="/jobs" element={<JobList />} />
             <Route path="/jobs/:id" element={<JobDetail />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/companies" element={<Companies />} />
+            <Route path="/companies/:id" element={<Company />} />
+            <Route path="/cv-match" element={<CVMatch />} />
+            
+            {/* Candidate Routes */}
+            <Route path="/dashboard" element={<PrivateRoute><CandidateDashboard /></PrivateRoute>} />
+            <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
+            <Route path="/my-applications" element={<PrivateRoute><MyApplications /></PrivateRoute>} />
+            <Route path="/favorites" element={<PrivateRoute><FavoriteJobs /></PrivateRoute>} />
+            <Route path="/messages" element={<PrivateRoute><Messages /></PrivateRoute>} />
+            
+            {/* Employer Routes */}
             <Route path="/employer/dashboard" element={<EmployerRoute><EmployerDashboard /></EmployerRoute>} />
             <Route path="/employer/analytics" element={<EmployerRoute><EmployerAnalytics /></EmployerRoute>} />
             <Route path="/employer/jobs/:jobId/applicants" element={<EmployerRoute><JobApplicants /></EmployerRoute>} />
             <Route path="/employer/jobs/new" element={<EmployerRoute><JobForm /></EmployerRoute>} />
             <Route path="/employer/jobs/:jobId/edit" element={<EmployerRoute><JobForm /></EmployerRoute>} />
-            <Route path="/cv-match" element={<CVMatch />} />
-            <Route path="/companies" element={<Companies />} />
-            <Route path="/companies/:id" element={<Company />} />
-            <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
-            <Route path="/my-applications" element={<PrivateRoute><MyApplications /></PrivateRoute>} />
-            <Route path="/favorites" element={<PrivateRoute><FavoriteJobs /></PrivateRoute>} />
           </Routes>
         </main>
       </div>

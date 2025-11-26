@@ -5,7 +5,9 @@ import { useAuth } from '../contexts/AuthContext';
 
 // Import các component của shadcn/ui
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import { Grid, List, ArrowUpDown } from 'lucide-react';
 import HeroBanner from '../components/HeroBanner'; 
 // Import các component con tùy chỉnh
 import HorizontalJobFilters from '../components/home/HorizontalJobFilters';
@@ -29,6 +31,9 @@ function JobList() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [pageCount, setPageCount] = useState(0);
+  const [totalCount, setTotalCount] = useState(0);
+  const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
+  const [sortBy, setSortBy] = useState('date-desc');
 
   // Gộp tất cả state bộ lọc vào một object, khởi tạo từ URL
   const [filters, setFilters] = useState(() => {
@@ -66,18 +71,22 @@ function JobList() {
   const fetchJobs = useCallback(async (currentFilters) => {
     setIsLoading(true);
     setError(null);
-    const params = new URLSearchParams(currentFilters);
+    
+    // Add sort parameter
+    const filtersWithSort = { ...currentFilters, ordering: sortBy };
+    const params = new URLSearchParams(filtersWithSort);
+    
     try {
       const response = await axiosClient.get(`/api/jobs/`, { params });
       setJobs(response.data.results || []);
-  // totalJobs not used; pageCount is derived below
+      setTotalCount(response.data.count || 0);
       setPageCount(Math.ceil((response.data.count || 0) / 10));
     } catch (err) {
       setError("Không thể tải danh sách công việc.");
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [sortBy]);
 
   // useEffect để gọi API và cập nhật URL khi `filters` thay đổi
   useEffect(() => {
@@ -180,10 +189,56 @@ function JobList() {
             {/* <PopularCategories />  */}
           </>
         )}
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-gray-800 dark:text-amber-100">
-             {Object.keys(filters).length > 0 ? 'Kết quả tìm kiếm' : 'Tất cả công việc'}
-          </h2>
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4">
+          <div>
+            <h2 className="text-xl font-semibold text-gray-800 dark:text-amber-100">
+              {Object.keys(filters).length > 0 ? 'Kết quả tìm kiếm' : 'Tất cả công việc'}
+            </h2>
+            {totalCount > 0 && (
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                Tìm thấy {totalCount} công việc
+              </p>
+            )}
+          </div>
+          
+          <div className="flex items-center gap-3">
+            {/* Sort */}
+            <div className="flex items-center gap-2">
+              <ArrowUpDown className="w-4 h-4 text-gray-600" />
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="date-desc">Mới nhất</SelectItem>
+                  <SelectItem value="date-asc">Cũ nhất</SelectItem>
+                  <SelectItem value="salary-desc">Lương cao nhất</SelectItem>
+                  <SelectItem value="salary-asc">Lương thấp nhất</SelectItem>
+                  <SelectItem value="title">Tên A-Z</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            {/* View Toggle */}
+            <div className="flex border rounded-lg">
+              <Button
+                variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('grid')}
+                className="rounded-r-none"
+              >
+                <Grid className="w-4 h-4" />
+              </Button>
+              <Button
+                variant={viewMode === 'list' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('list')}
+                className="rounded-l-none"
+              >
+                <List className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
         </div>
 
         {renderJobContent()}

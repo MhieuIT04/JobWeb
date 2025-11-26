@@ -16,7 +16,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 // import { Alert, AlertDescription } from "@/components/ui/alert";
-import { MapPin, Briefcase, DollarSign, Star, Tag } from "lucide-react";
+import { MapPin, Briefcase, DollarSign, Star, Tag, Share2, Facebook, Linkedin, Link as LinkIcon, Home, ChevronRight } from "lucide-react";
 
 import RecommendedJobs from '../components/RecommendedJobs';
 import HomeFooter from '../components/HomeFooter';
@@ -48,6 +48,9 @@ function JobDetail() {
 
     useEffect(() => {
         const fetchJobDetail = async () => {
+            // Scroll to top when job changes
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
             setIsLoading(true);
             setError(null);
             try {
@@ -105,9 +108,42 @@ function JobDetail() {
 
     const isNew = job.created_at && (new Date() - new Date(job.created_at)) / (1000 * 60 * 60 * 24) < 7;
 
+    // Share functions
+    const currentUrl = window.location.href;
+    const shareTitle = `${job.title} - ${job.employer?.company_name}`;
+    
+    const handleShareFacebook = () => {
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}`, '_blank');
+    };
+    
+    const handleShareLinkedIn = () => {
+        window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(currentUrl)}`, '_blank');
+    };
+    
+    const handleCopyLink = () => {
+        navigator.clipboard.writeText(currentUrl);
+        toast.success('Đã copy link!');
+    };
+
     return (
         <>
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-5xl mx-auto px-4 py-6">
+            {/* Breadcrumb */}
+            <nav className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-4">
+                <RouterLink to="/" className="flex items-center gap-1 hover:text-primary">
+                    <Home className="w-4 h-4" />
+                    <span>Trang chủ</span>
+                </RouterLink>
+                <ChevronRight className="w-4 h-4" />
+                <RouterLink to="/jobs" className="hover:text-primary">
+                    Danh sách công việc
+                </RouterLink>
+                <ChevronRight className="w-4 h-4" />
+                <span className="text-gray-900 dark:text-white font-medium truncate max-w-xs">
+                    {job.title}
+                </span>
+            </nav>
+
             <Card className="p-6 mb-6">
                 <div className="flex flex-col md:flex-row gap-6">
                     <div className="flex-shrink-0">
@@ -131,6 +167,41 @@ function JobDetail() {
                             <span className="flex items-center gap-1"><MapPin className="w-4 h-4" />{job.city?.name || 'N/A'}</span>
                                 <span className="flex items-center gap-1"><Tag className="w-4 h-4" />{job.category?.name || 'N/A'}</span>
                                 <span className="flex items-center gap-1"><Briefcase className="w-4 h-4" />{job.work_type?.name || 'N/A'}</span>
+                            </div>
+                            
+                            {/* Share Buttons */}
+                            <div className="flex items-center gap-2 mt-4">
+                                <span className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1">
+                                    <Share2 className="w-4 h-4" />
+                                    Chia sẻ:
+                                </span>
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={handleShareFacebook}
+                                    className="flex items-center gap-1"
+                                >
+                                    <Facebook className="w-4 h-4" />
+                                    Facebook
+                                </Button>
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={handleShareLinkedIn}
+                                    className="flex items-center gap-1"
+                                >
+                                    <Linkedin className="w-4 h-4" />
+                                    LinkedIn
+                                </Button>
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={handleCopyLink}
+                                    className="flex items-center gap-1"
+                                >
+                                    <LinkIcon className="w-4 h-4" />
+                                    Copy link
+                                </Button>
                             </div>
                         </div>
                     </div>

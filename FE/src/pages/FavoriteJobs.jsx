@@ -8,7 +8,9 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Star, Heart, MapPin, Briefcase } from "lucide-react";
+import { Star, Heart, MapPin, Briefcase, Send } from "lucide-react";
+import ApplyModal from '../components/ApplyModal';
+import { toast } from 'react-toastify';
 
 function FavoriteJobs() {
     // State để lưu danh sách các công việc yêu thích
@@ -16,31 +18,26 @@ function FavoriteJobs() {
     // State cho trạng thái loading và lỗi
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+    
+    // Quick Apply Modal
+    const [showApplyModal, setShowApplyModal] = useState(false);
+    const [selectedJob, setSelectedJob] = useState(null);
+    const [isApplying, setIsApplying] = useState(false);
+    const [userProfile, setUserProfile] = useState(null);
 
     // Lấy thông tin từ AuthContext
-    const { isAuthenticated, toggleFavorite } = useAuth();
+    const { isAuthenticated, toggleFavorite, user } = useAuth();
 
     useEffect(() => {
         const fetchFavoriteJobs = async () => {
             setIsLoading(true);
             setError(null);
             try {
-                console.log("Fetching favorite jobs...");
-                // Gọi API để lấy danh sách các "favorite objects"
-                // axiosClient đã tự động đính kèm token xác thực
                 const response = await axiosClient.get('/api/jobs/favorites/');
-                console.log("Favorite jobs response:", response.data);
-                
-                // Dữ liệu trả về là một mảng các object Favorite, 
-                // mỗi object chứa một object 'job' bên trong.
-                // Chúng ta chỉ cần lấy ra danh sách các 'job' đó.
                 const jobs = response.data.map(favorite => favorite.job);
                 setFavoriteJobs(jobs);
-                console.log("Favorite jobs set:", jobs);
-
             } catch (err) {
                 console.error("Lỗi khi tải danh sách công việc yêu thích:", err);
-                console.error("Error details:", err.response?.data);
                 setError("Không thể tải dữ liệu. Vui lòng thử lại sau.");
             } finally {
                 setIsLoading(false);
@@ -48,7 +45,55 @@ function FavoriteJobs() {
         };
 
         fetchFavoriteJobs();
-    }, []); // Mảng rỗng đảm bảo useEffect chỉ chạy một lần khi component được tải
+    }, []);
+    
+    useEffect(() => {
+        const fetchProfile = async () => {
+            if (isAuthenticated) {
+                try {
+                    const response = await axiosClient.get('/api/users/profile/');
+                    setUserProfile(response.data);
+                } catch (error) {
+                    console.error("Không thể tải profile:", error);
+                }
+            }
+        };
+        fetchProfile();
+    }, [isAuthenticated]);
+    
+    const handleQuickApply = (job) => {
+        if (!isAuthenticated) {
+            toast.warning('Vui lòng đăng nhập để ứng tuyển');
+            return;
+        }
+        setSelectedJob(job);
+        setShowApplyModal(true);
+    };
+    
+    const handleApplySubmit = async (coverLetter, cvFile) => {
+        setIsApplying(true);
+        
+        const formData = new FormData();
+        formData.append('job', selectedJob.id);
+        formData.append('cover_letter', coverLetter);
+        if (cvFile) {
+            formData.append('cv', cvFile);
+        }
+        
+        try {
+            await axiosClient.post('/api/jobs/applications/', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            toast.success('Ứng tuyển thành công!');
+            setShowApplyModal(false);
+        } catch (err) {
+            console.error('Lỗi khi ứng tuyển:', err);
+            const errorMsg = err.response?.data?.detail || 'Đã có lỗi xảy ra khi ứng tuyển.';
+            toast.error(errorMsg);
+        } finally {
+            setIsApplying(false);
+        }
+    };
 
     // Component JobCard cho favorite jobs
     const JobCard = ({ job }) => {
@@ -79,10 +124,19 @@ function FavoriteJobs() {
                 </div>
                 <div className="flex-1" />
                 <div className="flex items-center gap-2">
-                    <Button asChild size="sm" className="font-semibold bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600" variant="default">
+                    <Button 
+                        size="sm" 
+                        onClick={() => handleQuickApply(job)}
+                        className="flex-1 bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600"
+                    >
+                        <Send className="w-4 h-4 mr-2" />
+                        Ứng tuyển nhanh
+                    </Button>
+                    <Button asChild size="sm" variant="outline" className="flex-1">
                         <RouterLink to={`/jobs/${job.id}`}>Xem chi tiết</RouterLink>
                     </Button>
-                    <Button size="icon" variant="ghost" onClick={handleFavoriteClick} className="ml-auto text-red-500 dark:text-red-400">                        <Heart className="w-5 h-5" />
+                    <Button size="icon" variant="ghost" onClick={handleFavoriteClick} className="text-red-500 dark:text-red-400">
+                        <Heart className="w-5 h-5 fill-current" />
                     </Button>
                 </div>
             </Card>
@@ -125,6 +179,18 @@ function FavoriteJobs() {
                     </>
                 )}
             </div>
+            
+            {/* Apply Modal */}
+            {selectedJob && (
+                <ApplyModal
+                    open={showApplyModal}
+                    jobTitle={selectedJob.title}
+                    userProfile={userProfile}
+                    onClose={() => setShowApplyModal(false)}
+                    onSubmit={handleApplySubmit}
+                    isLoading={isApplying}
+                />
+            )}
         </div>
     );
 }
