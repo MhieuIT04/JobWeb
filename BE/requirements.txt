@@ -58,3 +58,5 @@ wrapt==1.17.3
 underthesea==8.3.0
 sentence-transformers
 hnswlib
+gunicorn==21.2.0
+dj-database-url==2.1.0
