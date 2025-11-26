@@ -1,0 +1,79 @@
+services:
+  # Django Backend API
+  - type: web
+    name: recruitment-api
+    runtime: python
+    region: singapore
+    plan: starter
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn recruitment.wsgi:application"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.0
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: False
+      - key: ALLOWED_HOSTS
+        sync: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: recruitment-db
+          property: connectionString
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: EMAIL_HOST_USER
+        sync: false
+      - key: EMAIL_HOST_PASSWORD
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: HUGGINGFACE_TOKEN
+        sync: false
+    healthCheckPath: /api/health/
+    autoDeploy: true
+
+databases:
+  # PostgreSQL Database
+  - name: recruitment-db
+    databaseName: recruitment
+    user: recruitment_user
+    region: singapore
+    plan: starter
+    postgresMajorVersion: 15
+    ipAllowList: []
+
+# Background Worker (Optional - for Celery)
+# - type: worker
+#   name: recruitment-worker
+#   runtime: python
+#   region: singapore
+#   plan: starter
+#   buildCommand: "pip install -r requirements.txt"
+#   startCommand: "celery -A recruitment worker -l info"
+#   envVars:
+#     - key: DATABASE_URL
+#       fromDatabase:
+#         name: recruitment-db
+#         property: connectionString
+#     - key: REDIS_URL
+#       fromService:
+#         name: recruitment-redis
+#         type: redis
+#         property: connectionString
+
+# Redis Cache (Optional)
+# - type: redis
+#   name: recruitment-redis
+#   region: singapore
+#   plan: starter
+#   maxmemoryPolicy: allkeys-lru
+#   ipAllowList: []

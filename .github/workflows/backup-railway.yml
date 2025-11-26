@@ -1,0 +1,72 @@
+name: Backup Railway Database
+
+on:
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Railway CLI
+        run: npm i -g @railway/cli
+
+      - name: Install PostgreSQL Client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Create Backup
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          railway link ${{ secrets.RAILWAY_PROJECT_ID }}
+          
+          # Get DATABASE_URL
+          DATABASE_URL=$(railway variables get DATABASE_URL)
+          
+          # Create backup
+          BACKUP_FILE="backup_$(date +%Y%m%d_%H%M%S).sql"
+          pg_dump $DATABASE_URL > $BACKUP_FILE
+          
+          # Compress
+          gzip $BACKUP_FILE
+          
+          echo "BACKUP_FILE=${BACKUP_FILE}.gz" >> $GITHUB_ENV
+
+      - name: Upload to GitHub Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: database-backup
+          path: backup_*.sql.gz
+          retention-days: 30
+
+      # Optional: Upload to S3
+      - name: Configure AWS Credentials
+        if: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-southeast-1
+
+      - name: Upload to S3
+        if: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        run: |
+          aws s3 cp ${{ env.BACKUP_FILE }} s3://${{ secrets.S3_BACKUP_BUCKET }}/backups/
+
+      - name: Notify Success
+        if: success()
+        run: |
+          echo "✅ Backup completed successfully!"
+          echo "Backup file: ${{ env.BACKUP_FILE }}"
+
+      - name: Notify Failure
+        if: failure()
+        run: echo "❌ Backup failed!"

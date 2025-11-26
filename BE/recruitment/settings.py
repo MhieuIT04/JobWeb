@@ -189,6 +189,14 @@ CORS_ALLOW_METHODS = [
     'PUT',
 ]
 
+CORS_ALLOWED_ORIGINS = [
+    "https://your-frontend.vercel.app",
+    "http://localhost:3000",
+    "http://localhost:5173",
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
 # Cho phép credentials
 CORS_ALLOW_CREDENTIALS = True
 
