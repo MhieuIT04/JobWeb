@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
 import { 
     AlertDialog, AlertDialogAction, AlertDialogCancel,
     AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
@@ -36,10 +35,12 @@ function JobApplicants() {
 
     useEffect(() => {
         fetchData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [jobId]);
 
     useEffect(() => {
         applyFiltersAndSort();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [applications, filterStatus, sortBy]);
 
     const fetchData = async () => {
@@ -51,7 +52,8 @@ function JobApplicants() {
             ]);
             
             setJob(jobRes.data);
-            setApplications(applicantsRes.data.results || applicantsRes.data);
+            const data = applicantsRes.data.results || applicantsRes.data || [];
+            setApplications(Array.isArray(data) ? data : []);
         } catch (err) {
             console.error('Lỗi tải dữ liệu:', err);
             toast.error('Không thể tải danh sách ứng viên.');
@@ -61,6 +63,10 @@ function JobApplicants() {
     };
 
     const applyFiltersAndSort = () => {
+        if (!Array.isArray(applications)) {
+            setFilteredApplications([]);
+            return;
+        }
         let filtered = [...applications];
 
         // Apply filter
@@ -183,6 +189,11 @@ function JobApplicants() {
         );
     }
 
+    // Helper for checkbox state
+    const isAllSelected = Array.isArray(filteredApplications) && 
+                         filteredApplications.length > 0 && 
+                         selectedIds.length === filteredApplications.length;
+
     return (
         <div className="container mx-auto px-4 py-8 max-w-7xl">
             {/* Header */}
@@ -198,9 +209,11 @@ function JobApplicants() {
                 
                 <Card>
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <Users className="w-6 h-6" />
-                            Quản lý ứng viên
+                        <CardTitle>
+                            <div className="flex items-center gap-2">
+                                <Users className="w-6 h-6" />
+                                <span>Quản lý ứng viên</span>
+                            </div>
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -336,9 +349,11 @@ function JobApplicants() {
                         <TableHeader>
                             <TableRow>
                                 <TableHead className="w-12">
-                                    <Checkbox 
-                                        checked={selectedIds.length === filteredApplications.length && filteredApplications.length > 0}
-                                        onCheckedChange={handleSelectAll}
+                                    <input
+                                        type="checkbox"
+                                        checked={isAllSelected}
+                                        onChange={(e) => handleSelectAll(e.target.checked)}
+                                        className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                                     />
                                 </TableHead>
                                 <TableHead>Ứng viên</TableHead>
@@ -353,9 +368,11 @@ function JobApplicants() {
                             {filteredApplications.length > 0 ? filteredApplications.map(app => (
                                 <TableRow key={app.id}>
                                     <TableCell>
-                                        <Checkbox 
+                                        <input
+                                            type="checkbox"
                                             checked={selectedIds.includes(app.id)}
-                                            onCheckedChange={(checked) => handleSelectOne(app.id, checked)}
+                                            onChange={(e) => handleSelectOne(app.id, e.target.checked)}
+                                            className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                                         />
                                     </TableCell>
                                     <TableCell>
@@ -394,21 +411,20 @@ function JobApplicants() {
                                     </TableCell>
                                     <TableCell>
                                         {app.cv ? (
-                                            <Button 
-                                                variant="outline" 
-                                                size="sm"
-                                                asChild
+                                            <a 
+                                                href={app.cv} 
+                                                target="_blank" 
+                                                rel="noopener noreferrer"
                                             >
-                                                <a 
-                                                    href={app.cv} 
-                                                    target="_blank" 
-                                                    rel="noopener noreferrer"
+                                                <Button 
+                                                    variant="outline" 
+                                                    size="sm"
                                                     className="flex items-center gap-1"
                                                 >
                                                     <FileText className="w-4 h-4" />
                                                     Xem CV
-                                                </a>
-                                            </Button>
+                                                </Button>
+                                            </a>
                                         ) : (
                                             <span className="text-sm text-gray-400">Không có</span>
                                         )}

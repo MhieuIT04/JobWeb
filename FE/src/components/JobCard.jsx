@@ -54,27 +54,29 @@ function JobCard({ job, isFavorited, onToggleFavorite, isAuthenticated }) {
                         </div>
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                                    <h2 className="font-bold text-neutral-900 dark:text-amber-100 truncate">
+                            <h2 className="font-bold text-neutral-900 dark:text-white truncate">
                                 {job.title}
                             </h2>
                             {isNew && (
                                 <Badge
                                     variant="secondary"
-                                        className="bg-green-500 text-white dark:text-white"                                >
+                                    className="bg-green-500 text-white"
+                                >
                                     Mới
                                 </Badge>
                             )}
                         </div>
-                        <p className="text-sm text-neutral-600 dark:text-amber-200 truncate">
+                        <p className="text-sm text-neutral-600 dark:text-slate-300 truncate">
                             {job.employer?.company_name}
                         </p>
                         {daysAgo !== null && (
-                            <p className="text-xs text-gray-500 dark:text-amber-300 mt-1">
-                                        {daysAgo === 0
-                                            ? "Hôm nay"
-                                            : daysAgo === 1
-                                            ? "Hôm qua"
-                                            : `${daysAgo} ngày trước`}                            </p>
+                            <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">
+                                {daysAgo === 0
+                                    ? "Hôm nay"
+                                    : daysAgo === 1
+                                    ? "Hôm qua"
+                                    : `${daysAgo} ngày trước`}
+                            </p>
                         )}
                     </div>
                 </div>
@@ -83,37 +85,38 @@ function JobCard({ job, isFavorited, onToggleFavorite, isAuthenticated }) {
                     {/* Tags */}
                     <div className="flex flex-wrap gap-2">
                         {job.work_type?.name && (
-                            <Badge variant="outline" className="text-xs text-neutral-700 dark:text-amber-200 border-neutral-200 dark:border-amber-600/50 bg-transparent dark:bg-amber-900/20">
+                            <Badge variant="outline" className="text-xs text-neutral-700 dark:text-slate-200 border-neutral-200 dark:border-slate-600 bg-transparent dark:bg-slate-700/50">
                                 <Briefcase className="w-3 h-3 mr-1" />
                                 {job.work_type.name}
                             </Badge>
                         )}
                         {experienceLabel && (
-                            <Badge variant="outline" className="text-xs text-neutral-700 dark:text-amber-200 border-neutral-200 dark:border-amber-600/50 bg-transparent dark:bg-amber-900/20">
+                            <Badge variant="outline" className="text-xs text-neutral-700 dark:text-slate-200 border-neutral-200 dark:border-slate-600 bg-transparent dark:bg-slate-700/50">
                                 {experienceLabel}
                             </Badge>
                         )}
                     </div>
 
                     {/* Location */}
-                    <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-amber-200">
+                    <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-slate-300">
                         <MapPin className="h-4 w-4" />
                         <span>{job.city?.name || "N/A"}</span>
                     </div>
 
                     {/* Salary */}
-                    <div className="text-green-600 dark:text-yellow-300 font-medium text-sm">
+                    <div className="text-green-600 dark:text-green-400 font-medium text-sm">
                         💰 {job.min_salary ? 
                         `${new Intl.NumberFormat('vi-VN').format(job.min_salary)} - ${new Intl.NumberFormat('vi-VN').format(job.max_salary)} ${job.currency}` 
-                        : "Thương lượng"}                    </div>
+                        : "Thương lượng"}
+                    </div>
                 </div>
             </CardContent>
 
-            <CardFooter className="pt-4 border-t border-gray-700">
+            <CardFooter className="pt-4 border-t border-gray-100 dark:border-slate-700">
                 <div className="flex items-center gap-2 w-full">
                     <Button 
                         size="sm" 
-                        className="flex-1 bg-white/10 text-white hover:bg-white/20"
+                        className="flex-1 bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
                         onClick={(e) => e.preventDefault()}
                     >
                         <span>Xem chi tiết</span>

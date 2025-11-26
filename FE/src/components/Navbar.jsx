@@ -65,6 +65,7 @@ function Navbar() {
                         <Button variant="secondary" asChild><RouterLink to="/profile">Hồ sơ</RouterLink></Button>
                         <Button variant="secondary" asChild><RouterLink to="/my-applications">Đã ứng tuyển</RouterLink></Button>
                         <Button variant="secondary" asChild><RouterLink to="/favorites">Việc đã lưu</RouterLink></Button>
+                        <Button variant="secondary" asChild><RouterLink to="/messages">Tin nhắn</RouterLink></Button>
                         <NotificationBell />
                                 <Button variant="ghost" size="icon" onClick={toggleTheme} title="Chuyển chế độ sáng/tối">
                                     {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}

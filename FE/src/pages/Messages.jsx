@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { MessageCircle, Send, Paperclip, Search, MoreVertical, Image as ImageIcon, File, RefreshCw, User } from 'lucide-react';
+import { MessageCircle, Send, Paperclip, Search, MoreVertical, Image as ImageIcon, File, RefreshCw, Plus, X } from 'lucide-react';
 
 export default function Messages() {
   const [threads, setThreads] = useState([]);
@@ -15,6 +15,9 @@ export default function Messages() {
   const [file, setFile] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [showNewMessageModal, setShowNewMessageModal] = useState(false);
+  const [recipientId, setRecipientId] = useState('');
+  const [isCreatingThread, setIsCreatingThread] = useState(false);
   const pollingRef = useRef(null);
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -81,6 +84,45 @@ export default function Messages() {
     (t.other_user_email || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const handleCreateThread = async () => {
+    const userId = recipientId.trim();
+    if (!userId) {
+      alert('Vui lòng nhập User ID người nhận');
+      return;
+    }
+
+    // Validate it's a number
+    if (!/^\d+$/.test(userId)) {
+      alert('User ID phải là số');
+      return;
+    }
+
+    setIsCreatingThread(true);
+    try {
+      const res = await axiosClient.post('/api/users/chat/threads/', { 
+        user_id: parseInt(userId) 
+      });
+      const newThread = res.data;
+      setShowNewMessageModal(false);
+      setRecipientId('');
+      await fetchThreads();
+      setActive(newThread);
+    } catch (e) {
+      const errorMsg = e.response?.data?.detail || e.response?.data?.error || 'Không thể tạo hội thoại mới. Vui lòng kiểm tra User ID.';
+      alert(errorMsg);
+      console.error('Error creating thread:', e);
+    } finally {
+      setIsCreatingThread(false);
+    }
+  };
+
+  const handleKeyPressModal = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleCreateThread();
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white dark:from-slate-900 dark:to-slate-800 py-8">
       <div className="container mx-auto px-4">
@@ -98,9 +140,14 @@ export default function Messages() {
                   <MessageCircle className="w-5 h-5" />
                   Hội thoại
                 </h2>
-                <Button size="sm" variant="ghost" onClick={fetchThreads} className="gap-1">
-                  <RefreshCw className="w-4 h-4" />
-                </Button>
+                <div className="flex gap-1">
+                  <Button size="sm" variant="ghost" onClick={() => setShowNewMessageModal(true)} className="gap-1">
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={fetchThreads} className="gap-1">
+                    <RefreshCw className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -191,7 +238,7 @@ export default function Messages() {
                       </div>
                     </div>
                   ) : (
-                    messages.map((m, idx) => {
+                    messages.map((m) => {
                       const isOwn = m.sender_email === active.other_user_email ? false : true;
                       return (
                         <div key={m.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
@@ -302,6 +349,86 @@ export default function Messages() {
             )}
           </Card>
         </div>
+
+        {/* New Message Modal */}
+        {showNewMessageModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowNewMessageModal(false)}>
+            <Card className="w-full max-w-md bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700" onClick={(e) => e.stopPropagation()}>
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-lg">
+                      <MessageCircle className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-slate-900 dark:text-white">Tin nhắn mới</h3>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => {
+                      setShowNewMessageModal(false);
+                      setRecipientId('');
+                    }}
+                  >
+                    <X className="w-5 h-5" />
+                  </Button>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                      User ID người nhận
+                    </label>
+                    <Input
+                      type="number"
+                      value={recipientId}
+                      onChange={(e) => setRecipientId(e.target.value)}
+                      onKeyPress={handleKeyPressModal}
+                      placeholder="Nhập User ID người bạn muốn nhắn tin..."
+                      className="bg-slate-50 dark:bg-slate-900"
+                      autoFocus
+                      disabled={isCreatingThread}
+                    />
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+                      Ví dụ: 2, 3, 4... (Bạn có thể tìm User ID trong danh sách công việc hoặc ứng viên)
+                    </p>
+                  </div>
+
+                  <div className="flex gap-2 pt-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setShowNewMessageModal(false);
+                        setRecipientId('');
+                      }}
+                      className="flex-1"
+                      disabled={isCreatingThread}
+                    >
+                      Hủy
+                    </Button>
+                    <Button
+                      onClick={handleCreateThread}
+                      disabled={!recipientId.trim() || isCreatingThread}
+                      className="flex-1 bg-blue-600 hover:bg-blue-700 gap-2"
+                    >
+                      {isCreatingThread ? (
+                        <>
+                          <RefreshCw className="w-4 h-4 animate-spin" />
+                          Đang tạo...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-4 h-4" />
+                          Bắt đầu
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </div>
+        )}
       </div>
     </div>
   );

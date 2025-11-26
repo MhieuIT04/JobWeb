@@ -26,7 +26,7 @@ import JobForm from "./pages/JobForm";
 import EmployerAnalytics from "./pages/EmployerAnalytics";
 import CVMatch from "./pages/CVMatch";
 import Companies from "./pages/Companies";
-import Company from "./pages/Company";
+import CompanyDetail from "./pages/CompanyDetail";
 import Messages from "./pages/Messages";
 import CandidateDashboard from "./pages/CandidateDashboard";
 
@@ -55,7 +55,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/companies" element={<Companies />} />
-            <Route path="/companies/:id" element={<Company />} />
+            <Route path="/companies/:id" element={<CompanyDetail />} />
             <Route path="/cv-match" element={<CVMatch />} />
             
             {/* Candidate Routes */}

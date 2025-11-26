@@ -21,13 +21,40 @@ export default function Companies() {
   const fetchPage = async (url) => {
     setLoading(true);
     try {
-      const res = await axiosClient.get(url || `/api/users/companies/?order=${sortBy}${searchQuery ? `&search=${searchQuery}` : ''}`);
+      // Try to fetch companies from jobs endpoint (public)
+      const res = await axiosClient.get(url || `/api/jobs/?order=${sortBy}${searchQuery ? `&search=${searchQuery}` : ''}`);
       const data = res.data;
-      const results = data.results || data;
-      setCompanies(results);
-      setNext(data.next || null);
-      setTotalCount(data.count || results.length);
-    } finally { setLoading(false); }
+      const jobs = data.results || data || [];
+      
+      // Extract unique companies from jobs
+      const uniqueCompanies = [];
+      const seenIds = new Set();
+      
+      jobs.forEach(job => {
+        if (job.employer && !seenIds.has(job.employer.id)) {
+          seenIds.add(job.employer.id);
+          uniqueCompanies.push({
+            id: job.employer.id,
+            name: job.employer.company_name,
+            logo: job.employer.logo,
+            industry: job.employer.industry,
+            city: job.employer.city?.name,
+            size: job.employer.company_size,
+            jobCount: jobs.filter(j => j.employer?.id === job.employer.id).length,
+            rating: job.employer_avg_rating || 4.5
+          });
+        }
+      });
+      
+      setCompanies(uniqueCompanies);
+      setNext(null); // Simplified - no pagination for now
+      setTotalCount(uniqueCompanies.length);
+    } catch (err) {
+      console.error('Error fetching companies:', err);
+      setCompanies([]);
+    } finally { 
+      setLoading(false); 
+    }
   };
 
   useEffect(() => {
@@ -112,22 +139,22 @@ export default function Companies() {
                 <Link key={c.id} to={`/companies/${c.id}`}>
                   <Card className="text-center p-4 bg-white dark:bg-gray-900 hover:shadow-lg transition-all hover:-translate-y-1 cursor-pointer h-full">
                     <Avatar className="w-16 h-16 mx-auto mb-2 border-2 border-gray-100 dark:border-gray-700">
-                      <AvatarImage src={c.logo} alt={c.company_name} />
+                      <AvatarImage src={c.logo} alt={c.name} />
                       <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-500 text-white font-bold text-xl">
-                        {c.company_name?.charAt(0)}
+                        {c.name?.charAt(0) || 'C'}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="font-semibold text-sm truncate text-gray-900 dark:text-blue-300 mb-1">
-                      {c.company_name}
+                    <div className="font-semibold text-sm truncate text-gray-900 dark:text-white mb-1">
+                      {c.name || 'Công ty'}
                     </div>
-                    <div className="flex items-center justify-center gap-1 text-xs text-gray-600 dark:text-blue-200 mb-2">
+                    <div className="flex items-center justify-center gap-1 text-xs text-gray-600 dark:text-slate-400 mb-2">
                       <Briefcase className="w-3 h-3" />
-                      {c.job_count} việc làm
+                      {c.jobCount || 0} việc làm
                     </div>
                     <div className="flex items-center justify-center gap-1">
-                      <RatingStars value={c.avg_rating || 0} size={14} />
-                      <span className="text-xs text-gray-600 dark:text-gray-400">
-                        {(c.avg_rating||0).toFixed(1)}
+                      <RatingStars value={c.rating || 0} size={14} />
+                      <span className="text-xs text-gray-600 dark:text-slate-400">
+                        {(c.rating || 0).toFixed(1)}
                       </span>
                     </div>
                   </Card>

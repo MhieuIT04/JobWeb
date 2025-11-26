@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
-import { Briefcase, TrendingUp, Building2, Star, ArrowRight, Users, MapPin, Clock } from 'lucide-react';
+import { Briefcase, TrendingUp, Building2, Star, ArrowRight, Users, Clock } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { useAuth } from '../contexts/AuthContext';
 
 // Import các component của trang chủ
-import HeroCarousel from '../components/HeroCarousel';
 import HorizontalJobFilters from '../components/home/HorizontalJobFilters';
 import FeaturedCategories from '../components/home/FeaturedCategories';
 import PersonalizedJobs from '../components/home/PersonalizedJobs';
@@ -15,10 +14,12 @@ import TrendingJobs from '../components/home/TrendingJobs';
 import FeaturedEmployers from '../components/home/FeaturedEmployers';
 import HotJobs from '../components/home/HotJobs';
 import JobGrid from '../components/JobGrid';
-import HeroBanner from '../components/HeroBanner'; 
+import HeroBanner from '../components/HeroBanner';
+import HomeFooter from '../components/HomeFooter'; 
 
 function HomePage() {
     const navigate = useNavigate();
+    const { toggleFavorite, isJobFavorited } = useAuth();
     const [categories, setCategories] = useState([]);
     const [cities, setCities] = useState([]);
     const [workTypes, setWorkTypes] = useState([]);
@@ -104,56 +105,34 @@ function HomePage() {
             </div>
             
             {/* Main Content */}
-            <main className="container mx-auto px-4 pb-12 space-y-16">
+            <main className="container mx-auto px-4 pb-12 space-y-12">
                 {/* Featured Categories */}
-                <section>
-                    <div className="flex items-center justify-between mb-6">
-                        <div>
-                            <h2 className="text-3xl font-bold text-slate-900 dark:text-white">Danh mục nổi bật</h2>
-                            <p className="text-slate-600 dark:text-slate-400 mt-1">Khám phá các ngành nghề phổ biến</p>
+                {categories.length > 0 && (
+                    <section>
+                        <div className="flex items-center justify-between mb-6">
+                            <div>
+                                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Danh mục nổi bật</h2>
+                                <p className="text-slate-600 dark:text-slate-400 mt-1">Khám phá các ngành nghề phổ biến</p>
+                            </div>
+                            <Button variant="ghost" onClick={() => navigate('/jobs')} className="gap-2">
+                                Xem tất cả <ArrowRight className="w-4 h-4" />
+                            </Button>
                         </div>
-                        <Button variant="ghost" onClick={() => navigate('/jobs')} className="gap-2">
-                            Xem tất cả <ArrowRight className="w-4 h-4" />
-                        </Button>
-                    </div>
-                    <FeaturedCategories categories={categories} />
-                </section>
+                        <FeaturedCategories categories={categories} />
+                    </section>
+                )}
 
-                {/* Personalized Jobs */}
-                <section>
-                    <div className="flex items-center gap-2 mb-6">
-                        <Star className="w-6 h-6 text-yellow-500" />
-                        <h2 className="text-3xl font-bold text-slate-900 dark:text-white">Việc làm dành cho bạn</h2>
-                    </div>
-                    <PersonalizedJobs />
-                </section>
+                {/* Personalized Jobs - Only show if user is logged in */}
+                <PersonalizedJobs />
 
                 {/* Trending Jobs */}
-                <section>
-                    <div className="flex items-center gap-2 mb-6">
-                        <TrendingUp className="w-6 h-6 text-green-500" />
-                        <h2 className="text-3xl font-bold text-slate-900 dark:text-white">Việc làm xu hướng</h2>
-                    </div>
-                    <TrendingJobs />
-                </section>
+                <TrendingJobs />
 
                 {/* Featured Employers */}
-                <section className="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-lg">
-                    <div className="flex items-center gap-2 mb-6">
-                        <Building2 className="w-6 h-6 text-blue-500" />
-                        <h2 className="text-3xl font-bold text-slate-900 dark:text-white">Nhà tuyển dụng nổi bật</h2>
-                    </div>
-                    <FeaturedEmployers />
-                </section>
+                <FeaturedEmployers />
 
                 {/* Hot Jobs */}
-                <section>
-                    <div className="flex items-center gap-2 mb-6">
-                        <Clock className="w-6 h-6 text-red-500" />
-                        <h2 className="text-3xl font-bold text-slate-900 dark:text-white">Việc làm hot</h2>
-                    </div>
-                    <HotJobs />
-                </section>
+                <HotJobs />
 
                 {/* Latest Jobs */}
                 <section>
@@ -176,7 +155,11 @@ function HomePage() {
                             ))}
                         </div>
                     ) : (
-                        <JobGrid jobs={latestJobs} />
+                        <JobGrid 
+                            jobs={latestJobs} 
+                            onToggleFavorite={toggleFavorite}
+                            isJobFavorited={isJobFavorited}
+                        />
                     )}
                 </section>
 
@@ -196,6 +179,9 @@ function HomePage() {
                     </div>
                 </section>
             </main>
+
+            {/* Footer */}
+            <HomeFooter />
         </div>
     );
 }

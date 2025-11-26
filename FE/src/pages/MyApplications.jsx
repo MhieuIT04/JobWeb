@@ -37,16 +37,22 @@ function MyApplications() {
         setIsLoading(true);
         try {
             const response = await axiosClient.get('/api/jobs/applications/');
-            setApplications(response.data);
+            const data = response.data.results || response.data || [];
+            setApplications(Array.isArray(data) ? data : []);
         } catch (err) {
             console.error('Lỗi khi tải danh sách ứng tuyển:', err);
             toast.error('Không thể tải danh sách ứng tuyển.');
+            setApplications([]);
         } finally {
             setIsLoading(false);
         }
     };
 
     const applyFiltersAndSort = () => {
+        if (!Array.isArray(applications)) {
+            setFilteredApplications([]);
+            return;
+        }
         let filtered = [...applications];
 
         // Apply filter
@@ -123,6 +129,7 @@ function MyApplications() {
     };
 
     const getStatusCount = (status) => {
+        if (!Array.isArray(applications)) return 0;
         if (status === 'all') return applications.length;
         return applications.filter(app => app.status === status).length;
     };
@@ -309,16 +316,11 @@ function MyApplications() {
                                         <Button 
                                             variant="outline" 
                                             size="sm" 
-                                            asChild
                                             className="w-full"
+                                            onClick={() => window.location.href = `/jobs/${app.job?.id || app.job_id}`}
                                         >
-                                            <RouterLink 
-                                                to={`/jobs/${app.job?.id || app.job_id}`}
-                                                className="flex items-center justify-center gap-2"
-                                            >
-                                                <ExternalLink className="w-4 h-4" />
-                                                Xem công việc
-                                            </RouterLink>
+                                            <ExternalLink className="w-4 h-4 mr-2" />
+                                            Xem công việc
                                         </Button>
 
                                         {/* Withdraw Button - Only for pending status */}

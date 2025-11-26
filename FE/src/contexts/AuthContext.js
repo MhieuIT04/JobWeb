@@ -212,6 +212,16 @@ export const AuthProvider = ({ children }) => {
 
   const isAuthenticated = !!authTokens;
 
+  // Fetch notifications when user is authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchNotifications();
+      // Poll for new notifications every 30 seconds
+      const interval = setInterval(fetchNotifications, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [isAuthenticated, fetchNotifications]);
+
   const register = async (email, password, role) => {
     try {
       await axiosClient.post('/api/users/register/', { email, password, role });
