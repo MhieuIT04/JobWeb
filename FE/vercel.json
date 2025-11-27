@@ -56,12 +56,12 @@
     }
   ],
   "env": {
-    "VITE_API_URL": "https://recruitment-api-jrcr.onrender.com",
+    "REACT_APP_API_URL": "https://recruitment-api-jrcr.onrender.com",
     "CI": "false"
   },
   "build": {
     "env": {
-      "VITE_API_URL": "https://recruitment-api-jrcr.onrender.com",
+      "REACT_APP_API_URL": "https://recruitment-api-jrcr.onrender.com",
       "CI": "false"
     }
   },

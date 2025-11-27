@@ -3,7 +3,7 @@ import axios from 'axios';
 
 // 1. Tạo một instance của axios KHÔNG có Content-Type mặc định
 const axiosClient = axios.create({
-  baseURL: 'http://127.0.0.1:8000',
+  baseURL: process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000',
   timeout: 30000,
   // XÓA BỎ 'headers' mặc định khỏi đây
 });
