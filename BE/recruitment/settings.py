@@ -22,12 +22,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-x^9y(8^j$9su^2ya&irb*j_t+=2%a+4!t(0*+(-mf@4vmfete+'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-x^9y(8^j$9su^2ya&irb*j_t+=2%a+4!t(0*+(-mf@4vmfete+')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 
 # Application definition
@@ -160,17 +160,18 @@ REST_FRAMEWORK = {
     'MAX_PAGE_SIZE': 100,
 }
 
-CORS_ALLOWED_ORIGINS = [
- 
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-]
+# CORS Configuration
+CORS_ALLOWED_ORIGINS = os.environ.get(
+    'CORS_ALLOWED_ORIGINS',
+    'http://localhost:3000,http://localhost:5173,http://127.0.0.1:3000'
+).split(',')
+
 CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOW_HEADERS = [
     'accept',
     'accept-encoding',
-    'authorization', # <-- DÒNG QUAN TRỌNG NHẤT
+    'authorization',
     'content-type',
     'dnt',
     'origin',
@@ -179,7 +180,6 @@ CORS_ALLOW_HEADERS = [
     'x-requested-with',
 ]
 
-# Thêm cấu hình cho file upload
 CORS_ALLOW_METHODS = [
     'DELETE',
     'GET',
@@ -188,14 +188,6 @@ CORS_ALLOW_METHODS = [
     'POST',
     'PUT',
 ]
-
-CORS_ALLOWED_ORIGINS = [
-    "https://your-frontend.vercel.app",
-    "http://localhost:3000",
-    "http://localhost:5173",
-]
-
-CORS_ALLOW_CREDENTIALS = True
 
 # Cho phép credentials
 CORS_ALLOW_CREDENTIALS = True
