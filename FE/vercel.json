@@ -1,10 +1,10 @@
 {
   "version": 2,
   "buildCommand": "npm run build",
-  "devCommand": "npm run dev",
+  "devCommand": "npm start",
   "installCommand": "npm install",
-  "framework": "vite",
-  "outputDirectory": "dist",
+  "framework": null,
+  "outputDirectory": "build",
   "regions": ["sin1"],
   "rewrites": [
     {
