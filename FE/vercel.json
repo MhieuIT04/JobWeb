@@ -56,11 +56,13 @@
     }
   ],
   "env": {
-    "VITE_API_URL": "https://recruitment-api-jrcz.onrender.com"
+    "VITE_API_URL": "https://recruitment-api-jrcz.onrender.com",
+    "CI": "false"
   },
   "build": {
     "env": {
-      "VITE_API_URL": "https://recruitment-api-jrcz.onrender.com"
+      "VITE_API_URL": "https://recruitment-api-jrcz.onrender.com",
+      "CI": "false"
     }
   },
   "trailingSlash": false,
