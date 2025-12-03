@@ -365,7 +365,7 @@ function Profile() {
                                 </div>
                                 
                                 <div className="flex flex-wrap gap-2">
-                                    {profile.skills.map((skill, index) => (
+                                    {(profile.skills || []).map((skill, index) => (
                                         <Badge key={index} variant="secondary" className="flex items-center gap-1">
                                             {skill}
                                             <X 
@@ -415,7 +415,7 @@ function Profile() {
                                 </div>
                                 
                                 <div className="space-y-3">
-                                    {profile.education.map((edu) => (
+                                    {(profile.education || []).map((edu) => (
                                         <div key={edu.id} className="p-4 border rounded-lg relative">
                                             <Button
                                                 type="button"
@@ -473,7 +473,7 @@ function Profile() {
                                 </div>
                                 
                                 <div className="space-y-3">
-                                    {profile.work_experience.map((exp) => (
+                                    {(profile.work_experience || []).map((exp) => (
                                         <div key={exp.id} className="p-4 border rounded-lg relative">
                                             <Button
                                                 type="button"

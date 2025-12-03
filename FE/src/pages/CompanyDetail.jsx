@@ -61,9 +61,10 @@ export default function CompanyDetail() {
         const jobsData = jobsRes.data.results || jobsRes.data || [];
         setJobs(jobsData);
 
-        // Get company info from first job's employer data
-        if (jobsData.length > 0 && jobsData[0].employer) {
-          const emp = jobsData[0].employer;
+        // Always try to fetch employer profile directly first for accurate data
+        try {
+          const empRes = await axiosClient.get(`/api/users/employers/${id}/`);
+          const emp = empRes.data;
           setCompany({
             id: emp.id,
             name: emp.company_name,
@@ -76,14 +77,15 @@ export default function CompanyDetail() {
             size: emp.company_size,
             industry: emp.industry,
             description: emp.bio,
-            rating: jobsData[0].employer_avg_rating || 4.5,
+            address: emp.address,
+            rating: 4.5,
             founded: emp.founded_year || '2020'
           });
-        } else {
-          // Fallback: try to fetch employer profile
-          try {
-            const empRes = await axiosClient.get(`/api/users/employers/${id}/`);
-            const emp = empRes.data;
+        } catch (err) {
+          console.error('Cannot fetch employer directly:', err);
+          // Fallback: Get company info from first job's employer data
+          if (jobsData.length > 0 && jobsData[0].employer) {
+            const emp = jobsData[0].employer;
             setCompany({
               id: emp.id,
               name: emp.company_name,
@@ -96,11 +98,10 @@ export default function CompanyDetail() {
               size: emp.company_size,
               industry: emp.industry,
               description: emp.bio,
-              rating: 4.5,
+              rating: jobsData[0].employer_avg_rating || 4.5,
               founded: emp.founded_year || '2020'
             });
-          } catch (err) {
-            console.error('Cannot fetch employer:', err);
+          } else {
             setCompany({
               id: id,
               name: `Công ty #${id}`,

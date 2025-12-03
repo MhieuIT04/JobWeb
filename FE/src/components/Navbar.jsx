@@ -54,7 +54,7 @@ function Navbar() {
             <div className="flex items-center gap-2">
                 {isAuthenticated ? (
                     <>
-                        <Button variant="secondary" asChild><RouterLink to="/">Gợi ý</RouterLink></Button>
+                        <Button variant="secondary" asChild><RouterLink to="/jobs">Tìm việc</RouterLink></Button>
                         <Button variant="secondary" asChild><RouterLink to="/cv-match">Phân tích CV</RouterLink></Button>
                         {user && user.role === 'employer' && (
                             <>

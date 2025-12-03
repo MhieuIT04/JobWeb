@@ -11,5 +11,8 @@ urlpatterns = [
     path('api/jobs/', include('jobs.urls')), # <-- URL sẽ bắt đầu bằng /api/jobs/
     path('api/notifications/', NotificationListView.as_view(), name='notification-list'),
 ]
+
+# Serve static and media files in development
 if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

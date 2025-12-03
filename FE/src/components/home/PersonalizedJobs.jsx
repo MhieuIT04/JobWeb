@@ -12,12 +12,17 @@ export default function PersonalizedJobs() {
             const applications = appsRes.data?.results || appsRes.data || [];
             
             if (applications.length > 0) {
-                const latestJobId = applications[0].job.id; // Giả sử API trả về nested object job
+                // Kiểm tra xem job có phải là object hay chỉ là ID
+                const latestJobId = typeof applications[0].job === 'object' 
+                    ? applications[0].job.id 
+                    : applications[0].job;
+                    
                 const recRes = await axiosClient.get(`/api/jobs/${latestJobId}/recommendations/`);
                 setJobs(recRes.data?.results || recRes.data || []);
             }
         } catch (error) {
             console.error("Failed to fetch personalized jobs:", error);
+            // Không hiển thị lỗi cho người dùng, chỉ log
         }
     })();
 }, []);

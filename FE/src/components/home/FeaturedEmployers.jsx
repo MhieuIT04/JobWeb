@@ -7,6 +7,8 @@
 
   export default function FeaturedEmployers() {
     const [companies, setCompanies] = useState([]);
+    const [showAll, setShowAll] = useState(false);
+    
     useEffect(() => {
       (async () => {
           try {
@@ -17,12 +19,27 @@
           }
       })();
   }, []);
+  
     if (!companies.length) return null;
+    
+    const displayedCompanies = showAll ? companies : companies.slice(0, 3);
+    
     return (
       <div className="mt-10">
-        <h2 className="text-2xl font-bold mb-4">Nhà tuyển dụng nổi bật</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-2xl font-bold">Nhà tuyển dụng nổi bật</h2>
+          {companies.length > 3 && (
+            <Button 
+              variant="link" 
+              onClick={() => setShowAll(!showAll)}
+              className="text-blue-600 hover:text-blue-700"
+            >
+              {showAll ? 'Thu gọn' : `Xem thêm (${companies.length - 3})`}
+            </Button>
+          )}
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {companies.slice(0,3).map(c => (
+          {displayedCompanies.map(c => (
             <Card key={c.id} className="p-5 flex items-center gap-4 bg-white dark:bg-gray-900">
               <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-700 dark:text-blue-300 font-semibold">
                 {c.company_name?.charAt(0)}

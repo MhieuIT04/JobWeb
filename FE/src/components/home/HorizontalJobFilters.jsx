@@ -58,7 +58,7 @@ function HorizontalJobFilters({
 
     // Hàm để xóa tất cả các bộ lọc
     const handleClearFilters = () => {
-        const clearedFilters = {};
+        const clearedFilters = { page: 1 }; // Reset về trang 1
         setFilters(clearedFilters);
         onFilterChange(clearedFilters);
     };

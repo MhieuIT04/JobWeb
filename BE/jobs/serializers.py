@@ -103,13 +103,26 @@ class ApplicationCreateSerializer(serializers.ModelSerializer):
         return job
 
     def create(self, validated_data):
+        from notifications.utils import notify_employer_new_application
+        
         user = self.context['request'].user
         job = validated_data['job']
         
         if Application.objects.filter(user=user, job=job).exists():
             raise serializers.ValidationError({"detail": "Bạn đã ứng tuyển vào công việc này rồi."})
-            
-        return Application.objects.create(user=user, **validated_data)
+        
+        # Tạo application
+        application = Application.objects.create(user=user, **validated_data)
+        
+        # Gửi thông báo và email cho nhà tuyển dụng
+        try:
+            notify_employer_new_application(application)
+            print(f"✓ Notification sent to employer for application {application.id}")
+        except Exception as e:
+            print(f"✗ Error sending notification to employer: {e}")
+            # Không raise exception để không ảnh hưởng đến việc tạo application
+        
+        return application
 
 
 class ApplicationStatusUpdateSerializer(serializers.ModelSerializer):

@@ -73,8 +73,15 @@ function JobDetail() {
         setIsApplying(true);
 
         const formData = new FormData();
-        formData.append('job', id);
-        formData.append('cover_letter', coverLetter);
+        // Backend yêu cầu job phải là integer ID
+        formData.append('job', parseInt(id));
+        
+        // Cover letter là optional nhưng nếu gửi thì phải có nội dung
+        if (coverLetter && coverLetter.trim()) {
+            formData.append('cover_letter', coverLetter.trim());
+        }
+        
+        // CV là optional
         if (cvFile) {
             formData.append('cv', cvFile);
         }
@@ -87,7 +94,36 @@ function JobDetail() {
             setShowApplyModal(false);
         } catch (err) {
             console.error('Lỗi khi ứng tuyển:', err);
-            const errorMsg = err.response?.data?.detail || 'Đã có lỗi xảy ra khi ứng tuyển.';
+            
+            // Xử lý các loại lỗi khác nhau
+            let errorMsg = 'Đã có lỗi xảy ra khi ứng tuyển.';
+            
+            if (err.response?.data) {
+                const errorData = err.response.data;
+                
+                // Nếu có detail message
+                if (errorData.detail) {
+                    errorMsg = errorData.detail;
+                }
+                // Nếu có lỗi validation từ các field
+                else if (typeof errorData === 'object') {
+                    const errors = Object.entries(errorData)
+                        .map(([key, value]) => {
+                            const fieldName = key === 'job' ? 'Công việc' : 
+                                            key === 'cover_letter' ? 'Thư ứng tuyển' : 
+                                            key === 'cv' ? 'CV' : key;
+                            const errorValue = Array.isArray(value) ? value.join(', ') : value;
+                            return `${fieldName}: ${errorValue}`;
+                        })
+                        .join('\n');
+                    errorMsg = errors || errorMsg;
+                }
+                // Nếu là string
+                else if (typeof errorData === 'string') {
+                    errorMsg = errorData;
+                }
+            }
+            
             toast.error(errorMsg);
         } finally {
             setIsApplying(false);

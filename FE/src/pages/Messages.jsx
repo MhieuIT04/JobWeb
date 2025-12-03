@@ -18,6 +18,9 @@ export default function Messages() {
   const [showNewMessageModal, setShowNewMessageModal] = useState(false);
   const [recipientId, setRecipientId] = useState('');
   const [isCreatingThread, setIsCreatingThread] = useState(false);
+  const [usersList, setUsersList] = useState([]);
+  const [usersLoading, setUsersLoading] = useState(false);
+  const [userSearchQuery, setUserSearchQuery] = useState('');
   const pollingRef = useRef(null);
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -84,16 +87,43 @@ export default function Messages() {
     (t.other_user_email || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleCreateThread = async () => {
-    const userId = recipientId.trim();
-    if (!userId) {
-      alert('Vui lòng nhập User ID người nhận');
-      return;
+  const fetchUsers = async (searchTerm = '') => {
+    setUsersLoading(true);
+    try {
+      // Fetch both job seekers and employers
+      const [seekersRes, employersRes] = await Promise.all([
+        axiosClient.get(`/api/users/job-seekers/?search=${searchTerm}`),
+        axiosClient.get(`/api/users/employers/?search=${searchTerm}`)
+      ]);
+      
+      const seekers = (seekersRes.data?.results || seekersRes.data || []).map(u => ({
+        id: u.id,
+        email: u.email,
+        name: u.full_name || u.email,
+        role: 'Ứng viên',
+        avatar: u.avatar
+      }));
+      
+      const employers = (employersRes.data?.results || employersRes.data || []).map(u => ({
+        id: u.id,
+        email: u.email,
+        name: u.company_name || u.email,
+        role: 'Nhà tuyển dụng',
+        avatar: u.logo
+      }));
+      
+      setUsersList([...seekers, ...employers]);
+    } catch (e) {
+      console.error('Error fetching users:', e);
+      setUsersList([]);
+    } finally {
+      setUsersLoading(false);
     }
+  };
 
-    // Validate it's a number
-    if (!/^\d+$/.test(userId)) {
-      alert('User ID phải là số');
+  const handleCreateThread = async (userId) => {
+    if (!userId) {
+      alert('Vui lòng chọn người nhận');
       return;
     }
 
@@ -105,10 +135,11 @@ export default function Messages() {
       const newThread = res.data;
       setShowNewMessageModal(false);
       setRecipientId('');
+      setUserSearchQuery('');
       await fetchThreads();
       setActive(newThread);
     } catch (e) {
-      const errorMsg = e.response?.data?.detail || e.response?.data?.error || 'Không thể tạo hội thoại mới. Vui lòng kiểm tra User ID.';
+      const errorMsg = e.response?.data?.detail || e.response?.data?.error || 'Không thể tạo hội thoại mới.';
       alert(errorMsg);
       console.error('Error creating thread:', e);
     } finally {
@@ -116,12 +147,25 @@ export default function Messages() {
     }
   };
 
-  const handleKeyPressModal = (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleCreateThread();
+  useEffect(() => {
+    if (showNewMessageModal) {
+      fetchUsers();
     }
-  };
+  }, [showNewMessageModal]);
+
+  useEffect(() => {
+    if (showNewMessageModal) {
+      const timer = setTimeout(() => {
+        fetchUsers(userSearchQuery);
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [userSearchQuery, showNewMessageModal]);
+
+  const filteredUsers = usersList.filter(u => 
+    u.name.toLowerCase().includes(userSearchQuery.toLowerCase()) ||
+    u.email.toLowerCase().includes(userSearchQuery.toLowerCase())
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white dark:from-slate-900 dark:to-slate-800 py-8">
@@ -377,21 +421,67 @@ export default function Messages() {
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                      User ID người nhận
+                      Tìm kiếm người dùng
                     </label>
-                    <Input
-                      type="number"
-                      value={recipientId}
-                      onChange={(e) => setRecipientId(e.target.value)}
-                      onKeyPress={handleKeyPressModal}
-                      placeholder="Nhập User ID người bạn muốn nhắn tin..."
-                      className="bg-slate-50 dark:bg-slate-900"
-                      autoFocus
-                      disabled={isCreatingThread}
-                    />
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
-                      Ví dụ: 2, 3, 4... (Bạn có thể tìm User ID trong danh sách công việc hoặc ứng viên)
-                    </p>
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                      <Input
+                        value={userSearchQuery}
+                        onChange={(e) => setUserSearchQuery(e.target.value)}
+                        placeholder="Tìm theo tên hoặc email..."
+                        className="pl-10 bg-slate-50 dark:bg-slate-900"
+                        autoFocus
+                        disabled={isCreatingThread}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="border border-slate-200 dark:border-slate-700 rounded-lg max-h-96 overflow-y-auto">
+                    {usersLoading ? (
+                      <div className="p-8 text-center">
+                        <RefreshCw className="w-8 h-8 mx-auto mb-2 animate-spin text-blue-600" />
+                        <p className="text-sm text-slate-500">Đang tải...</p>
+                      </div>
+                    ) : filteredUsers.length === 0 ? (
+                      <div className="p-8 text-center text-slate-500 dark:text-slate-400">
+                        <MessageCircle className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                        <p>Không tìm thấy người dùng</p>
+                      </div>
+                    ) : (
+                      <div className="divide-y divide-slate-200 dark:divide-slate-700">
+                        {filteredUsers.map(user => (
+                          <button
+                            key={user.id}
+                            onClick={() => handleCreateThread(user.id)}
+                            disabled={isCreatingThread}
+                            className="w-full p-4 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-left disabled:opacity-50"
+                          >
+                            <div className="flex items-center gap-3">
+                              <Avatar className="w-10 h-10">
+                                {user.avatar ? (
+                                  <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+                                ) : (
+                                  <AvatarFallback className="bg-blue-600 text-white">
+                                    {user.name[0].toUpperCase()}
+                                  </AvatarFallback>
+                                )}
+                              </Avatar>
+                              <div className="flex-1 min-w-0">
+                                <div className="font-medium text-slate-900 dark:text-white truncate">
+                                  {user.name}
+                                </div>
+                                <div className="text-sm text-slate-500 dark:text-slate-400 truncate">
+                                  {user.email}
+                                </div>
+                              </div>
+                              <Badge variant="outline" className="text-xs">
+                                {user.role}
+                              </Badge>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex gap-2 pt-2">
@@ -400,28 +490,12 @@ export default function Messages() {
                       onClick={() => {
                         setShowNewMessageModal(false);
                         setRecipientId('');
+                        setUserSearchQuery('');
                       }}
                       className="flex-1"
                       disabled={isCreatingThread}
                     >
                       Hủy
-                    </Button>
-                    <Button
-                      onClick={handleCreateThread}
-                      disabled={!recipientId.trim() || isCreatingThread}
-                      className="flex-1 bg-blue-600 hover:bg-blue-700 gap-2"
-                    >
-                      {isCreatingThread ? (
-                        <>
-                          <RefreshCw className="w-4 h-4 animate-spin" />
-                          Đang tạo...
-                        </>
-                      ) : (
-                        <>
-                          <Send className="w-4 h-4" />
-                          Bắt đầu
-                        </>
-                      )}
                     </Button>
                   </div>
                 </div>

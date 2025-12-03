@@ -105,6 +105,7 @@ function JobList() {
   
   const handleFilterChange = (newFilters) => {
     setFilters({ ...newFilters, page: 1 });
+    window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll lên đầu trang khi thay đổi filter
   };
 
   const handlePageChange = (newPage) => {
@@ -114,7 +115,8 @@ function JobList() {
   };
 
   const handleClearFilters = () => {
-    setFilters({});
+    setFilters({ page: 1 }); // Reset về trang 1
+    window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll lên đầu trang
   };
 
   // --- HÀM RENDER NỘI DUNG CHÍNH ---

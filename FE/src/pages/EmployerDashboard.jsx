@@ -13,7 +13,7 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { 
     Plus, Pencil, Trash2, Users, Briefcase, 
-    FileText, UserCheck, Clock, TrendingUp
+    FileText, UserCheck, Clock, TrendingUp, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 
@@ -28,6 +28,9 @@ function EmployerDashboard() {
     const [isLoading, setIsLoading] = useState(true);
     const [deleteJobId, setDeleteJobId] = useState(null);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const jobsPerPage = 10;
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -38,11 +41,13 @@ function EmployerDashboard() {
         setIsLoading(true);
         try {
             const [jobsRes, statsRes] = await Promise.all([
-                axiosClient.get('/api/jobs/employer/jobs/'),
+                axiosClient.get('/api/jobs/employer/jobs/?limit=100'),
                 axiosClient.get('/api/jobs/dashboard/employer/stats/')
             ]);
             
-            setJobs(jobsRes.data.results || jobsRes.data);
+            const allJobs = jobsRes.data.results || jobsRes.data;
+            setJobs(allJobs);
+            setTotalPages(Math.ceil(allJobs.length / jobsPerPage));
             setStats(statsRes.data);
         } catch (err) {
             console.error("Lỗi tải dữ liệu:", err);
@@ -209,8 +214,9 @@ function EmployerDashboard() {
                     <h2 className="text-xl font-semibold mb-4">Danh sách tin tuyển dụng</h2>
                     
                     {jobs.length > 0 ? (
+                        <>
                         <div className="space-y-4">
-                            {jobs.map((job) => (
+                            {jobs.slice((currentPage - 1) * jobsPerPage, currentPage * jobsPerPage).map((job) => (
                                 <div 
                                     key={job.id}
                                     className="p-4 border rounded-lg hover:shadow-md transition-shadow"
@@ -303,6 +309,60 @@ function EmployerDashboard() {
                                 </div>
                             ))}
                         </div>
+                        
+                        {/* Pagination */}
+                        {totalPages > 1 && (
+                            <div className="flex items-center justify-center gap-2 mt-6 pt-6 border-t">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                    disabled={currentPage === 1}
+                                >
+                                    <ChevronLeft className="h-4 w-4 mr-1" />
+                                    Trước
+                                </Button>
+                                <div className="flex items-center gap-2">
+                                    {[...Array(totalPages)].map((_, idx) => {
+                                        const pageNum = idx + 1;
+                                        // Show first, last, current, and adjacent pages
+                                        if (
+                                            pageNum === 1 ||
+                                            pageNum === totalPages ||
+                                            (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
+                                        ) {
+                                            return (
+                                                <Button
+                                                    key={pageNum}
+                                                    variant={currentPage === pageNum ? "default" : "outline"}
+                                                    size="sm"
+                                                    onClick={() => setCurrentPage(pageNum)}
+                                                    className="w-10"
+                                                >
+                                                    {pageNum}
+                                                </Button>
+                                            );
+                                        } else if (
+                                            pageNum === currentPage - 2 ||
+                                            pageNum === currentPage + 2
+                                        ) {
+                                            return <span key={pageNum} className="px-2">...</span>;
+                                        }
+                                        return null;
+                                    })}
+                                </div>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                                    disabled={currentPage === totalPages}
+                                >
+                                    Sau
+                                    <ChevronRight className="h-4 w-4 ml-1" />
+                                </Button>
+                            </div>
+                        )}
+                        </>
                     ) : (
                         <div className="text-center py-12">
                             <Briefcase className="w-16 h-16 mx-auto text-gray-400 mb-4" />

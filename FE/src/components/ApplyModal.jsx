@@ -5,6 +5,7 @@ import {
     DialogContent,
     DialogHeader,
     DialogTitle,
+    DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -78,6 +79,9 @@ const ApplyModal = ({ open, jobTitle, userProfile, onSubmit, onClose, error, isL
                         <Briefcase className="w-8 h-8 text-primary" />
                         <span className="font-bold text-lg text-primary">Ứng tuyển: {jobTitle}</span>
                     </DialogTitle>
+                    <DialogDescription>
+                        Điền thông tin và tải lên CV của bạn để ứng tuyển vào vị trí này.
+                    </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4 mt-2">
                     <Label className="font-semibold">Thông tin của bạn</Label>

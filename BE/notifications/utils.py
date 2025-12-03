@@ -107,89 +107,121 @@ Trân trọng,
 
 
 def create_and_send_notification(application):
+    """
+    Gửi thông báo và email cho ứng viên khi trạng thái đơn ứng tuyển thay đổi.
+    """
     user_to_notify = application.user
     job_title = application.job.title
     status = application.status
+    company_name = "Nhà tuyển dụng"
     
-    # --- THAY ĐỔI 1: Tách biệt nội dung cho web và email ---
-    # web_message là phiên bản văn bản thuần túy cho thông báo trên website.
-    # html_message là phiên bản HTML được định dạng cho email.
+    # Lấy tên công ty
+    if hasattr(application.job.employer, 'profile') and application.job.employer.profile.company_name:
+        company_name = application.job.employer.profile.company_name
+    
+    # Lấy tên ứng viên
+    candidate_name = user_to_notify.email
+    if hasattr(user_to_notify, 'profile'):
+        full_name = f"{user_to_notify.profile.first_name} {user_to_notify.profile.last_name}".strip()
+        if full_name:
+            candidate_name = full_name
     
     web_message = ""
-    html_message = ""
     email_subject = ""
+    status_color = ""
+    status_icon = ""
 
     if status == 'accepted':
-        email_subject = f"Cập nhật trạng thái ứng tuyển: Chúc mừng!"
-        web_message = f"Chúc mừng! Đơn ứng tuyển của bạn cho vị trí '{job_title}' đã được chấp nhận."
+        email_subject = "🎉 Chúc mừng! Đơn ứng tuyển của bạn đã được chấp nhận"
+        web_message = f"Chúc mừng! Đơn ứng tuyển của bạn cho vị trí '{job_title}' tại {company_name} đã được chấp nhận."
+        status_color = "#10b981"  # Green
+        status_icon = "✅"
         
-        # Sử dụng thẻ <strong> để in đậm và inline CSS để thêm màu xanh lá cây
-        html_message = f"""
-            <strong style="color: #28a745;">
-                Chúc mừng! Đơn ứng tuyển của bạn cho vị trí '{job_title}' đã được chấp nhận.
-            </strong>
-        """
     elif status == 'rejected':
-        email_subject = f"Cập nhật trạng thái ứng tuyển"
-        web_message = f"Rất tiếc, đơn ứng tuyển của bạn cho vị trí '{job_title}' đã bị từ chối."
-        
-        # Sử dụng thẻ <strong> để in đậm và inline CSS để thêm màu đỏ
-        html_message = f"""
-            <strong style="color: #dc3545;">
-                Rất tiếc, đơn ứng tuyển của bạn cho vị trí '{job_title}' đã bị từ chối.
-            </strong>
-        """
+        email_subject = "Cập nhật trạng thái ứng tuyển"
+        web_message = f"Rất tiếc, đơn ứng tuyển của bạn cho vị trí '{job_title}' tại {company_name} đã bị từ chối."
+        status_color = "#ef4444"  # Red
+        status_icon = "❌"
     else:
         # Nếu trạng thái không phải 'accepted' hay 'rejected', không làm gì cả
         return
 
-    # 1. Tạo thông báo trên web (sử dụng phiên bản văn bản thuần túy)
+    # 1. Tạo thông báo trên web
     try:
-        notification = Notification.objects.create(recipient=user_to_notify, message=web_message)
-        print(f"--- Web notification created successfully: ID {notification.id} ---")
+        notification = Notification.objects.create(
+            recipient=user_to_notify, 
+            message=web_message,
+            link='/my-applications'
+        )
+        print(f"✓ Web notification created: ID {notification.id}")
     except Exception as e:
-        print(f"!!! ERROR creating web notification: {e}")
+        print(f"✗ Error creating web notification: {e}")
 
-    # --- THAY ĐỔI 2: Tạo nội dung email với cả hai phiên bản Plain Text và HTML ---
-    
-    # Nội dung email dạng văn bản thuần túy (dành cho các trình duyệt mail cũ không hỗ trợ HTML)
+    # 2. Gửi email
+    # Email plain text
     email_body_text = f"""
-    Chào {user_to_notify.profile.first_name or user_to_notify.email},
+Chào {candidate_name},
 
-    {web_message}
+{web_message}
 
-    Bạn có thể xem lại lịch sử ứng tuyển của mình tại website.
+Thông tin chi tiết:
+- Vị trí: {job_title}
+- Công ty: {company_name}
+- Trạng thái: {'Đã chấp nhận' if status == 'accepted' else 'Đã từ chối'}
 
-    Trân trọng,
-    Đội ngũ JobBoard
+Bạn có thể xem lại lịch sử ứng tuyển của mình tại website.
+
+Trân trọng,
+Đội ngũ JobBoard
     """
 
-    # Nội dung email dạng HTML (hiển thị đẹp hơn trên hầu hết các trình duyệt mail)
-    # Sử dụng các thẻ <p> để tạo khoảng cách giữa các đoạn
+    # Email HTML
     email_body_html = f"""
-    <p>Chào {user_to_notify.profile.first_name or user_to_notify.email},</p>
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+    <h2 style="color: {status_color};">{status_icon} Cập nhật trạng thái ứng tuyển</h2>
     
-    <p>{html_message}</p>
+    <p>Chào <strong>{candidate_name}</strong>,</p>
     
-    <p>Bạn có thể xem lại lịch sử ứng tuyển của mình tại website.</p>
+    <p style="font-size: 16px; color: {status_color}; font-weight: bold;">
+        {web_message}
+    </p>
     
-    <p>
+    <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+        <p style="margin: 5px 0;"><strong>💼 Vị trí:</strong> {job_title}</p>
+        <p style="margin: 5px 0;"><strong>🏢 Công ty:</strong> {company_name}</p>
+        <p style="margin: 5px 0;"><strong>📊 Trạng thái:</strong> 
+            <span style="color: {status_color}; font-weight: bold;">
+                {'Đã chấp nhận' if status == 'accepted' else 'Đã từ chối'}
+            </span>
+        </p>
+    </div>
+    
+    {'<p>Nhà tuyển dụng sẽ liên hệ với bạn sớm để thảo luận về các bước tiếp theo. Chúc mừng bạn!</p>' if status == 'accepted' else '<p>Đừng nản lòng! Hãy tiếp tục tìm kiếm và ứng tuyển vào các vị trí phù hợp khác.</p>'}
+    
+    <div style="text-align: center; margin: 30px 0;">
+        <a href="{settings.FRONTEND_URL}/my-applications" 
+           style="background-color: #2563eb; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; display: inline-block;">
+            Xem lịch sử ứng tuyển
+        </a>
+    </div>
+    
+    <p style="color: #6b7280; font-size: 14px;">
         Trân trọng,<br>
         Đội ngũ JobBoard
     </p>
+</div>
     """
 
-    # 2. Gửi email
+    # Gửi email
     try:
-       # --- THAY ĐỔI 3: Sử dụng tham số `html_message` của hàm send_mail ---
-       send_mail(
+        send_mail(
             subject=email_subject,
-            message=email_body_text,  # Nội dung văn bản thuần túy làm dự phòng
+            message=email_body_text,
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[user_to_notify.email],
             fail_silently=False,
-            html_message=email_body_html,  # Nội dung HTML sẽ được ưu tiên hiển thị
+            html_message=email_body_html,
         )
-       print(f"--- Email sent successfully to {user_to_notify.email} ---")
+        print(f"✓ Email sent to candidate {user_to_notify.email}")
     except Exception as e:
-        print(f"!!! ERROR sending email: {e}")
+        print(f"✗ Error sending email: {e}")

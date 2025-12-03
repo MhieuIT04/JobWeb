@@ -43,13 +43,50 @@ axiosClient.interceptors.request.use(
   }
 );
 
-// Response interceptor để debug (giữ lại rất tốt)
+// Response interceptor với token refresh logic
 axiosClient.interceptors.response.use(
   (response) => {
     // console.log('API Response:', response.config.url, response.data);
     return response;
   },
-  (error) => {
+  async (error) => {
+    const originalRequest = error.config;
+    
+    // Nếu lỗi 401 và chưa retry
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+      
+      try {
+        const authTokens = JSON.parse(localStorage.getItem('authTokens') || '{}');
+        
+        if (authTokens?.refresh) {
+          // Thử refresh token
+          const refreshResponse = await axios.post(
+            `${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/api/users/token/refresh/`,
+            { refresh: authTokens.refresh }
+          );
+          
+          // Cập nhật token mới
+          const newTokens = {
+            ...authTokens,
+            access: refreshResponse.data.access
+          };
+          
+          localStorage.setItem('authTokens', JSON.stringify(newTokens));
+          
+          // Retry request với token mới
+          originalRequest.headers.Authorization = `Bearer ${refreshResponse.data.access}`;
+          return axiosClient(originalRequest);
+        }
+      } catch (refreshError) {
+        // Refresh thất bại → logout
+        console.error('Token refresh failed:', refreshError);
+        localStorage.removeItem('authTokens');
+        window.location.href = '/login';
+        return Promise.reject(refreshError);
+      }
+    }
+    
     // console.error('API Error:', error.config?.url, error.response?.data);
     return Promise.reject(error);
   }
