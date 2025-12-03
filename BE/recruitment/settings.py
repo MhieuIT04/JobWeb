@@ -245,6 +245,7 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = '2200003087@nttu.edu.vn' # <-- THAY BẰNG EMAIL CỦA BẠN
 EMAIL_HOST_PASSWORD = 'Kcntt@10102004' # <-- THAY BẰNG MẬT KHẨU ỨNG DỤNG
 DEFAULT_FROM_EMAIL = 'JobBoard <2200003087@Nttu.edu.vn>'
+EMAIL_HOST_PASSWORD = 'onfy yrjk txho qwvv'  # App Password 16 ký tự
 
 # Frontend URL for email links
 FRONTEND_URL = 'http://localhost:3000'
