@@ -18,8 +18,8 @@ echo "📁 Collecting static files..."
 python manage.py collectstatic --no-input
 
 # Create superuser automatically
-echo "👤 Creating superuser..."
-python create_superuser.py
+echo "👤 Ensuring superuser exists..."
+python manage.py ensure_superuser
 
 # Seed initial data
 echo "🌱 Seeding initial data..."
