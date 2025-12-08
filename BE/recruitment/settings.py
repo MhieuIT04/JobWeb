@@ -100,10 +100,14 @@ WSGI_APPLICATION = 'recruitment.wsgi.application'
 # Use DATABASE_URL if available (Render provides this)
 import dj_database_url
 
-if os.environ.get('DATABASE_URL'):
+# Try to get DATABASE_URL from environment
+database_url = os.environ.get('DATABASE_URL')
+
+if database_url:
+    # Parse DATABASE_URL for production (Render)
     DATABASES = {
-        'default': dj_database_url.config(
-            default=os.environ.get('DATABASE_URL'),
+        'default': dj_database_url.parse(
+            database_url,
             conn_max_age=600,
             conn_health_checks=True,
         )
