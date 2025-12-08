@@ -48,6 +48,15 @@ function HorizontalJobFilters({
     useEffect(() => {
         setFilters(initialFilters || {});
     }, [initialFilters]);
+    
+    // Parse category from URL on mount
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const categoryFromUrl = urlParams.get('category');
+        if (categoryFromUrl && !filters.category) {
+            handleFilterUpdate('category', categoryFromUrl);
+        }
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Hàm chung để cập nhật filter và gọi callback
     const handleFilterUpdate = (key, value) => {

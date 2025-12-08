@@ -107,7 +107,7 @@ function EmployerDashboard() {
             {/* Header */}
             <div className="flex justify-between items-center mb-8">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                    <h1 className="text-3xl font-bold text-gray-900 dark:text-amber-400">
                         Dashboard Nhà tuyển dụng
                     </h1>
                     <p className="text-gray-600 dark:text-gray-400 mt-1">
@@ -211,7 +211,7 @@ function EmployerDashboard() {
             {/* Jobs List */}
             <Card>
                 <CardContent className="pt-6">
-                    <h2 className="text-xl font-semibold mb-4">Danh sách tin tuyển dụng</h2>
+                    <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Danh sách tin tuyển dụng</h2>
                     
                     {jobs.length > 0 ? (
                         <>
@@ -219,7 +219,7 @@ function EmployerDashboard() {
                             {jobs.slice((currentPage - 1) * jobsPerPage, currentPage * jobsPerPage).map((job) => (
                                 <div 
                                     key={job.id}
-                                    className="p-4 border rounded-lg hover:shadow-md transition-shadow"
+                                    className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:shadow-md transition-shadow bg-white dark:bg-gray-800/50"
                                 >
                                     <div className="flex justify-between items-start">
                                         <div className="flex-1">
@@ -227,16 +227,16 @@ function EmployerDashboard() {
                                                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                                                     {job.title}
                                                 </h3>
-                                                <span className={`px-2 py-1 text-xs rounded-full ${
+                                                <span className={`px-2 py-1 text-xs font-medium rounded-full ${
                                                     job.status === 'approved' 
-                                                        ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' 
-                                                        : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+                                                        ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' 
+                                                        : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300'
                                                 }`}>
                                                     {job.status === 'approved' ? 'Đã duyệt' : 'Chờ duyệt'}
                                                 </span>
                                             </div>
                                             
-                                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600 dark:text-gray-400 mb-3">
+                                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600 dark:text-gray-300 mb-3">
                                                 <div>📍 {job.city?.name || 'N/A'}</div>
                                                 <div>💰 {job.min_salary ? `${job.min_salary.toLocaleString()} VNĐ` : 'Thỏa thuận'}</div>
                                                 <div>📂 {job.category?.name || 'N/A'}</div>
@@ -251,7 +251,7 @@ function EmployerDashboard() {
                                                         checked={job.is_active !== false}
                                                         onCheckedChange={() => handleToggleStatus(job.id, job.is_active !== false)}
                                                     />
-                                                    <span className="font-medium">
+                                                    <span className="font-medium text-gray-700 dark:text-gray-300">
                                                         {job.is_active !== false ? 'Đang hoạt động' : 'Tạm dừng'}
                                                     </span>
                                                 </div>
@@ -312,7 +312,7 @@ function EmployerDashboard() {
                         
                         {/* Pagination */}
                         {totalPages > 1 && (
-                            <div className="flex items-center justify-center gap-2 mt-6 pt-6 border-t">
+                            <div className="flex items-center justify-center gap-2 mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
                                 <Button
                                     variant="outline"
                                     size="sm"
@@ -346,7 +346,7 @@ function EmployerDashboard() {
                                             pageNum === currentPage - 2 ||
                                             pageNum === currentPage + 2
                                         ) {
-                                            return <span key={pageNum} className="px-2">...</span>;
+                                            return <span key={pageNum} className="px-2 text-gray-600 dark:text-gray-400">...</span>;
                                         }
                                         return null;
                                     })}

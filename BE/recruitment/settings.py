@@ -94,11 +94,11 @@ WSGI_APPLICATION = 'recruitment.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'Job_website',
-        'USER': 'postgres',
-        'PASSWORD': '0972970565',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': os.environ.get('DB_NAME', 'Job_website'),
+        'USER': os.environ.get('DB_USER', 'postgres'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', '0972970565'),
+        'HOST': os.environ.get('DB_HOST', 'localhost'),
+        'PORT': os.environ.get('DB_PORT', '5432'),
     }
 }
 
@@ -258,4 +258,8 @@ AUTHENTICATION_BACKENDS = [
     
     # Giữ lại backend mặc định để đăng nhập vào admin bằng username
     'django.contrib.auth.backends.ModelBackend',
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://recruitment-api-jrcr.onrender.com', 
 ]

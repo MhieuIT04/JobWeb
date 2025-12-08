@@ -55,7 +55,9 @@ function Navbar() {
                 {isAuthenticated ? (
                     <>
                         <Button variant="secondary" asChild><RouterLink to="/jobs">Tìm việc</RouterLink></Button>
-                        <Button variant="secondary" asChild><RouterLink to="/cv-match">Phân tích CV</RouterLink></Button>
+                        {user && user.role === 'candidate' && (
+                            <Button variant="secondary" asChild><RouterLink to="/cv-match">Phân tích CV</RouterLink></Button>
+                        )}
                         {user && user.role === 'employer' && (
                             <>
                                 <Button variant="secondary" asChild><RouterLink to="/employer/dashboard">Quản lý</RouterLink></Button>
@@ -63,8 +65,12 @@ function Navbar() {
                             </>
                         )}
                         <Button variant="secondary" asChild><RouterLink to="/profile">Hồ sơ</RouterLink></Button>
-                        <Button variant="secondary" asChild><RouterLink to="/my-applications">Đã ứng tuyển</RouterLink></Button>
-                        <Button variant="secondary" asChild><RouterLink to="/favorites">Việc đã lưu</RouterLink></Button>
+                        {user && user.role === 'candidate' && (
+                            <>
+                                <Button variant="secondary" asChild><RouterLink to="/my-applications">Đã ứng tuyển</RouterLink></Button>
+                                <Button variant="secondary" asChild><RouterLink to="/favorites">Việc đã lưu</RouterLink></Button>
+                            </>
+                        )}
                         <Button variant="secondary" asChild><RouterLink to="/messages">Tin nhắn</RouterLink></Button>
                         <NotificationBell />
                                 <Button variant="ghost" size="icon" onClick={toggleTheme} title="Chuyển chế độ sáng/tối">

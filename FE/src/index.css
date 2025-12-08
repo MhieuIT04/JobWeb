@@ -41,18 +41,18 @@
   .dark {
   /* Nền tối nhưng không quá đen */
   --background: 220 26% 14%; /* #1e293b - slate-800 */
-  --foreground: 45 100% 85%; /* Vàng nhạt #fef3c7 - amber-100 */
+  --foreground: 210 20% 98%; /* Trắng xám sáng cho text chính */
 
   /* Card và các thành phần */
   --card: 217 33% 17%; /* #1e293b nhạt hơn một chút */
-  --card-foreground: 45 100% 85%; /* Vàng nhạt */
+  --card-foreground: 210 20% 98%; /* Trắng xám sáng */
 
   --popover: 217 33% 17%;
-  --popover-foreground: 45 100% 85%;
+  --popover-foreground: 210 20% 98%;
 
   /* Muted - cho text phụ */
   --muted: 215 28% 17%; /* Nền muted */
-  --muted-foreground: 45 90% 70%; /* Vàng xám #fde68a - amber-200 */
+  --muted-foreground: 215 20% 65%; /* Xám sáng cho text phụ */
 
   /* Border và input */
   --border: 215 28% 25%; /* Border sáng hơn để dễ nhìn */
@@ -60,23 +60,23 @@
 
   /* Primary - xanh dương sáng */
   --primary: 217 91% 60%; /* #3b82f6 - blue-500 */
-  --primary-foreground: 45 100% 95%; /* Vàng rất nhạt */
+  --primary-foreground: 210 20% 98%; /* Trắng xám sáng */
 
   /* Secondary */
   --secondary: 215 28% 25%;
-  --secondary-foreground: 45 100% 85%;
+  --secondary-foreground: 210 20% 98%;
 
   /* Accent */
   --accent: 215 28% 25%;
-  --accent-foreground: 45 100% 85%;
+  --accent-foreground: 210 20% 98%;
 
   /* Success */
   --success: 142 76% 45%; /* Xanh lá sáng hơn */
-  --success-foreground: 45 100% 95%;
+  --success-foreground: 210 20% 98%;
 
   /* Destructive */
   --destructive: 0 84% 60%; /* Đỏ sáng */
-  --destructive-foreground: 45 100% 95%;
+  --destructive-foreground: 210 20% 98%;
 
   --ring: 217 91% 60%;
   }

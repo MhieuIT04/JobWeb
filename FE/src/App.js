@@ -33,10 +33,10 @@ import CandidateDashboard from "./pages/CandidateDashboard";
 function App() {
   return (
     // Container chính với ảnh nền trang trí
-    <div className="relative min-h-screen bg-slate-50 overflow-x-hidden">
+    <div className="relative min-h-screen bg-slate-50 dark:bg-slate-900 overflow-x-hidden">
       {/* Ảnh trang trí - z-index thấp nhất */}
-      <div className="hidden md:block fixed top-0 left-0 w-[120px] h-full bg-left-top bg-cover z-0" style={{ backgroundImage: "url(/images/side-bg-left.png)" }} />
-      <div className="hidden md:block fixed top-0 right-0 w-[120px] h-full bg-right-top bg-cover z-0" style={{ backgroundImage: "url(/images/side-bg-right.png)" }} />
+      <div className="hidden md:block fixed top-0 left-0 w-[120px] h-full bg-left-top bg-cover z-0 dark:opacity-20" style={{ backgroundImage: "url(/images/side-bg-left.png)" }} />
+      <div className="hidden md:block fixed top-0 right-0 w-[120px] h-full bg-right-top bg-cover z-0 dark:opacity-20" style={{ backgroundImage: "url(/images/side-bg-right.png)" }} />
 
       {/* Toast Container đặt ở cấp cao nhất */}
       <ToastContainer position="bottom-right" autoClose={5000} theme="colored" />

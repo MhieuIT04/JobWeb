@@ -146,7 +146,7 @@ function MyApplications() {
         <div className="container mx-auto px-4 py-8 max-w-6xl">
             {/* Header */}
             <div className="mb-8">
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-amber-400 mb-2">
                     Lịch sử ứng tuyển
                 </h1>
                 <p className="text-gray-600 dark:text-gray-400">
@@ -204,7 +204,7 @@ function MyApplications() {
                     <div className="flex flex-col md:flex-row gap-4">
                         {/* Filter by Status */}
                         <div className="flex-1">
-                            <label className="text-sm font-medium mb-2 flex items-center gap-2">
+                            <label className="text-sm font-medium mb-2 flex items-center gap-2 text-gray-900 dark:text-gray-200">
                                 <Filter className="w-4 h-4" />
                                 Lọc theo trạng thái
                             </label>
@@ -224,7 +224,7 @@ function MyApplications() {
 
                         {/* Sort */}
                         <div className="flex-1">
-                            <label className="text-sm font-medium mb-2 flex items-center gap-2">
+                            <label className="text-sm font-medium mb-2 flex items-center gap-2 text-gray-900 dark:text-gray-200">
                                 <ArrowUpDown className="w-4 h-4" />
                                 Sắp xếp
                             </label>
@@ -284,7 +284,7 @@ function MyApplications() {
                                                 <summary className="cursor-pointer text-sm text-blue-600 dark:text-blue-400 hover:underline">
                                                     Xem thư xin việc
                                                 </summary>
-                                                <p className="text-sm mt-2 p-3 bg-gray-50 dark:bg-gray-800 rounded whitespace-pre-line">
+                                                <p className="text-sm mt-2 p-3 bg-gray-50 dark:bg-gray-800 rounded whitespace-pre-line text-gray-900 dark:text-gray-200">
                                                     {app.cover_letter}
                                                 </p>
                                             </details>
