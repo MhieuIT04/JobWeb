@@ -196,3 +196,40 @@ python manage.py collectstatic --no-input
 # Check settings
 python manage.py diffsettings
 ```
+
+
+## ✅ FIXED: Unknown command 'seed_data'
+
+**Error:**
+```
+Unknown command: 'seed_data'
+Type 'manage.py help' for usage.
+```
+
+**Cause:** 
+`seed_data.py` is a standalone Python script, not a Django management command.
+
+**Solution:**
+Change the build command from:
+```bash
+python manage.py seed_data
+```
+
+To:
+```bash
+python seed_data.py
+```
+
+**Correct Build Command for Render:**
+
+**Option 1: Use build script (Recommended)**
+```bash
+bash build.sh
+```
+
+**Option 2: Inline commands**
+```bash
+pip install --upgrade pip && pip install -r requirements.txt && python manage.py migrate --no-input && python manage.py collectstatic --no-input && python manage.py ensure_superuser && python seed_data.py
+```
+
+**Status:** ✅ Superuser created successfully! Just need to fix seed_data command.
