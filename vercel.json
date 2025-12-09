@@ -1,5 +1,5 @@
 {
-  "buildCommand": "cd FE && npm install && npm run build",
+  "buildCommand": "cd FE && npm run build",
   "outputDirectory": "FE/build",
   "installCommand": "cd FE && npm install",
   "rewrites": [
@@ -7,5 +7,6 @@
       "source": "/(.*)",
       "destination": "/index.html"
     }
-  ]
+  ],
+  "framework": null
 }
