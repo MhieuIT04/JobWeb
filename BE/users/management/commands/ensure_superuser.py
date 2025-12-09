@@ -34,11 +34,19 @@ class Command(BaseCommand):
                     self.stdout.write(self.style.SUCCESS(f'Superuser {email} is already configured'))
             else:
                 # Create new superuser
-                User.objects.create_superuser(
+                # Extract username from email (before @)
+                username = email.split('@')[0]
+                
+                user = User(
                     email=email,
-                    password=password,
-                    role='admin'
+                    username=username,  # Add username field
+                    role='admin',
+                    is_staff=True,
+                    is_superuser=True,
+                    is_active=True
                 )
+                user.set_password(password)
+                user.save()
                 self.stdout.write(self.style.SUCCESS(f'✅ Created superuser: {email}'))
                 
         except Exception as e:
