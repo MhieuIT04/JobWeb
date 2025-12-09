@@ -1,79 +1,8 @@
 {
-  "version": 2,
-  "buildCommand": "npm run build",
-  "devCommand": "npm start",
-  "installCommand": "npm install",
-  "framework": null,
-  "outputDirectory": "build",
-  "regions": ["sin1"],
-  "routes": [
-    {
-      "src": "/static/(.*)",
-      "dest": "/static/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
-    }
-  ],
-  "headers": [
-    {
-      "source": "/assets/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
-        }
-      ]
-    },
+  "rewrites": [
     {
       "source": "/(.*)",
-      "headers": [
-        {
-          "key": "X-Content-Type-Options",
-          "value": "nosniff"
-        },
-        {
-          "key": "X-Frame-Options",
-          "value": "DENY"
-        },
-        {
-          "key": "X-XSS-Protection",
-          "value": "1; mode=block"
-        },
-        {
-          "key": "Referrer-Policy",
-          "value": "strict-origin-when-cross-origin"
-        },
-        {
-          "key": "Permissions-Policy",
-          "value": "camera=(), microphone=(), geolocation=()"
-        }
-      ]
+      "destination": "/index.html"
     }
-  ],
-  "redirects": [
-    {
-      "source": "/home",
-      "destination": "/",
-      "permanent": true
-    }
-  ],
-  "env": {
-    "REACT_APP_API_URL": "https://recruitment-api-jrcr.onrender.com",
-    "CI": "false"
-  },
-  "build": {
-    "env": {
-      "REACT_APP_API_URL": "https://recruitment-api-jrcr.onrender.com",
-      "CI": "false"
-    }
-  },
-  "trailingSlash": false,
-  "github": {
-    "silent": true
-  },
-  "images": {
-    "domains": ["recruitment-api-jrcz.onrender.com"]
-  }
+  ]
 }
