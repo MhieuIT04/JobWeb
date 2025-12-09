@@ -23,6 +23,6 @@ python manage.py ensure_superuser
 
 # Seed initial data
 echo "🌱 Seeding initial data..."
-python seed_data.py
+python manage.py seed_initial_data
 
 echo "✅ Build completed successfully!"
