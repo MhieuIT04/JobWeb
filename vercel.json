@@ -1,0 +1,37 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "FE/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "FE/build"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/static/(.*)",
+      "dest": "/static/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ],
+  "env": {
+    "REACT_APP_API_URL": "https://recruitment-api-jrcr.onrender.com",
+    "CI": "false",
+    "DISABLE_ESLINT_PLUGIN": "true"
+  },
+  "build": {
+    "env": {
+      "REACT_APP_API_URL": "https://recruitment-api-jrcr.onrender.com",
+      "CI": "false",
+      "DISABLE_ESLINT_PLUGIN": "true"
+    }
+  },
+  "buildCommand": "cd FE && npm install && npm run build",
+  "outputDirectory": "FE/build",
+  "installCommand": "cd FE && npm install"
+}
