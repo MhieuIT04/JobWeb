@@ -129,8 +129,9 @@ class ApplicationCreateSerializer(serializers.ModelSerializer):
         # Tạo application
         application = Application.objects.create(user=user, **validated_data)
         
-        # AI Processing - Queue background task for analysis
+        # AI Processing - Try async first, fallback to sync
         try:
+            # Try to import and use Celery tasks
             from .tasks import process_application_ai_async
             
             # Queue AI processing as background task
@@ -139,6 +140,7 @@ class ApplicationCreateSerializer(serializers.ModelSerializer):
             
         except ImportError:
             # Fallback to synchronous processing if Celery not available
+            print(f"ℹ Celery not available, processing AI synchronously for application {application.id}")
             try:
                 ai_result = job_matching_service.analyze_application(application)
                 if ai_result['success']:
@@ -150,10 +152,10 @@ class ApplicationCreateSerializer(serializers.ModelSerializer):
                 
         except Exception as e:
             print(f"⚠ Failed to queue AI processing for application {application.id}: {str(e)}")
-            # Fallback to sync processing
+            # Final fallback to sync processing
             try:
                 ai_result = job_matching_service.analyze_application(application)
-                print(f"✓ AI fallback processing for application {application.id}")
+                print(f"✓ AI fallback processing completed for application {application.id}")
             except Exception as sync_error:
                 print(f"⚠ AI fallback also failed for application {application.id}: {str(sync_error)}")
         

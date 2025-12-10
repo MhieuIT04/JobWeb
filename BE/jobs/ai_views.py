@@ -10,9 +10,15 @@ from django.utils import timezone
 from datetime import timedelta
 
 from .models import Application, Job
-from .tasks import process_application_ai_async, batch_process_applications
 from .ai_services import job_matching_service
 from notifications.utils import notify_ai_processing_complete, send_ai_processing_email
+
+# Import tasks only if available
+try:
+    from .tasks import process_application_ai_async, batch_process_applications
+    HAS_CELERY_TASKS = True
+except ImportError:
+    HAS_CELERY_TASKS = False
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -74,15 +80,24 @@ def retry_ai_processing(request, application_id):
         application.skills_extracted = None
         application.save()
         
-        # Queue new AI processing
-        task = process_application_ai_async.delay(application.id)
-        
-        return Response({
-            'success': True,
-            'message': 'Đã khởi động lại AI processing',
-            'task_id': task.id,
-            'application_id': application.id
-        })
+        if HAS_CELERY_TASKS:
+            # Queue new AI processing
+            task = process_application_ai_async.delay(application.id)
+            return Response({
+                'success': True,
+                'message': 'Đã khởi động lại AI processing (async)',
+                'task_id': task.id,
+                'application_id': application.id
+            })
+        else:
+            # Process synchronously if no Celery
+            ai_result = job_matching_service.analyze_application(application)
+            return Response({
+                'success': True,
+                'message': 'AI processing hoàn tất (sync)',
+                'match_score': ai_result.get('match_score'),
+                'application_id': application.id
+            })
         
     except Exception as e:
         return Response(
@@ -118,21 +133,46 @@ def batch_ai_processing(request, job_id):
         })
     
     try:
-        # Queue batch processing
-        task_results = []
-        for application in unprocessed_applications:
-            task = process_application_ai_async.delay(application.id)
-            task_results.append({
-                'application_id': application.id,
-                'task_id': task.id
+        if HAS_CELERY_TASKS:
+            # Queue batch processing
+            task_results = []
+            for application in unprocessed_applications:
+                task = process_application_ai_async.delay(application.id)
+                task_results.append({
+                    'application_id': application.id,
+                    'task_id': task.id
+                })
+            
+            return Response({
+                'success': True,
+                'message': f'Đã khởi động AI processing cho {len(task_results)} ứng viên (async)',
+                'queued_count': len(task_results),
+                'tasks': task_results
             })
-        
-        return Response({
-            'success': True,
-            'message': f'Đã khởi động AI processing cho {len(task_results)} ứng viên',
-            'queued_count': len(task_results),
-            'tasks': task_results
-        })
+        else:
+            # Process synchronously if no Celery
+            results = []
+            for application in unprocessed_applications:
+                try:
+                    ai_result = job_matching_service.analyze_application(application)
+                    results.append({
+                        'application_id': application.id,
+                        'success': ai_result['success'],
+                        'match_score': ai_result.get('match_score')
+                    })
+                except Exception as e:
+                    results.append({
+                        'application_id': application.id,
+                        'success': False,
+                        'error': str(e)
+                    })
+            
+            return Response({
+                'success': True,
+                'message': f'AI processing hoàn tất cho {len(results)} ứng viên (sync)',
+                'processed_count': len(results),
+                'results': results
+            })
         
     except Exception as e:
         return Response(

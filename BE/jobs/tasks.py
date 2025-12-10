@@ -2,8 +2,20 @@
 Celery tasks for background processing
 """
 import logging
-from celery import shared_task
 from django.utils import timezone
+
+# Import Celery only if available
+try:
+    from celery import shared_task
+    HAS_CELERY = True
+except ImportError:
+    HAS_CELERY = False
+    # Mock decorator for when Celery is not available
+    def shared_task(bind=False, max_retries=3):
+        def decorator(func):
+            return func
+        return decorator
+
 from .models import Application
 from .ai_services import job_matching_service
 from notifications.utils import notify_ai_processing_complete, notify_ai_processing_failed
