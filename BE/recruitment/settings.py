@@ -12,7 +12,13 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from datetime import timedelta
 from pathlib import Path
 import os
-import dj_database_url
+
+# Import dj_database_url only if available (for production)
+try:
+    import dj_database_url
+    HAS_DJ_DATABASE_URL = True
+except ImportError:
+    HAS_DJ_DATABASE_URL = False
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -97,13 +103,10 @@ WSGI_APPLICATION = 'recruitment.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# Use DATABASE_URL if available (Render provides this)
-import dj_database_url
-
-# Try to get DATABASE_URL from environment
+# Database configuration
 database_url = os.environ.get('DATABASE_URL')
 
-if database_url:
+if database_url and HAS_DJ_DATABASE_URL:
     # Parse DATABASE_URL for production (Render)
     DATABASES = {
         'default': dj_database_url.parse(
@@ -113,17 +116,26 @@ if database_url:
         )
     }
 else:
-    # Fallback to manual configuration for local development
+    # Local development configuration
+    # Use SQLite for easier local development
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.environ.get('DB_NAME', 'Job_website'),
-            'USER': os.environ.get('DB_USER', 'postgres'),
-            'PASSWORD': os.environ.get('DB_PASSWORD', '0972970565'),
-            'HOST': os.environ.get('DB_HOST', 'localhost'),
-            'PORT': os.environ.get('DB_PORT', '5432'),
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
+    
+    # Uncomment below to use PostgreSQL locally
+    # DATABASES = {
+    #     'default': {
+    #         'ENGINE': 'django.db.backends.postgresql',
+    #         'NAME': os.environ.get('DB_NAME', 'Job_website'),
+    #         'USER': os.environ.get('DB_USER', 'postgres'),
+    #         'PASSWORD': os.environ.get('DB_PASSWORD', '0972970565'),
+    #         'HOST': os.environ.get('DB_HOST', 'localhost'),
+    #         'PORT': os.environ.get('DB_PORT', '5432'),
+    #     }
+    # }
 
 
 # Password validation
