@@ -10,8 +10,12 @@ from django.utils import timezone
 from datetime import timedelta
 
 from .models import Application, Job
-from .ai_services import job_matching_service
+from .ai_services import job_matching_service, CVAnalysisService
+from .serializers import JobSerializer
 from notifications.utils import notify_ai_processing_complete, send_ai_processing_email
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Import tasks only if available
 try:
@@ -272,5 +276,97 @@ def manual_ai_processing(request, application_id):
     except Exception as e:
         return Response(
             {'error': f'Lỗi khi xử lý AI: {str(e)}'}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def analyze_cv_and_recommend_jobs(request):
+    """
+    Phân tích CV và đề xuất công việc phù hợp
+    """
+    if 'cv_file' not in request.FILES:
+        return Response(
+            {'error': 'Vui lòng tải lên file CV'}, 
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    cv_file = request.FILES['cv_file']
+    
+    # Validate file type
+    allowed_types = ['application/pdf', 'application/msword', 
+                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+    if cv_file.content_type not in allowed_types:
+        return Response(
+            {'error': 'Chỉ chấp nhận file PDF, DOC, DOCX'}, 
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    # Validate file size (10MB max)
+    if cv_file.size > 10 * 1024 * 1024:
+        return Response(
+            {'error': 'File quá lớn. Vui lòng chọn file nhỏ hơn 10MB'}, 
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    try:
+        cv_analyzer = CVAnalysisService()
+        
+        # Extract text from CV file
+        cv_text = cv_analyzer.extract_text_from_file(cv_file)
+        if not cv_text:
+            return Response(
+                {'error': 'Không thể đọc nội dung CV. Vui lòng kiểm tra file'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Extract skills from CV
+        extracted_skills = cv_analyzer.extract_skills_from_text(cv_text)
+        
+        # Get all approved jobs
+        active_jobs = Job.objects.filter(status='approved')
+        
+        # Calculate match scores for each job
+        job_matches = []
+        for job in active_jobs:
+            match_score = cv_analyzer.calculate_match_score(extracted_skills, job.description)
+            if match_score > 1.0:  # Only include jobs with reasonable match
+                job_matches.append({
+                    'job': job,
+                    'match_score': match_score,
+                    'match_percentage': min(match_score * 20, 100)  # Convert to percentage (max 100%)
+                })
+        
+        # Sort by match score (highest first)
+        job_matches.sort(key=lambda x: x['match_score'], reverse=True)
+        
+        # Limit to top 10 matches
+        top_matches = job_matches[:10]
+        
+        # Serialize job data
+        recommended_jobs = []
+        for match in top_matches:
+            job_data = JobSerializer(match['job']).data
+            job_data['match_score'] = round(match['match_score'], 2)
+            job_data['match_percentage'] = round(match['match_percentage'], 1)
+            recommended_jobs.append(job_data)
+        
+        return Response({
+            'success': True,
+            'cv_analysis': {
+                'skills_extracted': extracted_skills,
+                'skills_count': len(extracted_skills),
+                'cv_text_length': len(cv_text),
+                'analysis_summary': f"Tìm thấy {len(extracted_skills)} kỹ năng trong CV của bạn"
+            },
+            'recommended_jobs': recommended_jobs,
+            'total_matches': len(job_matches),
+            'message': f"Tìm thấy {len(top_matches)} công việc phù hợp với CV của bạn"
+        })
+        
+    except Exception as e:
+        logger.error(f"Error analyzing CV: {str(e)}")
+        return Response(
+            {'error': f'Lỗi khi phân tích CV: {str(e)}'}, 
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )

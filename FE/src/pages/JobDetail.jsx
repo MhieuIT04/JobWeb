@@ -31,6 +31,7 @@ function JobDetail() {
     const [error, setError] = useState(null);
     const [showApplyModal, setShowApplyModal] = useState(false);
     const [isApplying, setIsApplying] = useState(false);
+    const [applicationId, setApplicationId] = useState(null);
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -87,11 +88,12 @@ function JobDetail() {
         }
 
         try {
-            await axiosClient.post('/api/jobs/applications/', formData, {
+            const response = await axiosClient.post('/api/jobs/applications/', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
             toast.success('Ứng tuyển thành công!');
-            setShowApplyModal(false);
+            setApplicationId(response.data.id);
+            // Don't close modal immediately, let user see AI processing status
         } catch (err) {
             console.error('Lỗi khi ứng tuyển:', err);
             
@@ -276,9 +278,13 @@ function JobDetail() {
                     open={showApplyModal}
                     jobTitle={job.title}
                     userProfile={userProfile}
-                    onClose={() => setShowApplyModal(false)}
+                    onClose={() => {
+                        setShowApplyModal(false);
+                        setApplicationId(null);
+                    }}
                     onSubmit={handleApplySubmit}
                     isLoading={isApplying}
+                    applicationId={applicationId}
                 />
             )}
             <RecommendedJobs currentJobId={job.id} />

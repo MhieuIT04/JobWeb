@@ -15,6 +15,7 @@ import {
     Filter, ArrowUpDown, XCircle, Briefcase 
 } from 'lucide-react';
 import { toast } from 'react-toastify';
+import AIProcessingStatus from '../components/AIProcessingStatus';
 
 function MyApplications() {
     const [applications, setApplications] = useState([]);
@@ -276,6 +277,11 @@ function MyApplications() {
                                                 <Calendar className="w-4 h-4" />
                                                 Nộp ngày: {new Date(app.applied_at).toLocaleDateString('vi-VN')}
                                             </span>
+                                        </div>
+
+                                        {/* AI Processing Status */}
+                                        <div className="mt-3">
+                                            <AIProcessingStatus applicationId={app.id} />
                                         </div>
 
                                         {/* Cover Letter */}

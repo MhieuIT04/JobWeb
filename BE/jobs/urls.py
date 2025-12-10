@@ -10,7 +10,7 @@ from .views import (
 from .dashboard_views import employer_dashboard_stats, candidate_dashboard_stats
 from .ai_views import (
     ai_processing_status, retry_ai_processing, batch_ai_processing,
-    manual_ai_processing, ai_statistics
+    manual_ai_processing, ai_statistics, analyze_cv_and_recommend_jobs
 )
 
 # Router chỉ dùng cho các ViewSet phức tạp
@@ -71,6 +71,7 @@ urlpatterns = [
     path('ai/manual/<int:application_id>/', manual_ai_processing, name='manual-ai-processing'),
     path('ai/stats/', ai_statistics, name='ai-statistics'),
     path('ai/stats/<int:job_id>/', ai_statistics, name='ai-statistics-job'),
+    path('ai/analyze-cv/', analyze_cv_and_recommend_jobs, name='analyze-cv-recommend-jobs'),
     
     # Include các URL của router (favorites, employer/jobs)
     path('', include(router.urls)),

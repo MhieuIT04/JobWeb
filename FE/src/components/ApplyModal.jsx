@@ -12,7 +12,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Briefcase } from 'lucide-react';
+import { Briefcase, CheckCircle } from 'lucide-react';
+import AIProcessingStatus from './AIProcessingStatus';
 
 const allowedTypes = [
     'application/pdf',
@@ -20,7 +21,7 @@ const allowedTypes = [
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
 ];
 
-const ApplyModal = ({ open, jobTitle, userProfile, onSubmit, onClose, error, isLoading }) => {
+const ApplyModal = ({ open, jobTitle, userProfile, onSubmit, onClose, error, isLoading, applicationId }) => {
     const [applicantInfo, setApplicantInfo] = useState({
         fullName: '',
         email: '',
@@ -28,6 +29,7 @@ const ApplyModal = ({ open, jobTitle, userProfile, onSubmit, onClose, error, isL
     const [coverLetter, setCoverLetter] = useState('');
     const [cvFile, setCvFile] = useState(null);
     const [fileError, setFileError] = useState('');
+    const [showSuccess, setShowSuccess] = useState(false);
 
     useEffect(() => {
         if (userProfile) {
@@ -37,6 +39,12 @@ const ApplyModal = ({ open, jobTitle, userProfile, onSubmit, onClose, error, isL
             });
         }
     }, [userProfile]);
+
+    useEffect(() => {
+        if (applicationId) {
+            setShowSuccess(true);
+        }
+    }, [applicationId]);
 
     const handleInfoChange = (e) => {
         setApplicantInfo({
@@ -71,19 +79,62 @@ const ApplyModal = ({ open, jobTitle, userProfile, onSubmit, onClose, error, isL
         onSubmit(coverLetter, cvFile);
     };
 
+    const handleClose = () => {
+        setShowSuccess(false);
+        onClose();
+    };
+
     return (
-        <Dialog open={open} onOpenChange={onClose}>
-            <DialogContent className="max-w-lg mx-auto p-6 rounded-lg bg-white">
+        <Dialog open={open} onOpenChange={handleClose}>
+            <DialogContent className="max-w-lg mx-auto p-6 rounded-lg bg-white dark:bg-gray-800">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-3">
-                        <Briefcase className="w-8 h-8 text-primary" />
-                        <span className="font-bold text-lg text-primary">Ứng tuyển: {jobTitle}</span>
+                        {showSuccess ? (
+                            <>
+                                <CheckCircle className="w-8 h-8 text-green-500" />
+                                <span className="font-bold text-lg text-green-600 dark:text-green-400">Ứng tuyển thành công!</span>
+                            </>
+                        ) : (
+                            <>
+                                <Briefcase className="w-8 h-8 text-primary" />
+                                <span className="font-bold text-lg text-primary dark:text-white">Ứng tuyển: {jobTitle}</span>
+                            </>
+                        )}
                     </DialogTitle>
                     <DialogDescription>
-                        Điền thông tin và tải lên CV của bạn để ứng tuyển vào vị trí này.
+                        {showSuccess 
+                            ? "Đơn ứng tuyển của bạn đã được gửi thành công. Hệ thống AI đang phân tích CV của bạn."
+                            : "Điền thông tin và tải lên CV của bạn để ứng tuyển vào vị trí này."
+                        }
                     </DialogDescription>
                 </DialogHeader>
-                <form onSubmit={handleSubmit} className="space-y-4 mt-2">
+                
+                {showSuccess ? (
+                    <div className="space-y-4 mt-4">
+                        {applicationId && (
+                            <AIProcessingStatus 
+                                applicationId={applicationId}
+                                onStatusChange={(status) => {
+                                    // Optional: Auto-close modal after AI processing completes
+                                    if (status.status === 'completed') {
+                                        setTimeout(() => {
+                                            handleClose();
+                                        }, 3000);
+                                    }
+                                }}
+                            />
+                        )}
+                        <div className="flex gap-2">
+                            <Button 
+                                onClick={handleClose}
+                                className="flex-1"
+                            >
+                                Đóng
+                            </Button>
+                        </div>
+                    </div>
+                ) : (
+                    <form onSubmit={handleSubmit} className="space-y-4 mt-2">
                     <Label className="font-semibold">Thông tin của bạn</Label>
                     <Input
                         required
@@ -118,10 +169,11 @@ const ApplyModal = ({ open, jobTitle, userProfile, onSubmit, onClose, error, isL
                         className="bg-blue-50 rounded"
                     />
                     {error && <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>}
-                    <Button type="submit" disabled={isLoading} className="w-full mt-2">
-                        {isLoading ? 'Đang gửi...' : 'Nộp đơn'}
-                    </Button>
-                </form>
+                        <Button type="submit" disabled={isLoading} className="w-full mt-2">
+                            {isLoading ? 'Đang gửi...' : 'Nộp đơn'}
+                        </Button>
+                    </form>
+                )}
             </DialogContent>
         </Dialog>
     );

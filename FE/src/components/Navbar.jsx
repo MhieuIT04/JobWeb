@@ -56,7 +56,7 @@ function Navbar() {
                     <>
                         <Button variant="secondary" asChild><RouterLink to="/jobs">Tìm việc</RouterLink></Button>
                         {user && user.role === 'candidate' && (
-                            <Button variant="secondary" asChild><RouterLink to="/cv-match">Phân tích CV</RouterLink></Button>
+                            <Button variant="secondary" asChild><RouterLink to="/cv-analysis">Phân tích CV</RouterLink></Button>
                         )}
                         {user && user.role === 'employer' && (
                             <>
