@@ -13,6 +13,11 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.stdout.write('🌱 Seeding initial data...')
         
+        # Check if data already exists
+        if Category.objects.count() > 5 and City.objects.count() > 5:
+            self.stdout.write(self.style.WARNING('⚠️  Initial data already exists, skipping seed'))
+            return
+        
         # Seed Categories
         categories = [
             'IT - Phần mềm',
@@ -31,9 +36,13 @@ class Command(BaseCommand):
         
         created_count = 0
         for name in categories:
-            category, created = Category.objects.get_or_create(name=name)
-            if created:
-                created_count += 1
+            try:
+                category, created = Category.objects.get_or_create(name=name)
+                if created:
+                    created_count += 1
+            except Exception:
+                # Skip if already exists
+                continue
         
         self.stdout.write(self.style.SUCCESS(
             f'✅ Categories: {created_count} created, {len(categories) - created_count} already exist'
@@ -55,9 +64,13 @@ class Command(BaseCommand):
         
         created_count = 0
         for name in cities:
-            city, created = City.objects.get_or_create(name=name)
-            if created:
-                created_count += 1
+            try:
+                city, created = City.objects.get_or_create(name=name)
+                if created:
+                    created_count += 1
+            except Exception:
+                # Skip if already exists
+                continue
         
         self.stdout.write(self.style.SUCCESS(
             f'✅ Cities: {created_count} created, {len(cities) - created_count} already exist'
@@ -75,9 +88,13 @@ class Command(BaseCommand):
         
         created_count = 0
         for name in work_types:
-            work_type, created = WorkType.objects.get_or_create(name=name)
-            if created:
-                created_count += 1
+            try:
+                work_type, created = WorkType.objects.get_or_create(name=name)
+                if created:
+                    created_count += 1
+            except Exception:
+                # Skip if already exists
+                continue
         
         self.stdout.write(self.style.SUCCESS(
             f'✅ Work Types: {created_count} created, {len(work_types) - created_count} already exist'
