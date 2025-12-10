@@ -25,4 +25,16 @@ python manage.py ensure_superuser
 echo "🌱 Seeding initial data..."
 python manage.py seed_initial_data
 
+# Import production data if available
+echo "📦 Importing production data..."
+if [ -f "production_data.zip" ]; then
+    echo "🚀 Found production data, starting import..."
+    python manage.py import_production_data
+else
+    echo "⚠️  Production data not found, creating sample users..."
+    if [ -f "quick_import.py" ]; then
+        python quick_import.py
+    fi
+fi
+
 echo "✅ Build completed successfully!"
