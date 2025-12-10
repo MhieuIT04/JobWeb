@@ -84,10 +84,24 @@ class ApplicationSerializer(serializers.ModelSerializer):
     job_id = serializers.IntegerField(source='job.id', read_only=True)
     employer_id = serializers.IntegerField(source='job.employer.id', read_only=True)
     employer_company = serializers.CharField(source='job.employer.profile.company_name', read_only=True)
+    
+    # AI fields
+    match_score = serializers.FloatField(read_only=True)
+    skills_extracted = serializers.JSONField(read_only=True)
+    ai_processed_at = serializers.DateTimeField(read_only=True)
+    match_score_display = serializers.SerializerMethodField()
 
     class Meta:
         model = Application
-        fields = ['id', 'user_profile', 'job_title', 'job_id', 'employer_id', 'employer_company', 'cover_letter', 'cv', 'status', 'applied_at']
+        fields = ['id', 'user_profile', 'job_title', 'job_id', 'employer_id', 'employer_company', 
+                 'cover_letter', 'cv', 'status', 'applied_at', 'match_score', 'skills_extracted', 
+                 'ai_processed_at', 'match_score_display']
+    
+    def get_match_score_display(self, obj):
+        """Return formatted match score"""
+        if obj.match_score is not None:
+            return f"{obj.match_score}/5.0"
+        return "Chưa phân tích"
 
 
 class ApplicationCreateSerializer(serializers.ModelSerializer):
@@ -104,6 +118,7 @@ class ApplicationCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         from notifications.utils import notify_employer_new_application
+        from .ai_services import job_matching_service
         
         user = self.context['request'].user
         job = validated_data['job']
@@ -113,6 +128,16 @@ class ApplicationCreateSerializer(serializers.ModelSerializer):
         
         # Tạo application
         application = Application.objects.create(user=user, **validated_data)
+        
+        # AI Processing - Analyze CV and calculate match score
+        try:
+            ai_result = job_matching_service.analyze_application(application)
+            if ai_result['success']:
+                print(f"✓ AI analysis completed for application {application.id}: {ai_result['message']}")
+            else:
+                print(f"⚠ AI analysis failed for application {application.id}: {ai_result.get('error', 'Unknown error')}")
+        except Exception as e:
+            print(f"⚠ AI processing error for application {application.id}: {str(e)}")
         
         # Gửi thông báo và email cho nhà tuyển dụng
         try:

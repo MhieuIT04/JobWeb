@@ -84,6 +84,11 @@ class Application(models.Model):
     applied_at = models.DateTimeField(auto_now_add=True)
     cv = models.FileField(upload_to='cvs/', null=True, blank=True)
     
+    # AI Matching fields
+    match_score = models.FloatField(null=True, blank=True, help_text="AI matching score (0.0-5.0)")
+    skills_extracted = models.JSONField(null=True, blank=True, help_text="Skills extracted from CV")
+    ai_processed_at = models.DateTimeField(null=True, blank=True)
+    
     class Meta:
         db_table = 'applications'
         unique_together = ('user', 'job')
