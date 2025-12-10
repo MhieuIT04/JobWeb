@@ -1,0 +1,58 @@
+[
+{
+  "model": "jobs.worktype",
+  "pk": 1,
+  "fields": {
+    "name": "Offline",
+    "created_at": "2025-07-28T13:18:21.925Z"
+  }
+},
+{
+  "model": "jobs.worktype",
+  "pk": 2,
+  "fields": {
+    "name": "Remote",
+    "created_at": "2025-07-28T13:18:27.404Z"
+  }
+},
+{
+  "model": "jobs.worktype",
+  "pk": 3,
+  "fields": {
+    "name": "Full-time",
+    "created_at": "2025-12-10T13:42:38.309Z"
+  }
+},
+{
+  "model": "jobs.worktype",
+  "pk": 4,
+  "fields": {
+    "name": "Part-time",
+    "created_at": "2025-12-10T13:42:38.313Z"
+  }
+},
+{
+  "model": "jobs.worktype",
+  "pk": 5,
+  "fields": {
+    "name": "Freelance",
+    "created_at": "2025-12-10T13:42:38.315Z"
+  }
+},
+{
+  "model": "jobs.worktype",
+  "pk": 6,
+  "fields": {
+    "name": "Internship",
+    "created_at": "2025-12-10T13:42:38.318Z"
+  }
+},
+{
+  "model": "jobs.worktype",
+  "pk": 7,
+  "fields": {
+    "name": "Contract",
+    "created_at": "2025-12-10T13:42:38.320Z"
+  }
+}
+]

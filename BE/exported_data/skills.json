@@ -1,0 +1,16 @@
+[
+{
+  "model": "users.skill",
+  "pk": 1,
+  "fields": {
+    "name": "AWS certificate"
+  }
+},
+{
+  "model": "users.skill",
+  "pk": 2,
+  "fields": {
+    "name": "MOS"
+  }
+}
+]

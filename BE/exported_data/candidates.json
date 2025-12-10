@@ -1,0 +1,67 @@
+[
+  {
+    "email": "hieu2004@gmail.com",
+    "username": "c700de8e-9ef9-4f25-a37a-8efe6c456c29",
+    "first_name": "Nguyễn",
+    "last_name": "Hiếu",
+    "role": "candidate",
+    "phone_number": "0972970565",
+    "bio": "học tại NTTU - Dev \r\nChuyên Backend",
+    "city_id": null,
+    "skills": [],
+    "is_active": true,
+    "date_joined": "2025-08-05T16:27:39.162918+00:00"
+  },
+  {
+    "email": "2200003087@nttu.edu.vn",
+    "username": "0e93c79f-8d80-4f67-974e-8ec98b4fe9af",
+    "first_name": "Nguyễn",
+    "last_name": "Hiếu",
+    "role": "candidate",
+    "phone_number": "0972970565",
+    "bio": "",
+    "city_id": null,
+    "skills": [],
+    "is_active": true,
+    "date_joined": "2025-11-30T12:14:35.654600+00:00"
+  },
+  {
+    "email": "python_dev@gmail.com",
+    "username": "python_dev",
+    "first_name": "Alice",
+    "last_name": "Python",
+    "role": "candidate",
+    "phone_number": "",
+    "bio": "Experienced professional with skills in: Python, Django, React, PostgreSQL, Git, Docker",
+    "city_id": null,
+    "skills": [],
+    "is_active": true,
+    "date_joined": "2025-12-10T13:54:36.957832+00:00"
+  },
+  {
+    "email": "js_dev@gmail.com",
+    "username": "js_dev",
+    "first_name": "Bob",
+    "last_name": "JavaScript",
+    "role": "candidate",
+    "phone_number": "",
+    "bio": "Experienced professional with skills in: JavaScript, Node.js, React, MongoDB, Git",
+    "city_id": null,
+    "skills": [],
+    "is_active": true,
+    "date_joined": "2025-12-10T13:54:37.324264+00:00"
+  },
+  {
+    "email": "marketer@gmail.com",
+    "username": "marketer",
+    "first_name": "Carol",
+    "last_name": "Marketing",
+    "role": "candidate",
+    "phone_number": "",
+    "bio": "Experienced professional with skills in: Digital Marketing, SEO, Google Analytics, Social Media",
+    "city_id": null,
+    "skills": [],
+    "is_active": true,
+    "date_joined": "2025-12-10T13:54:37.697565+00:00"
+  }
+]

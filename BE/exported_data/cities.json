@@ -1,0 +1,170 @@
+[
+{
+  "model": "users.city",
+  "pk": 1,
+  "fields": {
+    "name": "Hà Nội"
+  }
+},
+{
+  "model": "users.city",
+  "pk": 2,
+  "fields": {
+    "name": "Ninh Bình"
+  }
+},
+{
+  "model": "users.city",
+  "pk": 3,
+  "fields": {
+    "name": "Đà Nẵng"
+  }
+},
+{
+  "model": "users.city",
+  "pk": 4,
+  "fields": {
+    "name": "Bình Dương"
+  }
+},
+{
+  "model": "users.city",
+  "pk": 5,
+  "fields": {
+    "name": "Hồ Chí Minh"
+  }
+},
+{
+  "model": "users.city",
+  "pk": 6,
+  "fields": {
+    "name": "Vũng Tàu"
+  }
+},
+{
+  "model": "users.city",
+  "pk": 7,
+  "fields": {
+    "name": "Hải Phòng"
+  }
+},
+{
+  "model": "users.city",
+  "pk": 8,
+  "fields": {
+    "name": "Cà Mau"
+  }
+},
+{
+  "model": "users.city",
+  "pk": 9,
+  "fields": {
+    "name": "Nha Trang"
+  }
+},
+{
+  "model": "users.city",
+  "pk": 10,
+  "fields": {
+    "name": "Bắc Ninh"
+  }
+},
+{
+  "model": "users.city",
+  "pk": 11,
+  "fields": {
+    "name": "Đà Lạt"
+  }
+},
+{
+  "model": "users.city",
+  "pk": 12,
+  "fields": {
+    "name": "Huế"
+  }
+},
+{
+  "model": "users.city",
+  "pk": 13,
+  "fields": {
+    "name": "Đồng Nai"
+  }
+},
+{
+  "model": "users.city",
+  "pk": 14,
+  "fields": {
+    "name": "Hưng Yên"
+  }
+},
+{
+  "model": "users.city",
+  "pk": 15,
+  "fields": {
+    "name": "Bạc Liêu"
+  }
+},
+{
+  "model": "users.city",
+  "pk": 16,
+  "fields": {
+    "name": "Bến Tre"
+  }
+},
+{
+  "model": "users.city",
+  "pk": 17,
+  "fields": {
+    "name": "Bình Định"
+  }
+},
+{
+  "model": "users.city",
+  "pk": 18,
+  "fields": {
+    "name": "Bình Thuận"
+  }
+},
+{
+  "model": "users.city",
+  "pk": 19,
+  "fields": {
+    "name": "Cần Thơ"
+  }
+},
+{
+  "model": "users.city",
+  "pk": 20,
+  "fields": {
+    "name": "Đắk Lắk"
+  }
+},
+{
+  "model": "users.city",
+  "pk": 21,
+  "fields": {
+    "name": "Gia Lai"
+  }
+},
+{
+  "model": "users.city",
+  "pk": 22,
+  "fields": {
+    "name": "Long An"
+  }
+},
+{
+  "model": "users.city",
+  "pk": 23,
+  "fields": {
+    "name": "Biên Hòa"
+  }
+},
+{
+  "model": "users.city",
+  "pk": 24,
+  "fields": {
+    "name": "Buôn Ma Thuột"
+  }
+}
+]
