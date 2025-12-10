@@ -1,0 +1,16 @@
+
+    Nguyễn Văn A
+    Software Developer
+    
+    Kỹ năng:
+    - Python
+    - JavaScript
+    - React
+    - Django
+    - PostgreSQL
+    - Git
+    
+    Kinh nghiệm:
+    - 3 năm phát triển web
+    - Làm việc với React và Django
+    

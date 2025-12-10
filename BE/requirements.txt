@@ -61,3 +61,7 @@ hnswlib
 gunicorn==21.2.0
 dj-database-url==2.1.0
 whitenoise==6.6.0
+
+# CV Analysis dependencies
+PyPDF2==3.0.1
+python-docx==1.1.2
