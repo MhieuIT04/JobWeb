@@ -116,26 +116,17 @@ if database_url and HAS_DJ_DATABASE_URL:
         )
     }
 else:
-    # Local development configuration
-    # Use SQLite for easier local development
+    # Local development configuration - PostgreSQL
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ.get('DB_NAME', 'Job_website'),
+            'USER': os.environ.get('DB_USER', 'postgres'),
+            'PASSWORD': os.environ.get('DB_PASSWORD', '0972970565'),
+            'HOST': os.environ.get('DB_HOST', 'localhost'),
+            'PORT': os.environ.get('DB_PORT', '5432'),
         }
     }
-    
-    # Uncomment below to use PostgreSQL locally
-    # DATABASES = {
-    #     'default': {
-    #         'ENGINE': 'django.db.backends.postgresql',
-    #         'NAME': os.environ.get('DB_NAME', 'Job_website'),
-    #         'USER': os.environ.get('DB_USER', 'postgres'),
-    #         'PASSWORD': os.environ.get('DB_PASSWORD', '0972970565'),
-    #         'HOST': os.environ.get('DB_HOST', 'localhost'),
-    #         'PORT': os.environ.get('DB_PORT', '5432'),
-    #     }
-    # }
 
 
 # Password validation
