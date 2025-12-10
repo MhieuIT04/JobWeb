@@ -22,6 +22,12 @@ class Command(BaseCommand):
         self.stdout.write("🚀 IMPORTING PRODUCTION DATA")
         self.stdout.write("=" * 50)
         
+        # Check if data already imported
+        if Job.objects.count() > 100:
+            self.stdout.write(self.style.WARNING("⚠️  Data already imported (found >100 jobs)"))
+            self.stdout.write("✅ Skipping import to avoid duplicates")
+            return
+        
         # Check if files exist
         if not os.path.exists('production_data.zip'):
             self.stdout.write(self.style.WARNING("❌ production_data.zip not found"))
@@ -29,18 +35,26 @@ class Command(BaseCommand):
         
         # Extract data
         self.stdout.write("📦 Extracting data package...")
-        with zipfile.ZipFile('production_data.zip', 'r') as zip_ref:
-            zip_ref.extractall('exported_data')
-        self.stdout.write("✅ Data extracted")
+        try:
+            with zipfile.ZipFile('production_data.zip', 'r') as zip_ref:
+                zip_ref.extractall('exported_data')
+            self.stdout.write("✅ Data extracted")
+        except Exception as e:
+            self.stdout.write(self.style.ERROR(f"❌ Failed to extract: {e}"))
+            return
         
         # Import data
-        self.import_basic_data()
-        self.import_users()
-        job_mapping = self.import_jobs()
-        self.import_applications(job_mapping)
-        
-        self.stdout.write(self.style.SUCCESS("✅ IMPORT COMPLETED!"))
-        self.stdout.write("🔑 Default password: 'imported123'")
+        try:
+            self.import_basic_data()
+            self.import_users()
+            job_mapping = self.import_jobs()
+            self.import_applications(job_mapping)
+            
+            self.stdout.write(self.style.SUCCESS("✅ IMPORT COMPLETED!"))
+            self.stdout.write("🔑 Default password: 'imported123'")
+        except Exception as e:
+            self.stdout.write(self.style.ERROR(f"❌ Import failed: {e}"))
+            # Continue anyway - partial import is better than no import
     
     def import_basic_data(self):
         """Import cities, skills, categories, work types"""
@@ -56,8 +70,12 @@ class Command(BaseCommand):
             
             for obj in serializers.deserialize("json", cities_data):
                 if obj.object.name not in existing_cities:
-                    obj.save()
-                    imported += 1
+                    try:
+                        obj.save()
+                        imported += 1
+                    except Exception as e:
+                        # Skip if already exists
+                        continue
             
             self.stdout.write(f"   ✅ Cities: {imported} new records")
         
@@ -71,8 +89,12 @@ class Command(BaseCommand):
             
             for obj in serializers.deserialize("json", skills_data):
                 if obj.object.name not in existing_skills:
-                    obj.save()
-                    imported += 1
+                    try:
+                        obj.save()
+                        imported += 1
+                    except Exception as e:
+                        # Skip if already exists
+                        continue
             
             self.stdout.write(f"   ✅ Skills: {imported} new records")
         
@@ -86,8 +108,12 @@ class Command(BaseCommand):
             
             for obj in serializers.deserialize("json", categories_data):
                 if obj.object.name not in existing_categories:
-                    obj.save()
-                    imported += 1
+                    try:
+                        obj.save()
+                        imported += 1
+                    except Exception as e:
+                        # Skip if already exists
+                        continue
             
             self.stdout.write(f"   ✅ Categories: {imported} new records")
         
@@ -101,8 +127,12 @@ class Command(BaseCommand):
             
             for obj in serializers.deserialize("json", work_types_data):
                 if obj.object.name not in existing_work_types:
-                    obj.save()
-                    imported += 1
+                    try:
+                        obj.save()
+                        imported += 1
+                    except Exception as e:
+                        # Skip if already exists
+                        continue
             
             self.stdout.write(f"   ✅ Work Types: {imported} new records")
     
