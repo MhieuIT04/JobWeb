@@ -8,6 +8,10 @@ from .views import (
     TopCompanyAPIView, HotJobsListView, JobRecommendationView,PredictCategoryView, TrendingJobs24hView
 )
 from .dashboard_views import employer_dashboard_stats, candidate_dashboard_stats
+from .ai_views import (
+    ai_processing_status, retry_ai_processing, batch_ai_processing,
+    manual_ai_processing, ai_statistics
+)
 
 # Router chỉ dùng cho các ViewSet phức tạp
 router = DefaultRouter()
@@ -59,6 +63,14 @@ urlpatterns = [
     # Dashboard Statistics APIs
     path('dashboard/employer/stats/', employer_dashboard_stats, name='employer-dashboard-stats'),
     path('dashboard/candidate/stats/', candidate_dashboard_stats, name='candidate-dashboard-stats'),
+    
+    # AI Processing APIs
+    path('ai/status/<int:application_id>/', ai_processing_status, name='ai-processing-status'),
+    path('ai/retry/<int:application_id>/', retry_ai_processing, name='retry-ai-processing'),
+    path('ai/batch/<int:job_id>/', batch_ai_processing, name='batch-ai-processing'),
+    path('ai/manual/<int:application_id>/', manual_ai_processing, name='manual-ai-processing'),
+    path('ai/stats/', ai_statistics, name='ai-statistics'),
+    path('ai/stats/<int:job_id>/', ai_statistics, name='ai-statistics-job'),
     
     # Include các URL của router (favorites, employer/jobs)
     path('', include(router.urls)),

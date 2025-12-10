@@ -9,6 +9,10 @@ import json
 
 logger = logging.getLogger(__name__)
 
+class AIProcessingError(Exception):
+    """Custom exception for AI processing errors"""
+    pass
+
 class CVAnalysisService:
     """Service for analyzing CV and calculating job match scores"""
     
@@ -26,6 +30,8 @@ class CVAnalysisService:
             'lập trình', 'phát triển', 'thiết kế', 'quản lý', 'phân tích',
             'giao tiếp', 'làm việc nhóm', 'lãnh đạo', 'sáng tạo'
         ]
+        self.max_retries = 3
+        self.timeout = 30  # seconds
     
     def extract_skills_from_text(self, text: str) -> List[str]:
         """Extract skills from CV text"""
@@ -65,24 +71,51 @@ class CVAnalysisService:
         
         return round(score, 2)
     
-    def process_cv_text(self, cv_text: str) -> Dict:
-        """Process CV text and extract information"""
+    def process_cv_text(self, cv_text: str, retry_count: int = 0) -> Dict:
+        """Process CV text and extract information with error handling"""
         try:
+            if not cv_text or len(cv_text.strip()) < 10:
+                raise AIProcessingError("CV text is too short or empty")
+            
             skills = self.extract_skills_from_text(cv_text)
+            
+            if len(skills) == 0:
+                logger.warning("No skills extracted from CV text")
             
             return {
                 'skills_extracted': skills,
                 'skills_count': len(skills),
                 'processed_at': timezone.now().isoformat(),
-                'success': True
+                'success': True,
+                'retry_count': retry_count
             }
-        except Exception as e:
-            logger.error(f"Error processing CV text: {str(e)}")
+            
+        except AIProcessingError as e:
+            logger.error(f"AI Processing Error: {str(e)}")
             return {
                 'skills_extracted': [],
                 'skills_count': 0,
-                'error': str(e),
-                'success': False
+                'error': f"AI Processing Error: {str(e)}",
+                'error_type': 'ai_processing_error',
+                'success': False,
+                'retry_count': retry_count
+            }
+            
+        except Exception as e:
+            logger.error(f"Unexpected error processing CV text: {str(e)}")
+            
+            # Retry logic
+            if retry_count < self.max_retries:
+                logger.info(f"Retrying CV processing (attempt {retry_count + 1}/{self.max_retries})")
+                return self.process_cv_text(cv_text, retry_count + 1)
+            
+            return {
+                'skills_extracted': [],
+                'skills_count': 0,
+                'error': f"Processing failed after {self.max_retries} retries: {str(e)}",
+                'error_type': 'system_error',
+                'success': False,
+                'retry_count': retry_count
             }
 
 class JobMatchingService:

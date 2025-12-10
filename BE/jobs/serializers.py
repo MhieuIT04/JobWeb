@@ -129,15 +129,33 @@ class ApplicationCreateSerializer(serializers.ModelSerializer):
         # Tạo application
         application = Application.objects.create(user=user, **validated_data)
         
-        # AI Processing - Analyze CV and calculate match score
+        # AI Processing - Queue background task for analysis
         try:
-            ai_result = job_matching_service.analyze_application(application)
-            if ai_result['success']:
-                print(f"✓ AI analysis completed for application {application.id}: {ai_result['message']}")
-            else:
-                print(f"⚠ AI analysis failed for application {application.id}: {ai_result.get('error', 'Unknown error')}")
+            from .tasks import process_application_ai_async
+            
+            # Queue AI processing as background task
+            task = process_application_ai_async.delay(application.id)
+            print(f"✓ AI processing queued for application {application.id}, task ID: {task.id}")
+            
+        except ImportError:
+            # Fallback to synchronous processing if Celery not available
+            try:
+                ai_result = job_matching_service.analyze_application(application)
+                if ai_result['success']:
+                    print(f"✓ AI analysis completed (sync) for application {application.id}: {ai_result['message']}")
+                else:
+                    print(f"⚠ AI analysis failed (sync) for application {application.id}: {ai_result.get('error', 'Unknown error')}")
+            except Exception as e:
+                print(f"⚠ AI processing error (sync) for application {application.id}: {str(e)}")
+                
         except Exception as e:
-            print(f"⚠ AI processing error for application {application.id}: {str(e)}")
+            print(f"⚠ Failed to queue AI processing for application {application.id}: {str(e)}")
+            # Fallback to sync processing
+            try:
+                ai_result = job_matching_service.analyze_application(application)
+                print(f"✓ AI fallback processing for application {application.id}")
+            except Exception as sync_error:
+                print(f"⚠ AI fallback also failed for application {application.id}: {str(sync_error)}")
         
         # Gửi thông báo và email cho nhà tuyển dụng
         try:
