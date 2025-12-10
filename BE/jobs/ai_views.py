@@ -280,7 +280,7 @@ def manual_ai_processing(request, application_id):
         )
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([])  # Allow public access for CV analysis
 def analyze_cv_and_recommend_jobs(request):
     """
     Phân tích CV và đề xuất công việc phù hợp

@@ -212,6 +212,14 @@ CORS_ALLOWED_ORIGINS = os.environ.get(
     'http://localhost:3000,http://localhost:5173,http://127.0.0.1:3000,https://jobwebjobboards.vercel.app'
 ).split(',')
 
+# Add all Vercel domains
+CORS_ALLOWED_ORIGINS.extend([
+    'https://jobwebjobboards.vercel.app',
+    'https://jobwebjobboards-git-main-your-username.vercel.app',
+    'https://jobwebjobboards-*.vercel.app',
+])
+
+CORS_ALLOW_ALL_ORIGINS = False  # Keep security
 CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOW_HEADERS = [
@@ -301,6 +309,14 @@ CSRF_TRUSTED_ORIGINS = [
     'https://jobwebjobboards.vercel.app',
     'https://*.vercel.app',  # Allow all Vercel preview deployments
 ]
+
+# Additional CORS settings for production
+if not DEBUG:
+    # Allow all Vercel domains in production
+    CORS_ALLOWED_ORIGIN_REGEXES = [
+        r"^https://.*\.vercel\.app$",
+        r"^https://jobwebjobboards.*\.vercel\.app$",
+    ]
 
 # Session Configuration for Production
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
