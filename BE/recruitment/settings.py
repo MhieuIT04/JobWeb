@@ -216,7 +216,9 @@ CORS_ALLOWED_ORIGINS = os.environ.get(
 CORS_ALLOWED_ORIGINS.extend([
     'https://jobwebjobboards.vercel.app',
     'https://jobwebjobboards-git-main-your-username.vercel.app',
-    'https://jobwebjobboards-*.vercel.app',
+    'https://jobwebjobboards-git-main-mhieuit04.vercel.app',
+    'https://jobwebjobboards-mhieuit04.vercel.app',
+    'https://jobwebjobboards-mhieuit04s-projects.vercel.app',
 ])
 
 CORS_ALLOW_ALL_ORIGINS = False  # Keep security
@@ -317,6 +319,14 @@ if not DEBUG:
         r"^https://.*\.vercel\.app$",
         r"^https://jobwebjobboards.*\.vercel\.app$",
     ]
+else:
+    # For development, also allow regex patterns
+    CORS_ALLOWED_ORIGIN_REGEXES = [
+        r"^https://.*\.vercel\.app$",
+    ]
+
+# Temporary: Allow all origins for debugging (REMOVE IN PRODUCTION)
+# CORS_ALLOW_ALL_ORIGINS = True
 
 # Session Configuration for Production
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'

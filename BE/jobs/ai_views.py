@@ -285,6 +285,10 @@ def analyze_cv_and_recommend_jobs(request):
     """
     Phân tích CV và đề xuất công việc phù hợp
     """
+    # Debug logging
+    logger.info(f"CV Analysis request from origin: {request.META.get('HTTP_ORIGIN', 'No origin')}")
+    logger.info(f"Request headers: {dict(request.headers)}")
+    
     if 'cv_file' not in request.FILES:
         return Response(
             {'error': 'Vui lòng tải lên file CV'}, 
