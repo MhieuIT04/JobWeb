@@ -1,0 +1,34 @@
+services:
+  - type: web
+    name: recruitment-api-fast
+    env: python
+    region: singapore  # Chọn region gần nhất
+    plan: free
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn recruitment.wsgi:application"
+    healthCheckPath: /api/jobs/
+    
+    # Tối ưu build
+    buildFilter:
+      paths:
+      - BE/**
+      ignoredPaths:
+      - FE/**
+      - README.md
+      - *.md
+    
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.7
+      - key: PIP_CACHE_DIR
+        value: /tmp/pip-cache
+      - key: DJANGO_SETTINGS_MODULE
+        value: recruitment.settings
+      - key: DEBUG
+        value: False
+        
+databases:
+  - name: recruitment-db
+    databaseName: recruitment
+    user: recruitment_user
+    region: singapore  # Same region as web service
