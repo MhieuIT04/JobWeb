@@ -23,6 +23,7 @@ cloudinary==1.44.1
 # Basic ML (lightweight)
 scikit-learn==1.7.2
 numpy==2.2.6
+pandas==2.3.2
 
 # Optional: Only install if needed
 # tensorflow==2.20.0  # Comment out for faster builds

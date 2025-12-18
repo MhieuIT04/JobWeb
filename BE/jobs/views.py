@@ -20,7 +20,6 @@ from users.serializers import EmployerSerializer
 from rest_framework.views import APIView
 from django.utils import timezone
 
-import pandas as pd
 import pickle
 import joblib
 import logging
