@@ -530,24 +530,38 @@ class JobRecommendationView(APIView):
 
         def get(self, request, job_id):
             logger.info(f"API /recommendations/ called for job_id: {job_id}")
-            # Ensure artifacts are loaded into memory once
+            
+            try:
+                # Try to get the current job first
+                current_job = Job.objects.get(id=job_id, status='approved')
+            except Job.DoesNotExist:
+                return Response({"error": "Job not found"}, status=404)
+            
+            # Try to load recommendation artifacts
             load_recommendation_artifacts()
             
             # Check if any recommendation artifacts are available
             has_nn = 'NN_INDICES' in globals() and globals().get('NN_INDICES') is not None
             has_cosine = COSINE_SIM is not None and INDICES is not None and JOB_DF is not None
             
-            if not has_nn and not has_cosine:
-                logger.warning('Recommendation artifacts missing when handling request.')
-                return Response({"error": "Recommendation data not found. Please run `python manage.py generate_recommendations` on the server."}, status=500)
-
-            recommended_jobs = get_recommendations(job_id, COSINE_SIM, INDICES, JOB_DF)
-            # DEBUG: log number of recommendations found
-            try:
-                logger.info(f"Found {recommended_jobs.count()} recommendations in DB")
-            except Exception:
-                # recommended_jobs may be empty or not a queryset in some error cases
-                logger.info('Found recommendations (count unavailable)')
+            if has_nn or has_cosine:
+                # Use AI recommendations if available
+                recommended_jobs = get_recommendations(job_id, COSINE_SIM, INDICES, JOB_DF)
+                logger.info(f"Found {recommended_jobs.count()} AI recommendations")
+            else:
+                # Fallback: Get jobs from same category
+                logger.info('Using fallback recommendations (same category)')
+                recommended_jobs = Job.objects.filter(
+                    category=current_job.category,
+                    status='approved'
+                ).exclude(id=job_id)[:6]
+                
+                # If no same category jobs, get recent jobs
+                if not recommended_jobs.exists():
+                    logger.info('Using fallback recommendations (recent jobs)')
+                    recommended_jobs = Job.objects.filter(
+                        status='approved'
+                    ).exclude(id=job_id).order_by('-created_at')[:6]
 
             serializer = JobSerializer(recommended_jobs, many=True, context={'request': request})
             return Response(serializer.data)
