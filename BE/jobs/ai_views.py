@@ -333,7 +333,11 @@ def analyze_cv_and_recommend_jobs(request):
         # Calculate match scores for each job
         job_matches = []
         for job in active_jobs:
-            match_score = cv_analyzer.calculate_match_score(extracted_skills, job.description)
+            match_score = cv_analyzer.calculate_match_score(
+                extracted_skills, 
+                job.description, 
+                job.title
+            )
             if match_score > 1.0:  # Only include jobs with reasonable match
                 job_matches.append({
                     'job': job,

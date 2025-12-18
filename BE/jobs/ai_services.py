@@ -18,17 +18,56 @@ class CVAnalysisService:
     
     def __init__(self):
         self.skills_keywords = [
-            # Technical Skills
-            'python', 'javascript', 'java', 'react', 'django', 'nodejs', 'sql',
-            'html', 'css', 'git', 'docker', 'kubernetes', 'aws', 'azure',
+            # Programming Languages
+            'python', 'javascript', 'java', 'c++', 'c#', 'php', 'ruby', 'go', 'rust', 'swift',
+            'kotlin', 'typescript', 'scala', 'r', 'matlab', 'perl', 'dart', 'objective-c',
             
-            # Soft Skills
-            'teamwork', 'leadership', 'communication', 'problem solving',
-            'project management', 'analytical', 'creative', 'adaptable',
+            # Web Technologies
+            'react', 'angular', 'vue', 'nodejs', 'express', 'django', 'flask', 'laravel',
+            'spring', 'asp.net', 'html', 'css', 'sass', 'less', 'bootstrap', 'tailwind',
+            'jquery', 'webpack', 'babel', 'npm', 'yarn',
             
-            # Vietnamese Skills
-            'lập trình', 'phát triển', 'thiết kế', 'quản lý', 'phân tích',
-            'giao tiếp', 'làm việc nhóm', 'lãnh đạo', 'sáng tạo'
+            # Databases
+            'mysql', 'postgresql', 'mongodb', 'redis', 'elasticsearch', 'oracle', 'sqlite',
+            'sql server', 'cassandra', 'dynamodb', 'firebase',
+            
+            # Cloud & DevOps
+            'aws', 'azure', 'gcp', 'docker', 'kubernetes', 'jenkins', 'gitlab ci', 'github actions',
+            'terraform', 'ansible', 'chef', 'puppet', 'vagrant', 'nginx', 'apache',
+            
+            # Mobile Development
+            'android', 'ios', 'react native', 'flutter', 'xamarin', 'ionic', 'cordova',
+            
+            # Data Science & AI
+            'machine learning', 'deep learning', 'tensorflow', 'pytorch', 'pandas', 'numpy',
+            'scikit-learn', 'jupyter', 'tableau', 'power bi', 'spark', 'hadoop',
+            
+            # Tools & Frameworks
+            'git', 'svn', 'jira', 'confluence', 'slack', 'trello', 'asana', 'figma', 'sketch',
+            'photoshop', 'illustrator', 'indesign', 'after effects', 'premiere',
+            
+            # Soft Skills (English)
+            'teamwork', 'leadership', 'communication', 'problem solving', 'critical thinking',
+            'project management', 'analytical', 'creative', 'adaptable', 'time management',
+            'customer service', 'presentation', 'negotiation', 'mentoring', 'coaching',
+            
+            # Vietnamese Technical Skills
+            'lập trình', 'phát triển web', 'phát triển ứng dụng', 'thiết kế web', 'thiết kế ui/ux',
+            'cơ sở dữ liệu', 'hệ thống', 'mạng máy tính', 'bảo mật', 'kiểm thử phần mềm',
+            'phân tích dữ liệu', 'trí tuệ nhân tạo', 'học máy', 'blockchain', 'iot',
+            
+            # Vietnamese Soft Skills
+            'giao tiếp', 'làm việc nhóm', 'lãnh đạo', 'sáng tạo', 'quản lý dự án',
+            'phân tích', 'giải quyết vấn đề', 'tư duy logic', 'thuyết trình', 'đàm phán',
+            'chăm sóc khách hàng', 'quản lý thời gian', 'làm việc độc lập', 'học hỏi nhanh',
+            
+            # Business Skills
+            'marketing', 'sales', 'business analysis', 'financial analysis', 'accounting',
+            'hr management', 'recruitment', 'training', 'consulting', 'strategy',
+            
+            # Vietnamese Business Skills
+            'marketing', 'bán hàng', 'phân tích kinh doanh', 'kế toán', 'tài chính',
+            'nhân sự', 'tuyển dụng', 'đào tạo', 'tư vấn', 'chiến lược kinh doanh'
         ]
         self.max_retries = 3
         self.timeout = 30  # seconds
@@ -99,27 +138,67 @@ class CVAnalysisService:
         
         return list(set(found_skills))  # Remove duplicates
     
-    def calculate_match_score(self, cv_skills: List[str], job_description: str) -> float:
+    def calculate_match_score(self, cv_skills: List[str], job_description: str, job_title: str = "") -> float:
         """Calculate match score between CV skills and job requirements"""
         if not cv_skills or not job_description:
             return 0.0
         
-        job_desc_lower = job_description.lower()
-        job_skills = self.extract_skills_from_text(job_description)
+        # Combine job title and description for better matching
+        full_job_text = f"{job_title} {job_description}".lower()
+        job_skills = self.extract_skills_from_text(full_job_text)
         
         if not job_skills:
             return 2.5  # Default score if no skills detected in job
         
-        # Calculate overlap
-        matching_skills = set(cv_skills) & set(job_skills)
-        match_ratio = len(matching_skills) / len(job_skills)
+        # Normalize skills for better matching
+        cv_skills_normalized = [skill.lower().strip() for skill in cv_skills]
+        job_skills_normalized = [skill.lower().strip() for skill in job_skills]
+        
+        # Calculate exact matches
+        exact_matches = set(cv_skills_normalized) & set(job_skills_normalized)
+        
+        # Calculate partial matches (for compound skills)
+        partial_matches = set()
+        for cv_skill in cv_skills_normalized:
+            for job_skill in job_skills_normalized:
+                if cv_skill in job_skill or job_skill in cv_skill:
+                    if cv_skill not in exact_matches and job_skill not in exact_matches:
+                        partial_matches.add((cv_skill, job_skill))
+        
+        # Calculate weighted score
+        exact_weight = 1.0
+        partial_weight = 0.5
+        
+        total_matches = len(exact_matches) * exact_weight + len(partial_matches) * partial_weight
+        total_required = len(job_skills_normalized)
+        
+        # Base match ratio
+        match_ratio = min(1.0, total_matches / total_required)
         
         # Convert to 0-5 scale
-        score = min(5.0, match_ratio * 5.0)
+        base_score = match_ratio * 5.0
         
-        # Add bonus for high skill count
-        if len(cv_skills) > 10:
-            score += 0.5
+        # Apply bonuses and penalties
+        score = base_score
+        
+        # Bonus for high skill diversity
+        if len(cv_skills) > 15:
+            score += 0.3
+        elif len(cv_skills) > 10:
+            score += 0.2
+        
+        # Bonus for exact matches on critical skills
+        critical_skills = ['python', 'javascript', 'java', 'react', 'django', 'nodejs', 'sql']
+        critical_matches = sum(1 for skill in exact_matches if any(crit in skill for crit in critical_skills))
+        if critical_matches > 0:
+            score += critical_matches * 0.1
+        
+        # Penalty for very low skill count
+        if len(cv_skills) < 3:
+            score *= 0.8
+        
+        # Ensure score is within bounds
+        score = max(0.0, min(5.0, score))
         
         return round(score, 2)
     
@@ -190,10 +269,10 @@ class JobMatchingService:
                 return cv_analysis
             
             # Calculate match score with job
-            job_description = f"{application.job.title} {application.job.description}"
             match_score = self.cv_analyzer.calculate_match_score(
                 cv_analysis['skills_extracted'],
-                job_description
+                application.job.description,
+                application.job.title
             )
             
             # Update application

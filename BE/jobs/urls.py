@@ -2,7 +2,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
 from .views import (
-    JobViewSet, ApplicationListCreateView, FavoriteViewSet,
+    JobViewSet, ApplicationListCreateView, ApplicationViewSet, FavoriteViewSet,
     CategoryListAPIView, EmployerJobViewSet, JobApplicationListView,
     ApplicationUpdateView, WorkTypeListAPIView, TopCategoryAPIView,
     TopCompanyAPIView, HotJobsListView, JobRecommendationView,PredictCategoryView, TrendingJobs24hView
@@ -17,6 +17,7 @@ from .ai_views import (
 router = DefaultRouter()
 router.register(r'favorites', FavoriteViewSet, basename='favorites')
 router.register(r'employer/jobs', EmployerJobViewSet, basename='employer-job')
+router.register(r'applications', ApplicationViewSet, basename='applications')
 
 urlpatterns = [
     # --- CÁC URL CÔNG KHAI (PUBLIC) ---

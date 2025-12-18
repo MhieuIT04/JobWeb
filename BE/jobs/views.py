@@ -238,16 +238,75 @@ class JobViewSet(viewsets.ModelViewSet):
                 status=500
             )
 
-@method_decorator(csrf_exempt, name='dispatch')
-class ApplicationListCreateView(generics.ListCreateAPIView):
+class ApplicationViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet cho Application - hỗ trợ đầy đủ CRUD operations
+    """
     serializer_class = ApplicationSerializer
     permission_classes = [permissions.IsAuthenticated]
-
     parser_classes = [MultiPartParser, FormParser]  # Cho phép upload file CV
     
     def get_queryset(self):
         # Chỉ trả về các đơn ứng tuyển của người dùng đang đăng nhập
-        # Sắp xếp theo ngày ứng tuyển mới nhất lên đầu (dấu trừ '-' là descending)
+        return Application.objects.filter(user=self.request.user).order_by('-applied_at')
+
+    def get_serializer_context(self):
+        return {'request': self.request}
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return ApplicationCreateSerializer
+        return ApplicationSerializer
+    
+    def create(self, request, *args, **kwargs):
+        # Kiểm tra file size trước khi xử lý
+        cv_file = request.FILES.get('cv')
+        if cv_file and cv_file.size > 10 * 1024 * 1024:  # 10MB
+            return Response(
+                {'cv': ['File CV quá lớn. Vui lòng chọn file nhỏ hơn 10MB.']},
+                status=400
+            )
+        
+        try:
+            return super().create(request, *args, **kwargs)
+        except Exception as e:
+            print(f"Lỗi khi tạo application: {str(e)}")
+            return Response(
+                {'detail': 'Đã có lỗi xảy ra khi tạo đơn ứng tuyển. Vui lòng thử lại.'},
+                status=500
+            )
+    
+    def destroy(self, request, *args, **kwargs):
+        """Cho phép ứng viên rút đơn ứng tuyển"""
+        try:
+            instance = self.get_object()
+            # Chỉ cho phép rút đơn nếu trạng thái là 'pending'
+            if instance.status != 'pending':
+                return Response(
+                    {'detail': 'Chỉ có thể rút đơn ở trạng thái chờ duyệt.'},
+                    status=400
+                )
+            
+            self.perform_destroy(instance)
+            return Response(
+                {'detail': 'Đã rút đơn ứng tuyển thành công.'},
+                status=204
+            )
+        except Exception as e:
+            print(f"Lỗi khi rút đơn: {str(e)}")
+            return Response(
+                {'detail': 'Có lỗi xảy ra khi rút đơn. Vui lòng thử lại.'},
+                status=500
+            )
+
+# Giữ lại class cũ để backward compatibility
+@method_decorator(csrf_exempt, name='dispatch')
+class ApplicationListCreateView(generics.ListCreateAPIView):
+    serializer_class = ApplicationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+    
+    def get_queryset(self):
         return Application.objects.filter(user=self.request.user).order_by('-applied_at')
 
     def get_serializer_context(self):
@@ -259,9 +318,8 @@ class ApplicationListCreateView(generics.ListCreateAPIView):
         return ApplicationSerializer
     
     def create(self, request, *args, **kwargs):
-        # Tối ưu hóa: Kiểm tra file size trước khi xử lý
         cv_file = request.FILES.get('cv')
-        if cv_file and cv_file.size > 10 * 1024 * 1024:  # 10MB
+        if cv_file and cv_file.size > 10 * 1024 * 1024:
             return Response(
                 {'cv': ['File CV quá lớn. Vui lòng chọn file nhỏ hơn 10MB.']},
                 status=400
