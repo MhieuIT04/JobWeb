@@ -544,19 +544,29 @@ class JobRecommendationView(APIView):
             has_nn = 'NN_INDICES' in globals() and globals().get('NN_INDICES') is not None
             has_cosine = COSINE_SIM is not None and INDICES is not None and JOB_DF is not None
             
+            recommended_jobs = None
+            
             if has_nn or has_cosine:
-                # Use AI recommendations if available
-                recommended_jobs = get_recommendations(job_id, COSINE_SIM, INDICES, JOB_DF)
-                logger.info(f"Found {recommended_jobs.count()} AI recommendations")
-            else:
-                # Fallback: Get jobs from same category
+                # Try AI recommendations if available
+                try:
+                    recommended_jobs = get_recommendations(job_id, COSINE_SIM, INDICES, JOB_DF)
+                    logger.info(f"Found {recommended_jobs.count()} AI recommendations")
+                except Exception as e:
+                    logger.error(f"AI recommendations failed: {e}")
+                    recommended_jobs = None
+            
+            # Fallback logic
+            if not recommended_jobs or not recommended_jobs.exists():
                 logger.info('Using fallback recommendations (same category)')
-                recommended_jobs = Job.objects.filter(
-                    category=current_job.category,
-                    status='approved'
-                ).exclude(id=job_id)[:6]
+                if current_job.category:
+                    recommended_jobs = Job.objects.filter(
+                        category=current_job.category,
+                        status='approved'
+                    ).exclude(id=job_id)[:6]
+                else:
+                    recommended_jobs = Job.objects.none()
                 
-                # If no same category jobs, get recent jobs
+                # If still no jobs, get recent jobs
                 if not recommended_jobs.exists():
                     logger.info('Using fallback recommendations (recent jobs)')
                     recommended_jobs = Job.objects.filter(

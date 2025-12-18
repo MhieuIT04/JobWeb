@@ -303,3 +303,37 @@ class ChatUnreadCountView(APIView):
         # The sender__ne is not valid in Django; use exclude instead
         count = ChatMessage.objects.filter(thread_id__in=list(threads)).exclude(sender=user).filter(read_at__isnull=True).count()
         return Response({'unread': count})
+
+class UserSearchView(APIView):
+    """
+    API để search users cho messaging system
+    """
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get(self, request):
+        query = request.GET.get('q', '').strip()
+        
+        if not query:
+            return Response([])
+        
+        # Search users by email, first_name, last_name, company_name
+        users = User.objects.filter(
+            Q(email__icontains=query) |
+            Q(profile__first_name__icontains=query) |
+            Q(profile__last_name__icontains=query) |
+            Q(profile__company_name__icontains=query)
+        ).exclude(id=request.user.id).select_related('profile')[:10]
+        
+        results = []
+        for user in users:
+            profile = getattr(user, 'profile', None)
+            results.append({
+                'id': user.id,
+                'email': user.email,
+                'name': f"{profile.first_name} {profile.last_name}".strip() if profile else user.email,
+                'company_name': profile.company_name if profile else None,
+                'role': user.role,
+                'avatar': profile.avatar.url if profile and profile.avatar else None,
+            })
+        
+        return Response(results)

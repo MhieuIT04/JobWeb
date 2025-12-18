@@ -20,6 +20,7 @@ from .views import (
     ChatMessageListCreateView,
     ChatThreadMarkReadView,
     ChatUnreadCountView,
+    UserSearchView,
 )
 
 urlpatterns = [
@@ -44,6 +45,9 @@ urlpatterns = [
     path('employers/<int:employer_id>/reviews/', EmployerReviewListCreateView.as_view(), name='employer-review-list-create'),
     path('reviews/<int:pk>/', EmployerReviewDetailView.as_view(), name='employer-review-detail'),
 
+    # User search for messaging
+    path('search/', UserSearchView.as_view(), name='user-search'),
+    
     # Chat / Messaging
     path('chat/threads/', ChatThreadListCreateView.as_view(), name='chat-thread-list-create'),
     path('chat/threads/<int:thread_id>/messages/', ChatMessageListCreateView.as_view(), name='chat-message-list-create'),
