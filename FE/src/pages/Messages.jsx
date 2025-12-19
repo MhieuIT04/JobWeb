@@ -90,29 +90,44 @@ export default function Messages() {
   const fetchUsers = async (searchTerm = '') => {
     setUsersLoading(true);
     try {
-      // Fetch both job seekers and employers
-      const [seekersRes, employersRes] = await Promise.all([
-        axiosClient.get(`/api/users/job-seekers/?search=${searchTerm}`),
-        axiosClient.get(`/api/users/employers/?search=${searchTerm}`)
-      ]);
-      
-      const seekers = (seekersRes.data?.results || seekersRes.data || []).map(u => ({
-        id: u.id,
-        email: u.email,
-        name: u.full_name || u.email,
-        role: 'Ứng viên',
-        avatar: u.avatar
-      }));
-      
-      const employers = (employersRes.data?.results || employersRes.data || []).map(u => ({
-        id: u.id,
-        email: u.email,
-        name: u.company_name || u.email,
-        role: 'Nhà tuyển dụng',
-        avatar: u.logo
-      }));
-      
-      setUsersList([...seekers, ...employers]);
+      if (searchTerm.trim()) {
+        // Use search endpoint when there's a search term
+        const response = await axiosClient.get(`/api/users/search/?q=${searchTerm}`);
+        
+        const users = (response.data || []).map(u => ({
+          id: u.id,
+          email: u.email,
+          name: u.name || u.company_name || u.email,
+          role: u.role === 'employer' ? 'Nhà tuyển dụng' : 'Ứng viên',
+          avatar: u.avatar
+        }));
+        
+        setUsersList(users);
+      } else {
+        // Fetch both job seekers and employers when no search term
+        const [seekersRes, employersRes] = await Promise.all([
+          axiosClient.get(`/api/users/job-seekers/`),
+          axiosClient.get(`/api/users/employers/`)
+        ]);
+        
+        const seekers = (seekersRes.data || []).map(u => ({
+          id: u.id,
+          email: u.email,
+          name: u.full_name || u.email,
+          role: 'Ứng viên',
+          avatar: u.avatar
+        }));
+        
+        const employers = (employersRes.data || []).map(u => ({
+          id: u.id,
+          email: u.email,
+          name: u.company_name || u.email,
+          role: 'Nhà tuyển dụng',
+          avatar: u.logo
+        }));
+        
+        setUsersList([...seekers, ...employers]);
+      }
     } catch (e) {
       console.error('Error fetching users:', e);
       setUsersList([]);

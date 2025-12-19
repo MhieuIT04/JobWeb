@@ -337,3 +337,72 @@ class UserSearchView(APIView):
             })
         
         return Response(results)
+
+class JobSeekersListView(generics.ListAPIView):
+    """
+    API để lấy danh sách job seekers cho messaging
+    """
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_queryset(self):
+        search = self.request.GET.get('search', '').strip()
+        queryset = User.objects.filter(role='job_seeker').exclude(id=self.request.user.id).select_related('profile')
+        
+        if search:
+            queryset = queryset.filter(
+                Q(email__icontains=search) |
+                Q(profile__first_name__icontains=search) |
+                Q(profile__last_name__icontains=search)
+            )
+        
+        return queryset[:20]
+    
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        results = []
+        
+        for user in queryset:
+            profile = getattr(user, 'profile', None)
+            results.append({
+                'id': user.id,
+                'email': user.email,
+                'full_name': f"{profile.first_name} {profile.last_name}".strip() if profile else user.email,
+                'avatar': profile.avatar.url if profile and profile.avatar else None,
+                'role': 'job_seeker'
+            })
+        
+        return Response(results)
+
+class EmployersListView(generics.ListAPIView):
+    """
+    API để lấy danh sách employers cho messaging
+    """
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_queryset(self):
+        search = self.request.GET.get('search', '').strip()
+        queryset = User.objects.filter(role='employer').exclude(id=self.request.user.id).select_related('profile')
+        
+        if search:
+            queryset = queryset.filter(
+                Q(email__icontains=search) |
+                Q(profile__company_name__icontains=search)
+            )
+        
+        return queryset[:20]
+    
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        results = []
+        
+        for user in queryset:
+            profile = getattr(user, 'profile', None)
+            results.append({
+                'id': user.id,
+                'email': user.email,
+                'company_name': profile.company_name if profile else user.email,
+                'logo': profile.logo.url if profile and profile.logo else None,
+                'role': 'employer'
+            })
+        
+        return Response(results)

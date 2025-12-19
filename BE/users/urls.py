@@ -21,6 +21,8 @@ from .views import (
     ChatThreadMarkReadView,
     ChatUnreadCountView,
     UserSearchView,
+    JobSeekersListView,
+    EmployersListView,
 )
 
 urlpatterns = [
@@ -47,6 +49,8 @@ urlpatterns = [
 
     # User search for messaging
     path('search/', UserSearchView.as_view(), name='user-search'),
+    path('job-seekers/', JobSeekersListView.as_view(), name='job-seekers-list'),
+    path('employers/', EmployersListView.as_view(), name='employers-list'),
     
     # Chat / Messaging
     path('chat/threads/', ChatThreadListCreateView.as_view(), name='chat-thread-list-create'),
