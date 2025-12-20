@@ -17,7 +17,7 @@ Thưa thầy cô, em thực sự chưa dùng Sentence-Transformers mà đang s�
 
 - **Kế hoạch cải thiện**: Em dự định nâng cấp lên Sentence-Transformers hoặc PhoBERT trong phiên bản tiếp theo để hiểu nghĩa câu tốt hơn, không chỉ đếm từ khóa
 
-### 1.2 Về xử lý ngôn ngữ tiếng Việt
+### 1.2 Về xử lý ngôn ngữ tiếng Việt    
 **Câu hỏi**: "Thư viện Underthesea đóng vai trò gì trong pipeline xử lý dữ liệu của em? Em có thực hiện Stop-words hay Lemmatization trước khi vector hóa không?"
 
 **Trả lời**:
