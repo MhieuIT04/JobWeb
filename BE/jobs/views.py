@@ -1,7 +1,7 @@
 from django.db.models import Count, Q
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions, serializers
 from rest_framework.response import Response
 from django.contrib.postgres.search import SearchVector, SearchQuery, SearchHeadline
 from django_filters.rest_framework import DjangoFilterBackend
@@ -372,7 +372,15 @@ class ApplicationListCreateView(generics.ListCreateAPIView):
         
         try:
             return super().create(request, *args, **kwargs)
+        except serializers.ValidationError as e:
+            # Trả lỗi validation của serializer về client (HTTP 400)
+            print(f"Lỗi khi tạo application (validation): {getattr(e, 'detail', str(e))}")
+            detail = getattr(e, 'detail', None) or str(e)
+            return Response(detail, status=400)
         except Exception as e:
+            # Log traceback để dễ debug và trả 500 cho các lỗi không mong muốn
+            import traceback
+            traceback.print_exc()
             print(f"Lỗi khi tạo application: {str(e)}")
             return Response(
                 {'detail': 'Đã có lỗi xảy ra khi tạo đơn ứng tuyển. Vui lòng thử lại.'},
