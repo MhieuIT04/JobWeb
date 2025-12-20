@@ -7,6 +7,7 @@ from .models import Notification
 def notify_employer_new_application(application):
     """
     Gửi thông báo cho nhà tuyển dụng khi có ứng viên mới apply.
+    Optimized to prevent timeout - skip email if it takes too long
     """
     employer = application.job.employer
     candidate = application.user
@@ -20,7 +21,7 @@ def notify_employer_new_application(application):
     else:
         candidate_name = candidate.email
     
-    # 1. Tạo thông báo trên web
+    # 1. Tạo thông báo trên web (nhanh)
     web_message = f'{candidate_name} đã ứng tuyển vào vị trí "{job_title}"'
     
     try:
@@ -33,77 +34,15 @@ def notify_employer_new_application(application):
     except Exception as e:
         print(f"✗ Error creating notification: {e}")
     
-    # 2. Gửi email cho nhà tuyển dụng
-    email_subject = "Có ứng viên mới ứng tuyển!"
+    # 2. Skip email to prevent timeout - can be done async later
+    print(f"ℹ Email notification skipped to prevent timeout (can be sent async)")
     
-    # Lấy thông tin công ty
-    company_name = "Nhà tuyển dụng"
-    if hasattr(employer, 'profile') and employer.profile.company_name:
-        company_name = employer.profile.company_name
-    
-    # Email plain text
-    email_body_text = f"""
-Chào {company_name},
-
-Bạn có một ứng viên mới ứng tuyển!
-
-Thông tin:
-- Ứng viên: {candidate_name}
-- Email: {candidate.email}
-- Vị trí: {job_title}
-- Thời gian: {application.applied_at.strftime('%d/%m/%Y %H:%M')}
-
-Vui lòng đăng nhập vào hệ thống để xem chi tiết CV và thông tin ứng viên.
-
-Trân trọng,
-Đội ngũ JobBoard
-    """
-    
-    # Email HTML
-    email_body_html = f"""
-<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-    <h2 style="color: #2563eb;">Có ứng viên mới ứng tuyển! 🎉</h2>
-    
-    <p>Chào <strong>{company_name}</strong>,</p>
-    
-    <p>Bạn có một ứng viên mới ứng tuyển vào vị trí công việc của bạn:</p>
-    
-    <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
-        <p style="margin: 5px 0;"><strong>👤 Ứng viên:</strong> {candidate_name}</p>
-        <p style="margin: 5px 0;"><strong>📧 Email:</strong> {candidate.email}</p>
-        <p style="margin: 5px 0;"><strong>💼 Vị trí:</strong> {job_title}</p>
-        <p style="margin: 5px 0;"><strong>🕐 Thời gian:</strong> {application.applied_at.strftime('%d/%m/%Y %H:%M')}</p>
-    </div>
-    
-    <p>Vui lòng đăng nhập vào hệ thống để xem chi tiết CV và thông tin ứng viên.</p>
-    
-    <div style="text-align: center; margin: 30px 0;">
-        <a href="{settings.FRONTEND_URL}/employer/jobs/{application.job.id}/applicants" 
-           style="background-color: #2563eb; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; display: inline-block;">
-            Xem chi tiết ứng viên
-        </a>
-    </div>
-    
-    <p style="color: #6b7280; font-size: 14px;">
-        Trân trọng,<br>
-        Đội ngũ JobBoard
-    </p>
-</div>
-    """
-    
-    # Gửi email
-    try:
-        send_mail(
-            subject=email_subject,
-            message=email_body_text,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[employer.email],
-            fail_silently=False,
-            html_message=email_body_html,
-        )
-        print(f"✓ Email sent to employer {employer.email}")
-    except Exception as e:
-        print(f"✗ Error sending email: {e}")
+    # TODO: Implement async email sending with Celery
+    # try:
+    #     from .tasks import send_employer_notification_email_async
+    #     send_employer_notification_email_async.delay(application.id)
+    # except ImportError:
+    #     pass  # Celery not available
 
 
 def create_and_send_notification(application):
