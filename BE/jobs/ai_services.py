@@ -75,15 +75,32 @@ class CVAnalysisService:
     def extract_text_from_file(self, file) -> str:
         """Extract text from uploaded CV file"""
         try:
-            import io
+            # Handle Django FieldFile (from database)
+            if hasattr(file, 'read'):
+                file.seek(0)  # Reset file pointer
+                file_content = file.read()
+                file.seek(0)  # Reset again for potential future reads
+                
+                # Get content type from file name if not available
+                content_type = getattr(file, 'content_type', None)
+                if not content_type:
+                    file_name = getattr(file, 'name', '')
+                    if file_name.lower().endswith('.pdf'):
+                        content_type = 'application/pdf'
+                    elif file_name.lower().endswith(('.doc', '.docx')):
+                        content_type = 'application/msword'
+                    else:
+                        content_type = 'text/plain'
+            else:
+                # Handle regular file upload
+                file_content = file.read()
+                file.seek(0)  # Reset file pointer
+                content_type = getattr(file, 'content_type', 'text/plain')
             
-            # Read file content
-            file_content = file.read()
-            file.seek(0)  # Reset file pointer
-            
-            if file.content_type == 'application/pdf':
+            if content_type == 'application/pdf':
                 try:
                     import PyPDF2
+                    import io
                     pdf_reader = PyPDF2.PdfReader(io.BytesIO(file_content))
                     text = ""
                     for page in pdf_reader.pages:
@@ -91,15 +108,16 @@ class CVAnalysisService:
                     return text
                 except ImportError:
                     # Fallback: return basic text representation
-                    return f"PDF file uploaded: {file.name}"
+                    return f"PDF file uploaded: {getattr(file, 'name', 'unknown')}"
                 except Exception as e:
                     logger.error(f"Error extracting PDF text: {e}")
-                    return f"PDF content from {file.name}"
+                    return f"PDF content from {getattr(file, 'name', 'unknown')}"
             
-            elif file.content_type in ['application/msword', 
-                                     'application/vnd.openxmlformats-officedocument.wordprocessingml.document']:
+            elif content_type in ['application/msword', 
+                                 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']:
                 try:
                     import docx
+                    import io
                     doc = docx.Document(io.BytesIO(file_content))
                     text = ""
                     for paragraph in doc.paragraphs:
@@ -107,22 +125,25 @@ class CVAnalysisService:
                     return text
                 except ImportError:
                     # Fallback: return basic text representation
-                    return f"Word document uploaded: {file.name}"
+                    return f"Word document uploaded: {getattr(file, 'name', 'unknown')}"
                 except Exception as e:
                     logger.error(f"Error extracting Word text: {e}")
-                    return f"Word document content from {file.name}"
+                    return f"Word document content from {getattr(file, 'name', 'unknown')}"
             
             else:
                 # Try to decode as text
                 try:
-                    return file_content.decode('utf-8')
+                    if isinstance(file_content, bytes):
+                        return file_content.decode('utf-8')
+                    else:
+                        return str(file_content)
                 except UnicodeDecodeError:
-                    return f"File uploaded: {file.name}"
+                    return f"File uploaded: {getattr(file, 'name', 'unknown')}"
                     
         except Exception as e:
-            logger.error(f"Error processing file {file.name}: {e}")
+            logger.error(f"Error processing file {getattr(file, 'name', 'unknown')}: {e}")
             # Return filename as fallback to allow skill extraction to continue
-            return f"CV file: {file.name}"
+            return f"CV file: {getattr(file, 'name', 'unknown')}"
     
     def extract_skills_from_text(self, text: str) -> List[str]:
         """Extract skills from CV text"""
