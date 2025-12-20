@@ -1,0 +1,120 @@
+FRESH EMPLOYER ACCOUNTS WITH JOBS
+============================================================
+
+Server: https://recruitment-api-jrcr.onrender.com
+Frontend: https://jobwebjobboards.vercel.app
+
+Company: TechCorp Innovation
+Email: techcorp2024@company.vn
+Password: TechCorp2024!
+User ID: 32
+Jobs to create: 2
+
+  Job 1: Senior Python Developer
+  Salary: 18,000,000 - 30,000,000 VND
+  Description: Phát triển ứng dụng web với Python Django/Flask. Yêu cầu: 4+ năm kinh nghiệm Python, Django, Postgre...
+
+  Job 2: Full Stack JavaScript Developer
+  Salary: 15,000,000 - 25,000,000 VND
+  Description: Phát triển ứng dụng full-stack với React và Node.js. Yêu cầu: 3+ năm kinh nghiệm JavaScript, React, ...
+
+------------------------------------------------------------
+Company: Digital Marketing Solutions
+Email: digitalmarketing@company.vn
+Password: Digital2024!
+User ID: 33
+Jobs to create: 2
+
+  Job 1: Digital Marketing Specialist
+  Salary: 10,000,000 - 18,000,000 VND
+  Description: Quản lý chiến dịch marketing online, SEO, SEM, Social Media Marketing. Yêu cầu: 2+ năm kinh nghiệm, ...
+
+  Job 2: Content Marketing Manager
+  Salary: 12,000,000 - 20,000,000 VND
+  Description: Quản lý nội dung marketing, lập kế hoạch content, viết bài PR, quản lý fanpage. Yêu cầu: Kỹ năng viế...
+
+------------------------------------------------------------
+Company: Frontend Solutions Ltd
+Email: frontend@company.vn
+Password: Frontend2024!
+User ID: 34
+Jobs to create: 2
+
+  Job 1: React Frontend Developer
+  Salary: 12,000,000 - 20,000,000 VND
+  Description: Phát triển giao diện người dùng với React, Redux, TypeScript. Yêu cầu: Thành thạo React, HTML5, CSS3...
+
+  Job 2: Vue.js Developer
+  Salary: 11,000,000 - 18,000,000 VND
+  Description: Phát triển ứng dụng web với Vue.js, Vuex, Nuxt.js. Yêu cầu: 2+ năm Vue.js, JavaScript, CSS framework...
+
+------------------------------------------------------------
+Company: Innovation Startup Hub
+Email: startup@company.vn
+Password: Startup2024!
+User ID: 35
+Jobs to create: 4
+
+  Job 1: sáng tạo nội dung kênh truyền thông
+  Salary: 7,000,000 - 12,000,000 VND
+  Description: Sáng tạo nội dung cho các kênh truyền thông, quản lý fanpage, tạo video content, livestream. Yêu cầu...
+
+  Job 2: phát triển giải pháp website
+  Salary: 10,000,000 - 18,000,000 VND
+  Description: Phát triển website và ứng dụng web cho khách hàng. Yêu cầu: HTML, CSS, JavaScript, PHP hoặc Python, ...
+
+  Job 3: thông tin yêu cầu mua hàng
+  Salary: 6,000,000 - 10,000,000 VND
+  Description: Xử lý thông tin yêu cầu mua hàng, tư vấn khách hàng, quản lý đơn hàng. Yêu cầu: Kỹ năng giao tiếp tố...
+
+  Job 4: lương khoán trích lượng thực hiện
+  Salary: 8,000,000 - 20,000,000 VND
+  Description: Công việc theo khoán, trích lương theo sản lượng thực tế. Phù hợp người muốn thu nhập cao, làm việc ...
+
+------------------------------------------------------------
+Company: Tech Solutions Enterprise
+Email: techsolutions@company.vn
+Password: TechSol2024!
+User ID: 36
+Jobs to create: 3
+
+  Job 1: Senior Python Developer
+  Salary: 20,000,000 - 35,000,000 VND
+  Description: Phát triển hệ thống backend với Python Django, thiết kế API RESTful, tối ưu database. Yêu cầu: 5+ nă...
+
+  Job 2: Full Stack JavaScript Developer
+  Salary: 15,000,000 - 28,000,000 VND
+  Description: Phát triển ứng dụng full-stack với React và Node.js. Yêu cầu: React, Node.js, Express, MongoDB, Type...
+
+  Job 3: Digital Marketing Specialist
+  Salary: 10,000,000 - 18,000,000 VND
+  Description: Quản lý chiến dịch marketing online, SEO, Google Ads, Facebook Ads. Yêu cầu: 2+ năm kinh nghiệm digi...
+
+------------------------------------------------------------
+Company: FPT Software Solutions
+Email: fptsoftware@company.vn
+Password: FPTSoft2024!
+User ID: 37
+Jobs to create: 5
+
+  Job 1: xây dựng nhiệm vụ đề án dự án
+  Salary: 15,000,000 - 25,000,000 VND
+  Description: Xây dựng nhiệm vụ đề án, lập kế hoạch dự án, quản lý tiến độ, phối hợp các bộ phận. Yêu cầu: Kỹ năng...
+
+  Job 2: cung cấp thông tin chi tiết sản phẩm
+  Salary: 8,000,000 - 14,000,000 VND
+  Description: Cung cấp thông tin chi tiết về sản phẩm, tư vấn khách hàng, hỗ trợ kỹ thuật, training khách hàng. Yê...
+
+  Job 3: giới thiệu tư vấn khách hàng
+  Salary: 7,000,000 - 15,000,000 VND
+  Description: Giới thiệu và tư vấn sản phẩm/dịch vụ IT cho khách hàng doanh nghiệp, chăm sóc khách hàng tiềm năng....
+
+  Job 4: phối hợp team marketing xây dựng chiến lược
+  Salary: 12,000,000 - 20,000,000 VND
+  Description: Phối hợp với team marketing xây dựng chiến lược, thực hiện campaign, phân tích hiệu quả. Yêu cầu: Ki...
+
+  Job 5: xây dựng hệ thống phần mềm
+  Salary: 18,000,000 - 30,000,000 VND
+  Description: Xây dựng hệ thống phần mềm phù hợp với yêu cầu doanh nghiệp, phân tích nghiệp vụ, thiết kế kiến trúc...
+
+------------------------------------------------------------

@@ -1,0 +1,25 @@
+WORKING PRODUCTION ACCOUNTS
+==================================================
+
+Server: https://recruitment-api-jrcr.onrender.com
+Frontend: https://jobwebjobboards.vercel.app
+
+EMPLOYERS:
+--------------------
+Email: test_employer@example.com
+Password: defaultpass123
+Role: employer
+ID: 26
+
+Email: employer11new@test.com
+Password: 12345678
+Role: employer
+ID: 24
+
+ADMINS:
+--------------------
+Email: admin@jobboard.com
+Password: admin123456
+Role: admin
+ID: 25
+

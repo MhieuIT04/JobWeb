@@ -1,0 +1,54 @@
+RECRUITMENT SYSTEM SETUP SUMMARY
+==================================================
+
+SYSTEM URLS:
+Frontend: https://jobwebjobboards.vercel.app
+Backend: https://recruitment-api-jrcr.onrender.com
+Admin: https://recruitment-api-jrcr.onrender.com/admin/
+
+EMPLOYER ACCOUNTS:
+------------------------------
+Company: TechCorp Innovation
+Email: techcorp2024@company.vn
+Password: TechCorp2024!
+User ID: 32
+
+Company: Digital Marketing Solutions
+Email: digitalmarketing@company.vn
+Password: Digital2024!
+User ID: 33
+
+Company: Frontend Solutions Ltd
+Email: frontend@company.vn
+Password: Frontend2024!
+User ID: 34
+
+Company: Innovation Startup Hub
+Email: startup@company.vn
+Password: Startup2024!
+User ID: 35
+
+Company: Tech Solutions Enterprise
+Email: techsolutions@company.vn
+Password: TechSol2024!
+User ID: 36
+
+Company: FPT Software Solutions
+Email: fptsoftware@company.vn
+Password: FPTSoft2024!
+User ID: 37
+
+JOB SEEKER ACCOUNT:
+------------------------------
+Email: jobseeker@test.com
+Password: JobSeeker123!
+
+OLD ACCOUNTS TO DELETE:
+------------------------------
+testemployer2024@gmail.com
+marketer@gmail.com
+js_dev@gmail.com
+python_dev@gmail.com
+hieu2004@gmail.com
+employer_test@gmail.com
+employer5@test.com
