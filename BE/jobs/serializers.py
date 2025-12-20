@@ -126,7 +126,30 @@ class ApplicationCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({"detail": "Bạn đã ứng tuyển vào công việc này rồi."})
         
         # Tạo application trước (nhanh)
-        application = Application.objects.create(user=user, **validated_data)
+        try:
+            application = Application.objects.create(user=user, **validated_data)
+        except (OSError, IOError) as e:
+            # Lỗi khi lưu file (ví dụ: storage không cấu hình hoặc permission)
+            import traceback
+            traceback.print_exc()
+            raise serializers.ValidationError({
+                'cv': ['Không thể lưu file CV. Vui lòng thử lại hoặc gửi file khác.']
+            })
+        except Exception as e:
+            # Một số DB error (ví dụ race condition) có thể ném IntegrityError
+            try:
+                from django.db import IntegrityError
+            except Exception:
+                IntegrityError = None
+
+            if IntegrityError is not None and isinstance(e, IntegrityError):
+                raise serializers.ValidationError({"detail": "Bạn đã ứng tuyển vào công việc này rồi."})
+            # Bắt mọi lỗi khác, log rõ traceback để dễ debug trên production
+            import traceback
+            traceback.print_exc()
+            raise serializers.ValidationError({
+                'detail': 'Đã có lỗi xảy ra khi tạo đơn ứng tuyển. Vui lòng thử lại sau.'
+            })
         
         # AI Processing - Làm async hoặc bỏ qua nếu lỗi để không block user
         try:
