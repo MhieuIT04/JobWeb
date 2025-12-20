@@ -19,6 +19,7 @@ from users.models import User
 from users.serializers import EmployerSerializer
 from rest_framework.views import APIView
 from django.utils import timezone
+from django.http import JsonResponse
 
 import pickle
 import joblib
@@ -26,6 +27,15 @@ import logging
 import os
 
 logger = logging.getLogger(__name__)
+
+# Health check endpoint
+def health_check(request):
+    """Simple health check endpoint"""
+    return JsonResponse({
+        'status': 'healthy',
+        'timestamp': timezone.now().isoformat(),
+        'message': 'Server is running'
+    })
 
 # Recommendation artifacts cached in memory to avoid reloading on each request
 COSINE_SIM = None
@@ -267,14 +277,49 @@ class ApplicationViewSet(viewsets.ModelViewSet):
                 status=400
             )
         
+        # Kiểm tra định dạng file
+        if cv_file:
+            allowed_types = [
+                'application/pdf',
+                'application/msword',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'text/plain'
+            ]
+            if cv_file.content_type not in allowed_types:
+                return Response(
+                    {'cv': ['Chỉ chấp nhận file PDF, DOC, DOCX hoặc TXT.']},
+                    status=400
+                )
+        
         try:
-            return super().create(request, *args, **kwargs)
+            # Tạo application nhanh chóng
+            response = super().create(request, *args, **kwargs)
+            
+            # Thêm thông báo thành công
+            if response.status_code == 201:
+                response.data['message'] = 'Ứng tuyển thành công! CV của bạn đang được phân tích.'
+            
+            return response
+            
         except Exception as e:
             print(f"Lỗi khi tạo application: {str(e)}")
-            return Response(
-                {'detail': 'Đã có lỗi xảy ra khi tạo đơn ứng tuyển. Vui lòng thử lại.'},
-                status=500
-            )
+            
+            # Kiểm tra lỗi cụ thể
+            if 'đã ứng tuyển' in str(e):
+                return Response(
+                    {'detail': 'Bạn đã ứng tuyển vào công việc này rồi.'},
+                    status=400
+                )
+            elif 'timeout' in str(e).lower():
+                return Response(
+                    {'detail': 'Server đang xử lý, vui lòng thử lại sau ít phút.'},
+                    status=503
+                )
+            else:
+                return Response(
+                    {'detail': 'Đã có lỗi xảy ra khi tạo đơn ứng tuyển. Vui lòng thử lại.'},
+                    status=500
+                )
     
     def destroy(self, request, *args, **kwargs):
         """Cho phép ứng viên rút đơn ứng tuyển"""

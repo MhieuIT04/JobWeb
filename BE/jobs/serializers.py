@@ -118,7 +118,6 @@ class ApplicationCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         from notifications.utils import notify_employer_new_application
-        from .ai_services import job_matching_service
         
         user = self.context['request'].user
         job = validated_data['job']
@@ -126,10 +125,10 @@ class ApplicationCreateSerializer(serializers.ModelSerializer):
         if Application.objects.filter(user=user, job=job).exists():
             raise serializers.ValidationError({"detail": "Bạn đã ứng tuyển vào công việc này rồi."})
         
-        # Tạo application
+        # Tạo application trước (nhanh)
         application = Application.objects.create(user=user, **validated_data)
         
-        # AI Processing - Try async first, fallback to sync
+        # AI Processing - Làm async hoặc bỏ qua nếu lỗi để không block user
         try:
             # Try to import and use Celery tasks
             from .tasks import process_application_ai_async
@@ -139,27 +138,14 @@ class ApplicationCreateSerializer(serializers.ModelSerializer):
             print(f"✓ AI processing queued for application {application.id}, task ID: {task.id}")
             
         except ImportError:
-            # Fallback to synchronous processing if Celery not available
-            print(f"ℹ Celery not available, processing AI synchronously for application {application.id}")
-            try:
-                ai_result = job_matching_service.analyze_application(application)
-                if ai_result['success']:
-                    print(f"✓ AI analysis completed (sync) for application {application.id}: {ai_result['message']}")
-                else:
-                    print(f"⚠ AI analysis failed (sync) for application {application.id}: {ai_result.get('error', 'Unknown error')}")
-            except Exception as e:
-                print(f"⚠ AI processing error (sync) for application {application.id}: {str(e)}")
-                
+            # Skip AI processing if Celery not available to avoid timeout
+            print(f"ℹ Celery not available, skipping AI processing for application {application.id} to avoid timeout")
+            
         except Exception as e:
             print(f"⚠ Failed to queue AI processing for application {application.id}: {str(e)}")
-            # Final fallback to sync processing
-            try:
-                ai_result = job_matching_service.analyze_application(application)
-                print(f"✓ AI fallback processing completed for application {application.id}")
-            except Exception as sync_error:
-                print(f"⚠ AI fallback also failed for application {application.id}: {str(sync_error)}")
+            # Don't do sync processing to avoid timeout
         
-        # Gửi thông báo và email cho nhà tuyển dụng
+        # Gửi thông báo (làm nhanh)
         try:
             notify_employer_new_application(application)
             print(f"✓ Notification sent to employer for application {application.id}")

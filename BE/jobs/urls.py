@@ -5,7 +5,8 @@ from .views import (
     JobViewSet, ApplicationListCreateView, ApplicationViewSet, FavoriteViewSet,
     CategoryListAPIView, EmployerJobViewSet, JobApplicationListView,
     ApplicationUpdateView, WorkTypeListAPIView, TopCategoryAPIView,
-    TopCompanyAPIView, HotJobsListView, JobRecommendationView,PredictCategoryView, TrendingJobs24hView
+    TopCompanyAPIView, HotJobsListView, JobRecommendationView,PredictCategoryView, TrendingJobs24hView,
+    health_check
 )
 from .dashboard_views import employer_dashboard_stats, candidate_dashboard_stats
 from .ai_views import (
@@ -20,6 +21,9 @@ router.register(r'employer/jobs', EmployerJobViewSet, basename='employer-job')
 router.register(r'applications', ApplicationViewSet, basename='applications')
 
 urlpatterns = [
+    # Health check endpoint
+    path('health/', health_check, name='health-check'),
+    
     # --- CÁC URL CÔNG KHAI (PUBLIC) ---
     # Đặt các URL cụ thể hơn lên trên
 
