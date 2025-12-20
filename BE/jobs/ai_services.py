@@ -147,12 +147,40 @@ class CVAnalysisService:
         full_job_text = f"{job_title} {job_description}".lower()
         job_skills = self.extract_skills_from_text(full_job_text)
         
+        # FIX 1: Return 0.0 if no meaningful skills found in job
         if not job_skills:
-            return 2.5  # Default score if no skills detected in job
+            return 0.0
         
         # Normalize skills for better matching
         cv_skills_normalized = [skill.lower().strip() for skill in cv_skills]
         job_skills_normalized = [skill.lower().strip() for skill in job_skills]
+        
+        # FIX 2: Filter out single-letter skills that cause false positives
+        # Remove single letters like 'r', 'c', 'go' unless they're clearly technical
+        meaningful_job_skills = []
+        for skill in job_skills_normalized:
+            if len(skill) == 1:
+                # Only keep single letters if they're clearly programming languages
+                if skill in ['r', 'c']:
+                    # Check if it appears in a technical context
+                    if any(tech_word in full_job_text for tech_word in 
+                          ['programming', 'developer', 'software', 'code', 'lập trình', 'phát triển']):
+                        meaningful_job_skills.append(skill)
+                # Skip other single letters
+            elif len(skill) == 2 and skill == 'go':
+                # 'Go' language - only keep if in technical context
+                if any(tech_word in full_job_text for tech_word in 
+                      ['programming', 'developer', 'software', 'golang', 'lập trình']):
+                    meaningful_job_skills.append(skill)
+            else:
+                # Keep all multi-character skills
+                meaningful_job_skills.append(skill)
+        
+        # If no meaningful skills after filtering, return low score
+        if not meaningful_job_skills:
+            return 0.5  # Very low score for jobs with no clear technical requirements
+        
+        job_skills_normalized = meaningful_job_skills
         
         # Calculate exact matches
         exact_matches = set(cv_skills_normalized) & set(job_skills_normalized)
@@ -161,37 +189,48 @@ class CVAnalysisService:
         partial_matches = set()
         for cv_skill in cv_skills_normalized:
             for job_skill in job_skills_normalized:
-                if cv_skill in job_skill or job_skill in cv_skill:
-                    if cv_skill not in exact_matches and job_skill not in exact_matches:
-                        partial_matches.add((cv_skill, job_skill))
+                if len(cv_skill) > 2 and len(job_skill) > 2:  # Only partial match longer skills
+                    if cv_skill in job_skill or job_skill in cv_skill:
+                        if cv_skill not in exact_matches and job_skill not in exact_matches:
+                            partial_matches.add((cv_skill, job_skill))
+        
+        # FIX 3: Require minimum matches for high scores
+        total_matches = len(exact_matches) + len(partial_matches) * 0.5
+        
+        # If very few matches, cap the score
+        if total_matches < 2:
+            max_possible_score = 3.0  # Cap at 3.0 for jobs with <2 skill matches
+        else:
+            max_possible_score = 5.0
         
         # Calculate weighted score
         exact_weight = 1.0
         partial_weight = 0.5
         
-        total_matches = len(exact_matches) * exact_weight + len(partial_matches) * partial_weight
+        weighted_matches = len(exact_matches) * exact_weight + len(partial_matches) * partial_weight
         total_required = len(job_skills_normalized)
         
         # Base match ratio
-        match_ratio = min(1.0, total_matches / total_required)
+        match_ratio = min(1.0, weighted_matches / total_required)
         
         # Convert to 0-5 scale
-        base_score = match_ratio * 5.0
+        base_score = match_ratio * max_possible_score
         
-        # Apply bonuses and penalties
+        # FIX 4: Only apply bonuses if there are meaningful matches
         score = base_score
         
-        # Bonus for high skill diversity
-        if len(cv_skills) > 15:
-            score += 0.3
-        elif len(cv_skills) > 10:
-            score += 0.2
-        
-        # Bonus for exact matches on critical skills
-        critical_skills = ['python', 'javascript', 'java', 'react', 'django', 'nodejs', 'sql']
-        critical_matches = sum(1 for skill in exact_matches if any(crit in skill for crit in critical_skills))
-        if critical_matches > 0:
-            score += critical_matches * 0.1
+        if total_matches >= 2:  # Only give bonuses for jobs with real skill overlap
+            # Bonus for high skill diversity
+            if len(cv_skills) > 15:
+                score += 0.2  # Reduced bonus
+            elif len(cv_skills) > 10:
+                score += 0.1  # Reduced bonus
+            
+            # Bonus for exact matches on critical skills
+            critical_skills = ['python', 'javascript', 'java', 'react', 'django', 'nodejs', 'sql', 'mysql', 'postgresql']
+            critical_matches = sum(1 for skill in exact_matches if any(crit in skill for crit in critical_skills))
+            if critical_matches > 0:
+                score += critical_matches * 0.1
         
         # Penalty for very low skill count
         if len(cv_skills) < 3:
