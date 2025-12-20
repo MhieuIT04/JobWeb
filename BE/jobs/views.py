@@ -13,7 +13,7 @@ from .serializers import JobSerializer, ApplicationSerializer, FavoriteSerialize
 from notifications.models import Notification
 from .pagination import CustomJobPagination
 from .filters import JobFilter
-from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from notifications.utils import create_and_send_notification
 from users.models import User
 from users.serializers import EmployerSerializer
@@ -254,7 +254,7 @@ class ApplicationViewSet(viewsets.ModelViewSet):
     """
     serializer_class = ApplicationSerializer
     permission_classes = [permissions.IsAuthenticated]
-    parser_classes = [MultiPartParser, FormParser]  # Cho phép upload file CV
+    parser_classes = [MultiPartParser, FormParser, JSONParser]  # Hỗ trợ cả JSON và file upload
     
     def get_queryset(self):
         # Chỉ trả về các đơn ứng tuyển của người dùng đang đăng nhập
@@ -349,7 +349,7 @@ class ApplicationViewSet(viewsets.ModelViewSet):
 class ApplicationListCreateView(generics.ListCreateAPIView):
     serializer_class = ApplicationSerializer
     permission_classes = [permissions.IsAuthenticated]
-    parser_classes = [MultiPartParser, FormParser]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]  # Hỗ trợ cả JSON và file upload
     
     def get_queryset(self):
         return Application.objects.filter(user=self.request.user).order_by('-applied_at')
